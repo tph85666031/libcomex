@@ -1,0 +1,499 @@
+#!/bin/bash
+
+show_usage()
+{
+	echo "Usage:  -d build with debug option"
+	echo "        -u build as unit test app"
+	echo "        -s build static library"
+	echo "        -c remove all build file"
+    echo "        -D build wirh dbus session support"
+    echo "        -L build libraries"
+    echo "        -W build for win32"
+	echo ""
+	exit -1
+}
+
+show_message()
+{
+    echo "[-------------"$1"-----------------]"
+}
+
+BUILD_TYPE="Release"
+UNIT_TEST="false"
+PROJECT_CLEAN= "false"
+BUILD_LIBS=0
+OS_TYPE=`uname`
+BUILD_ARCH="x64"
+
+if [ x"${OS_TYPE}" == x"Darwin" ];then
+    DIR_ROOT=`pwd`
+else
+    DIR_ROOT=`realpath $(dirname "$0")`
+fi
+
+if [ -n "$1" ];then
+if [ x"${1:0:1}" != "x-" ];then
+  show_usage
+fi
+fi
+
+while getopts 'cdsuj:LW' OPT; do
+	case $OPT in
+	c)
+		PROJECT_CLEAN="true";;
+	d)
+		BUILD_TYPE="Debug";;
+	u)
+		UNIT_TEST="true";;
+    j)
+		JOBS=$OPTARG;;
+    L)
+		BUILD_LIBS=1;;
+    W)
+		BUILD_ARCH="Win32";;   
+	?)
+		show_usage
+	esac
+done
+shift $(($OPTIND - 1))
+
+if [ x"${OS_TYPE}" == x"Darwin" ];then
+    export KERNEL_BITS=64
+elif [ x"${OS_TYPE}" == x"Linux" ];then
+    OS_TYPE="Linux"
+else
+    OS_TYPE="Win"
+fi
+
+
+#清理环境
+if [ x"${PROJECT_CLEAN}" == x"true" ];then
+	rm -rf ${DIR_ROOT}/tmp/ 2>&1 > /dev/null
+	#rm -rf ${DIR_ROOT}/out/ 2>&1 > /dev/null
+    
+    rm -rf ${DIR_ROOT}/dependent/libsmb2/build 2>&1 > /dev/null
+    rm -rf ${DIR_ROOT}/dependent/libnfs/build 2>&1 > /dev/null
+    rm -rf ${DIR_ROOT}/dependent/libwebsockets/build 2>&1 > /dev/null
+    rm -rf ${DIR_ROOT}/dependent/mosquitto/build 2>&1 > /dev/null
+    rm -rf ${DIR_ROOT}/dependent/curl/tmp 2>&1 > /dev/null
+    rm -rf ${DIR_ROOT}/dependent/zlib/build 2>&1 > /dev/null
+    rm -rf ${DIR_ROOT}/dependent/bzip2/build 2>&1 > /dev/null 
+    rm -rf ${DIR_ROOT}/dependent/libzip/build 2>&1 > /dev/null
+    rm -rf ${DIR_ROOT}/dependent/libarchive/tmp 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/libpng/build 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/libjpeg/build 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/libtiff/tmp 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/brotli/build 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/freetype/build 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/expat/build 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/harfbuzz/build 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/libxml2/build 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/podofo/build 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/dependent/xz/build 2>&1 > /dev/null
+	
+    pushd ${DIR_ROOT}/dependent/libiconv/build
+    make distclean
+    popd
+	rm -rf ${DIR_ROOT}/dependent/libiconv/build 2>&1 > /dev/null
+	
+    pushd ${DIR_ROOT}/dependent/openssl/build
+    make distclean
+    popd
+	rm -rf ${DIR_ROOT}/dependent/openssl/build 2>&1 > /dev/null
+    
+    pushd ${DIR_ROOT}/dependent/libtar/build
+    make distclean
+    popd
+	rm -rf ${DIR_ROOT}/dependent/libtar/build 2>&1 > /dev/null
+	
+	pushd ${DIR_ROOT}/dependent/libidn/build
+    make distclean
+    popd
+	rm -rf ${DIR_ROOT}/dependent/libidn/build 2>&1 > /dev/null
+	
+	pushd ${DIR_ROOT}/dependent/fontconfig/build
+    make distclean
+    popd
+	rm -rf ${DIR_ROOT}/dependent/fontconfig/build 2>&1 > /dev/null
+	
+	pushd ${DIR_ROOT}/dependent/libunistring/build
+    make distclean
+    popd
+	rm -rf ${DIR_ROOT}/dependent/libunistring/build 2>&1 > /dev/null
+    
+	show_message "clean done"
+	echo ""
+	exit 0
+fi
+
+#环境准备
+mkdir -pv ${DIR_ROOT}/out/include > /dev/null 2>&1
+mkdir -pv ${DIR_ROOT}/out/lib > /dev/null 2>&1
+mkdir -pv ${DIR_ROOT}/tmp/ > /dev/null 2>&1
+
+#编译
+if [ x"${JOBS}" == x"" ];then
+    JOBS=`grep -c ^processor /proc/cpuinfo`
+fi
+
+if [ -z ${JOBS} ];then
+    JOBS=1
+fi
+
+if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
+    #编译openssl
+	mkdir ${DIR_ROOT}/dependent/openssl/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/openssl/build
+    ../config no-asm no-tests no-shared --prefix=${DIR_ROOT}/out
+    make -j${JOBS} && make install_sw
+    if [ $? != 0 ]; then
+        show_message "failed to make openssl"
+        popd
+        exit -1
+    fi
+    popd
+    
+	#编译libiconv
+	mkdir ${DIR_ROOT}/dependent/libiconv/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libiconv/build
+    ../configure --with-pic=yes --enable-extra-encodings --enable-static=yes --enable-shared=no --prefix=${DIR_ROOT}/out
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libiconv"
+        popd
+        exit -1
+    fi
+    popd
+    
+    #编译libsmb2
+	mkdir ${DIR_ROOT}/dependent/libsmb2/build 2>&1 > /dev/null
+	pushd ${DIR_ROOT}/dependent/libsmb2/build
+    if [ ${OS_TYPE} = "Darwin" ] ; then
+        ../configure --enable-static --disable-shared --without-libkrb5 --disable-werror --prefix="${DIR_ROOT}/out"
+        make -j${JOBS} && make install
+        if [ $? != 0 ]; then
+            show_message "failed to make libsmb2"
+            popd
+            exit -1
+        fi
+    else
+        cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DBUILD_SHARED_LIBS=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+        make -j${JOBS} && make install
+        if [ $? != 0 ]; then
+            show_message "failed to make libsmb2"
+            popd
+            exit -1
+        fi
+    fi
+	popd
+    
+    #编译libnfs
+	mkdir ${DIR_ROOT}/dependent/libnfs/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libnfs/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DBUILD_SHARED_LIBS=0 -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libnfs"
+        popd
+        exit -1
+    fi
+    popd
+    
+    #编译bzip2
+	mkdir ${DIR_ROOT}/dependent/bzip2/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/bzip2/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DENABLE_LIB_ONLY=1 -DENABLE_STATIC_LIB=1 -DENABLE_SHARED_LIB=0 -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make bzip2"
+        popd
+        exit -1
+    fi
+    popd
+    mv ${DIR_ROOT}/out/lib/libbz2_static.a ${DIR_ROOT}/out/lib/libbz2.a
+	
+    #编译libz
+	mkdir ${DIR_ROOT}/dependent/zlib/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/zlib/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libz"
+        popd
+        exit -1
+    fi
+    popd
+	rm -f ${DIR_ROOT}/out/lib/libz.so*
+
+    #编译libtar
+	mkdir ${DIR_ROOT}/dependent/libtar/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libtar/build
+    autoreconf --force --install
+    CXXFLAGS="-fPIC -I${DIR_ROOT}/out/include" CFLAGS="-fPIC -I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib" ../configure --enable-static=yes --enable-shared=no --prefix=${DIR_ROOT}/out
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libtar"
+        popd
+        exit -1
+    fi
+    popd
+    
+    #编译libzip
+	mkdir ${DIR_ROOT}/dependent/libzip/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libzip/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DBUILD_SHARED_LIBS=0 -DBUILD_DOC=0 -DBUILD_EXAMPLES=0 -DBUILD_REGRESS=0 -DBUILD_TOOLS=0 -DENABLE_GNUTLS=0 -DENABLE_MBEDTLS=0 -DENABLE_OPENSSL=1 -DENABLE_LZMA=0 -DENABLE_ZSTD=0 -DENABLE_BZIP2=1 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libzip"
+        popd
+        exit -1
+    fi
+    popd
+    
+	#编译libjpeg
+	mkdir ${DIR_ROOT}/dependent/libjpeg/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libjpeg/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DENABLE_SHARED=0 -DENABLE_STATIC=1 -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libjpeg"
+        popd
+        exit -1
+    fi
+    popd
+	rm -f ${DIR_ROOT}/out/lib/lib*.so*
+    
+    #编译libpng
+	mkdir ${DIR_ROOT}/dependent/libpng/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libpng/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DPNG_SHARED=0 -DPNG_STATIC=1 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libpng"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译brotli
+	mkdir ${DIR_ROOT}/dependent/brotli/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/brotli/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make brotli"
+        popd
+        exit -1
+    fi
+    popd
+	mv ${DIR_ROOT}/out/lib/libbrotlicommon-static.a ${DIR_ROOT}/out/lib/libbrotlicommon.a
+	mv ${DIR_ROOT}/out/lib/libbrotlidec-static.a ${DIR_ROOT}/out/lib/libbrotlidec.a
+	mv ${DIR_ROOT}/out/lib/libbrotlienc-static.a ${DIR_ROOT}/out/lib/libbrotlienc.a
+	rm -f ${DIR_ROOT}/out/lib/libbrotli*.so*
+	
+	#编译expat
+	mkdir ${DIR_ROOT}/dependent/expat/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/expat/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DEXPAT_BUILD_DOCS=0 -DEXPAT_BUILD_EXAMPLES=0 -DEXPAT_BUILD_TESTS=0 -DEXPAT_BUILD_TOOLS=0 -DEXPAT_SHARED_LIBS=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make expat"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译libidn
+	mkdir ${DIR_ROOT}/dependent/libidn/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libidn/build
+    ../configure --with-pic --prefix=${DIR_ROOT}/out --disable-shared 
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libidn"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译libunistring
+	mkdir ${DIR_ROOT}/dependent/libunistring/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libunistring/build
+    ../configure --with-pic --prefix=${DIR_ROOT}/out --disable-shared
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libunistring"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译libjbig
+    pushd ${DIR_ROOT}/dependent/libjbig
+    make -j${JOBS}
+    if [ $? != 0 ]; then
+        show_message "failed to make libjbig"
+        popd
+        exit -1
+    fi
+	cp libjbig/jbig.h ${DIR_ROOT}/out/include
+	cp libjbig/libjbig.a ${DIR_ROOT}/out/lib
+    popd
+	
+	#编译xz
+	mkdir ${DIR_ROOT}/dependent/xz/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/xz/build
+	cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DBUILD_TESTING=0 -DBUILD_SHARED_LIBS=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make xz"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译libtiff
+	mkdir ${DIR_ROOT}/dependent/libtiff/tmp 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libtiff/tmp
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -Dtiff-docs=0 -Dtiff-tests=0 -Dtiff-tools=0 -DBUILD_SHARED_LIBS=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libtiff"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译libxml2
+	mkdir ${DIR_ROOT}/dependent/libxml2/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libxml2/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DLIBXML2_WITH_TESTS=0 -DLIBXML2_WITH_PYTHON=0 -DLIBXML2_WITH_PROGRAMS=0 -DBUILD_SHARED_LIBS=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libxml2"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译libarchive
+	mkdir ${DIR_ROOT}/dependent/libarchive/tmp 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libarchive/tmp
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DENABLE_ICONV=1 -DENABLE_LZ4=0 -DENABLE_LIBB2=0 -DENABLE_LZO=0 -DENABLE_ZSTD=0 -DENABLE_OPENSSL=1 -DENABLE_LZMA=1 -DENABLE_LIBXML2=1 -DENABLE_EXPAT=1 -DENABLE_TEST=0 -DENABLE_COVERAGE=0 -DENABLE_TAR=0 -DENABLE_CPIO=0 -DENABLE_CAT=0 -DENABLE_XATTR=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libarchive"
+        popd
+        exit -1
+    fi
+    popd
+	rm -f ${DIR_ROOT}/out/lib/libarchive.so*
+	
+	#编译harfbuzz
+	mkdir ${DIR_ROOT}/dependent/harfbuzz/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/harfbuzz/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DBUILD_SHARED_LIBS=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make harfbuzz"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译freetype
+	mkdir ${DIR_ROOT}/dependent/freetype/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/freetype/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DBUILD_SHARED_LIBS=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make freetype"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译fontconfig
+	mkdir ${DIR_ROOT}/dependent/fontconfig/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/fontconfig/build
+    CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib " ../configure --disable-cache-build --disable-docs --with-pic --disable-shared --enable-static --prefix=${DIR_ROOT}/out
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make freetype"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译podofo
+	mkdir ${DIR_ROOT}/dependent/podofo/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/podofo/build
+    CXXFLAGS="-fpermissive" cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DPODOFO_BUILD_LIB_ONLY=1 -DPODOFO_BUILD_STATIC=1 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make podofo"
+        popd
+        exit -1
+    fi
+    popd
+	
+    #编译curl
+	mkdir ${DIR_ROOT}/dependent/curl/tmp 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/curl/tmp
+    cmake -DBUILD_SHARED_LIBS=0 -DBUILD_TESTING=0 -DUSE_LIBIDN2=0 -DUSE_LIBSSH2=0 -DUSE_LIBRTMP=0 -DCURL_DISABLE_GOPHER=1 -DCURL_DISABLE_LDAP=1 -DCURL_DISABLE_LDAPS=1 -DCURL_DISABLE_RTSP=1 -DCURL_DISABLE_MQTT=1 -DCURL_DISABLE_PROXY=1 -DCURL_DISABLE_RTSP=1 -DCURL_ENABLE_SSL=1 -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DCURL_DISABLE_MIME=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make curl"
+        popd
+        exit -1
+    fi
+    popd
+    
+    #编译libwebsocket
+	mkdir ${DIR_ROOT}/dependent/libwebsockets/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libwebsockets/build
+    cmake -DLWS_WITH_STATIC=1 -DLWS_WITH_SHARED=0 -DLWS_STATIC_PIC=1 -DLWS_WITH_SSL=1 -DLWS_WITH_ZLIB=0 -DLWS_WITHOUT_TESTAPPS=1 -DLWS_WITHOUT_TEST_SERVER=1 -DLWS_WITHOUT_TEST_SERVER_EXTPOLL=1 -DLWS_WITHOUT_TEST_PING=1 -DLWS_WITHOUT_TEST_CLIENT=1 -DLWS_WITH_EXTERNAL_POLL=1 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libwebsocket"
+        popd
+        exit -1
+    fi
+    popd
+    
+    #编译mosquitto
+	mkdir ${DIR_ROOT}/dependent/mosquitto/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/mosquitto/build
+    cmake -DWITH_TLS=1 -DWITH_LIB_CPP=0 -DWITH_CJSON=0 -DWITH_THREADING=1 -DWITH_STATIC_LIBRARIES=1 -DWITH_SHARED_LIBRARIES=0 -DWITH_PIC=1 -DWITH_SRV=0 -DWITH_SOCKS=0 -DWITH_UNIX_SOCKETS=1 -DWITH_EC=0 -DWITH_BROKER=1 -DWITH_APPS=0 -DWITH_PLUGINS=0 -DDOCUMENTATION=0 -DINC_MEMTRACK=0 -DWITH_SYS_TREE=0 -DWITH_WEBSOCKETS=1 -DSTATIC_WEBSOCKETS=1 -DWITH_CONTROL=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make mosquitto"
+        popd
+        exit -1
+    fi
+    popd
+    mv ${DIR_ROOT}/out/lib/libmosquitto_static.a ${DIR_ROOT}/out/lib/libmosquitto.a
+	rm -f ${DIR_ROOT}/out/lib/libmosquitto.so*
+	
+elif [ ${OS_TYPE} == "Win" ] ; then
+    echo "copy required libs for Win_${BUILD_ARCH}"
+    rm -f  ${DIR_ROOT}/out/lib/* > /dev/null 2>&1
+    rm -f  ${DIR_ROOT}/out/include/* > /dev/null 2>&1
+    cp -rf ${DIR_ROOT}/dependent/win/include/* ${DIR_ROOT}/out/include/
+    cp -f  ${DIR_ROOT}/dependent/win/lib/${BUILD_ARCH}/* ${DIR_ROOT}/out/lib/
+fi
+
+#编译comex
+cd ${DIR_ROOT}/tmp
+if [ -d ${DIR_ROOT} ];then
+  if [ x"$OS_TYPE" == x"Win" ];then
+      cmake -A ${BUILD_ARCH} -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} ${DIR_ROOT} && cmake --build . --config ${BUILD_TYPE}
+  else
+      cmake -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} ${DIR_ROOT} && make -j${JOBS}
+  fi
+  if [ $? != 0 ]; then
+    show_message "failed to make comex"
+    exit -1
+  fi
+fi
+
+show_message "succeed"

@@ -1,0 +1,188 @@
+#include "comex_iconv.h"
+#include "com_log.h"
+#include "iconv.h"
+
+CPPBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const CPPBytes& data)
+{
+    return comex_iconv_convert(cs_to, cs_from, data.getData(), data.getDataSize());
+}
+
+CPPBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const void* data, int data_size)
+{
+    if(cs_to == NULL || cs_from == NULL || data == NULL || data_size <= 0)
+    {
+        return CPPBytes();
+    }
+    iconv_t handle = iconv_open(cs_to, cs_from);
+    if(handle <= 0)
+    {
+        return CPPBytes();
+    }
+
+    size_t size_src = (size_t)data_size;
+    size_t size_src_remain = size_src;
+    char* p_src = (char*)data;
+
+    size_t size_dst = (size_src + 1) * 4;
+    size_t size_dst_remian = size_dst;
+    char* p_result = new char[size_dst_remian + 1];
+    char* p_dst = p_result;
+
+    int ret = iconv(handle, &p_src, &size_src_remain, &p_dst, &size_dst_remian);
+    iconv_close(handle);
+    if(ret == -1)
+    {
+        delete[] p_result;
+        return CPPBytes();
+    }
+
+    size_dst -= size_dst_remian;
+
+    CPPBytes result;
+    result.append((uint8*)p_result, size_dst);
+
+    delete[] p_result;
+    return result;
+}
+
+
+CPPBytes comex_iconv_utf8_to_utf16(const CPPBytes& utf8)
+{
+    return comex_iconv_convert(htons(0x1234) == 0x1234 ? "UTF-16BE" : "UTF-16LE",
+                               "UTF-8",
+                               utf8);
+}
+
+CPPBytes comex_iconv_utf16_to_utf8(const CPPBytes& utf16)
+{
+    return comex_iconv_convert("UTF-8",
+                               htons(0x1234) == 0x1234 ? "UTF-16BE" : "UTF-16LE",
+                               utf16);
+}
+
+CPPBytes comex_iconv_utf8_to_utf32(const CPPBytes& utf8)
+{
+    return comex_iconv_convert(htons(0x1234) == 0x1234 ? "UTF-32BE" : "UTF-32LE",
+                               "UTF-8",
+                               utf8);
+}
+
+CPPBytes comex_iconv_utf32_to_utf8(const CPPBytes& utf32)
+{
+    return comex_iconv_convert("UTF-8",
+                               htons(0x1234) == 0x1234 ? "UTF-32BE" : "UTF-32LE",
+                               utf32);
+}
+
+CPPBytes comex_iconv_utf16_to_utf32(const CPPBytes& utf16)
+{
+    return comex_iconv_convert(htons(0x1234) == 0x1234 ? "UTF-32BE" : "UTF-32LE",
+                               htons(0x1234) == 0x1234 ? "UTF-16BE" : "UTF-16LE",
+                               utf16);
+}
+
+CPPBytes comex_iconv_utf32_to_utf16(const CPPBytes& utf32)
+{
+    return comex_iconv_convert(htons(0x1234) == 0x1234 ? "UTF-16BE" : "UTF-16LE",
+                               htons(0x1234) == 0x1234 ? "UTF-32BE" : "UTF-32LE",
+                               utf32);
+}
+
+std::wstring comex_iconv_utf8_to_wstring(const CPPBytes& utf8)
+{
+    std::wstring wstr;
+    if(sizeof(wchar_t) == 2)
+    {
+        CPPBytes utf16 = comex_iconv_utf8_to_utf16(utf8);
+        wstr.append((wchar_t*)utf16.getData(), utf16.getDataSize() / 2);
+    }
+    else
+    {
+        CPPBytes utf32 = comex_iconv_utf8_to_utf32(utf8);
+        wstr.append((wchar_t*)utf32.getData(), utf32.getDataSize() / 4);
+    }
+
+    return wstr;
+}
+
+std::wstring comex_iconv_utf16_to_wstring(const CPPBytes& utf16)
+{
+    std::wstring wstr;
+    if(sizeof(wchar_t) == 2)
+    {
+        wstr.append((wchar_t*)utf16.getData(), utf16.getDataSize() / 2);
+    }
+    else
+    {
+        CPPBytes utf32 = comex_iconv_utf16_to_utf32(utf16);
+        wstr.append((wchar_t*)utf32.getData(), utf32.getDataSize() / 4);
+    }
+
+    return wstr;
+}
+
+std::wstring comex_iconv_utf32_to_wstring(const CPPBytes& utf32)
+{
+    std::wstring wstr;
+    if(sizeof(wchar_t) == 2)
+    {
+        CPPBytes utf16 = comex_iconv_utf32_to_utf16(utf32);
+        wstr.append((wchar_t*)utf16.getData(), utf16.getDataSize() / 2);
+    }
+    else
+    {
+        wstr.append((wchar_t*)utf32.getData(), utf32.getDataSize() / 4);
+    }
+
+    return wstr;
+}
+
+CPPBytes comex_iconv_wstring_to_utf8(const std::wstring& wstr)
+{
+    CPPBytes result;
+    if(sizeof(wchar_t) == 2)
+    {
+        result.append((uint8*)wstr.data(), wstr.length() * 2);
+        result = comex_iconv_utf16_to_utf8(result);
+    }
+    else
+    {
+        result.append((uint8*)wstr.data(), wstr.length() * 4);
+        result = comex_iconv_utf32_to_utf8(result);
+    }
+
+    return result;
+}
+
+CPPBytes comex_iconv_wstring_to_utf16(const std::wstring& wstr)
+{
+    CPPBytes result;
+    if(sizeof(wchar_t) == 2)
+    {
+        result.append((uint8*)wstr.data(), wstr.length() * 2);
+    }
+    else
+    {
+        result.append((uint8*)wstr.data(), wstr.length() * 4);
+        result = comex_iconv_utf32_to_utf16(result);
+    }
+
+    return result;
+}
+
+CPPBytes comex_iconv_wstring_to_utf32(const std::wstring& wstr)
+{
+    CPPBytes result;
+    if(sizeof(wchar_t) == 2)
+    {
+        result.append((uint8*)wstr.data(), wstr.length() * 2);
+        result = comex_iconv_utf16_to_utf32(result);
+    }
+    else
+    {
+        result.append((uint8*)wstr.data(), wstr.length() * 4);
+    }
+
+    return result;
+}
+
