@@ -3,8 +3,10 @@
 
 void comex_podofo_unit_test_suit(void** state)
 {
-    PdfTextExtrator extractor;
-    extractor.extractText("./3.pdf");
-    //LOG_I("text=%s",extractor.getText().c_str());
+    PdfExtrator extractor;
+    extractor.loadFromFile("/data/3.pdf");
+    extractor.extractText();
+    extractor.extractImage();
+    LOG_I("text=%s", extractor.getText().c_str());
 }
 

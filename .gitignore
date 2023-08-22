@@ -28,3 +28,4 @@ dependent/libunistring/build
 dependent/libunistring/lib/libunistring.sym-t1
 *.o
 *.d
+*.in

@@ -228,7 +228,7 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
     #编译libtar
 	mkdir ${DIR_ROOT}/dependent/libtar/build 2>&1 > /dev/null
     pushd ${DIR_ROOT}/dependent/libtar/build
-    autoreconf --force --install
+    autoreconf --force --install ..
     CXXFLAGS="-fPIC -I${DIR_ROOT}/out/include" CFLAGS="-fPIC -I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib" ../configure --enable-static=yes --enable-shared=no --prefix=${DIR_ROOT}/out
     make -j${JOBS} && make install
     if [ $? != 0 ]; then

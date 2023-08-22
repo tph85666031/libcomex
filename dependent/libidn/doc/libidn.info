@@ -1,6 +1,7 @@
 This is libidn.info, produced by makeinfo version 6.5 from libidn.texi.
 
-This manual is last updated 25 June 2022 for version 1.41 of GNU Libidn.
+This manual is last updated 21 August 2023 for version 1.41 of GNU
+Libidn.
 
    Copyright © 2002–2022 Simon Josefsson.
 
@@ -31,7 +32,8 @@ File: libidn.info,  Node: Top,  Next: Introduction,  Up: (dir)
 GNU Libidn
 **********
 
-This manual is last updated 25 June 2022 for version 1.41 of GNU Libidn.
+This manual is last updated 21 August 2023 for version 1.41 of GNU
+Libidn.
 
    Copyright © 2002–2022 Simon Josefsson.
 
@@ -4209,96 +4211,96 @@ Concept Index
 
 
 Tag Table:
-Node: Top1020
-Node: Introduction2778
-Node: Getting Started5090
-Node: Features6201
-Node: Library Overview7555
-Node: Supported Platforms8353
-Node: Getting help12145
-Node: Commercial Support12608
-Node: Downloading and Installing13549
-Node: Installing under Windows15914
-Node: Bug Reports17318
-Node: Contributing18724
-Node: Preparation20727
-Node: Header21449
-Node: Initialization24560
-Node: Version Check24757
-Ref: stringprep_check_version25296
-Node: Building the source26271
-Node: Autoconf tests28193
-Node: Memory handling under Windows30594
-Ref: idn_free31554
-Node: Utility Functions32112
-Ref: stringprep_unichar_to_utf832784
-Ref: stringprep_utf8_to_unichar33216
-Ref: stringprep_ucs4_to_utf833818
-Ref: stringprep_utf8_to_ucs434703
-Ref: stringprep_ucs4_nfkc_normalize35528
-Ref: stringprep_utf8_nfkc_normalize36025
-Ref: stringprep_locale_charset37196
-Ref: stringprep_convert38373
-Ref: stringprep_locale_to_utf838942
-Ref: stringprep_utf8_to_locale39331
-Node: Stringprep Functions39690
-Ref: stringprep_4i41617
-Ref: stringprep_4zi44352
-Ref: stringprep45598
-Ref: stringprep_profile46958
-Ref: stringprep_strerror48092
-Node: Punycode Functions51785
-Ref: punycode_encode53554
-Ref: punycode_decode56123
-Ref: punycode_strerror58292
-Node: IDNA Functions59061
-Ref: idna_to_ascii_4i61683
-Ref: idna_to_unicode_44i63332
-Ref: idna_to_ascii_4z65315
-Ref: idna_to_ascii_8z65921
-Ref: idna_to_ascii_lz66521
-Ref: idna_to_unicode_4z4z67268
-Ref: idna_to_unicode_8z4z67932
-Ref: idna_to_unicode_8z8z68590
-Ref: idna_to_unicode_8zlz69242
-Ref: idna_to_unicode_lzlz69983
-Ref: idna_strerror70811
-Node: TLD Functions72427
-Ref: tld_check_4t74088
-Ref: tld_check_4tz75021
-Ref: tld_get_475907
-Ref: tld_get_4z76429
-Ref: tld_get_z76855
-Ref: tld_get_table77372
-Ref: tld_default_table78162
-Ref: tld_check_478909
-Ref: tld_check_4z80210
-Ref: tld_check_8z81427
-Ref: tld_check_lz82745
-Ref: tld_strerror84134
-Node: PR29 Functions84959
-Ref: pr29_487255
-Ref: pr29_4z87896
-Ref: pr29_8z88430
-Ref: pr29_strerror89103
-Node: Examples89826
-Node: Example 190279
-Node: Example 292089
-Node: Example 397869
-Node: Example 499626
-Node: Example 5101390
-Node: Invoking idn104114
-Node: Emacs API110950
-Node: Java API113768
-Node: C# API118941
-Node: Acknowledgements119410
-Node: History120512
-Node: PR29 discussion122175
-Node: On Label Separators126045
-Ref: On Label Separators-Footnote-1128576
-Node: GNU Free Documentation License128675
-Node: Function and Variable Index154056
-Node: Concept Index159053
+Node: Top1022
+Node: Introduction2782
+Node: Getting Started5094
+Node: Features6205
+Node: Library Overview7559
+Node: Supported Platforms8357
+Node: Getting help12149
+Node: Commercial Support12612
+Node: Downloading and Installing13553
+Node: Installing under Windows15918
+Node: Bug Reports17322
+Node: Contributing18728
+Node: Preparation20731
+Node: Header21453
+Node: Initialization24564
+Node: Version Check24761
+Ref: stringprep_check_version25300
+Node: Building the source26275
+Node: Autoconf tests28197
+Node: Memory handling under Windows30598
+Ref: idn_free31558
+Node: Utility Functions32116
+Ref: stringprep_unichar_to_utf832788
+Ref: stringprep_utf8_to_unichar33220
+Ref: stringprep_ucs4_to_utf833822
+Ref: stringprep_utf8_to_ucs434707
+Ref: stringprep_ucs4_nfkc_normalize35532
+Ref: stringprep_utf8_nfkc_normalize36029
+Ref: stringprep_locale_charset37200
+Ref: stringprep_convert38377
+Ref: stringprep_locale_to_utf838946
+Ref: stringprep_utf8_to_locale39335
+Node: Stringprep Functions39694
+Ref: stringprep_4i41621
+Ref: stringprep_4zi44356
+Ref: stringprep45602
+Ref: stringprep_profile46962
+Ref: stringprep_strerror48096
+Node: Punycode Functions51789
+Ref: punycode_encode53558
+Ref: punycode_decode56127
+Ref: punycode_strerror58296
+Node: IDNA Functions59065
+Ref: idna_to_ascii_4i61687
+Ref: idna_to_unicode_44i63336
+Ref: idna_to_ascii_4z65319
+Ref: idna_to_ascii_8z65925
+Ref: idna_to_ascii_lz66525
+Ref: idna_to_unicode_4z4z67272
+Ref: idna_to_unicode_8z4z67936
+Ref: idna_to_unicode_8z8z68594
+Ref: idna_to_unicode_8zlz69246
+Ref: idna_to_unicode_lzlz69987
+Ref: idna_strerror70815
+Node: TLD Functions72431
+Ref: tld_check_4t74092
+Ref: tld_check_4tz75025
+Ref: tld_get_475911
+Ref: tld_get_4z76433
+Ref: tld_get_z76859
+Ref: tld_get_table77376
+Ref: tld_default_table78166
+Ref: tld_check_478913
+Ref: tld_check_4z80214
+Ref: tld_check_8z81431
+Ref: tld_check_lz82749
+Ref: tld_strerror84138
+Node: PR29 Functions84963
+Ref: pr29_487259
+Ref: pr29_4z87900
+Ref: pr29_8z88434
+Ref: pr29_strerror89107
+Node: Examples89830
+Node: Example 190283
+Node: Example 292093
+Node: Example 397873
+Node: Example 499630
+Node: Example 5101394
+Node: Invoking idn104118
+Node: Emacs API110954
+Node: Java API113772
+Node: C# API118945
+Node: Acknowledgements119414
+Node: History120516
+Node: PR29 discussion122179
+Node: On Label Separators126049
+Ref: On Label Separators-Footnote-1128580
+Node: GNU Free Documentation License128679
+Node: Function and Variable Index154060
+Node: Concept Index159057
 
 End Tag Table
 

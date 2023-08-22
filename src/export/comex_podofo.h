@@ -3,16 +3,27 @@
 
 #include "com_base.h"
 
-class COM_EXPORT PdfTextExtrator
+class COM_EXPORT PdfExtrator
 {
 public:
-    PdfTextExtrator();
-    virtual ~PdfTextExtrator();
+    PdfExtrator();
+    virtual ~PdfExtrator();
+
+    void loadFromFile(const char* file);
+    void loadFromMemory(const CPPBytes& content);
 
     std::string getText();
-    void extractText(const char* file);
+    std::vector<CPPBytes>& getImage();
+
+    void extractText();
+    void extractImage();
 private:
+    CPPBytes ppmToJpeg(int width, int height, const uint8* ppm, int ppm_size);
+private:
+    std::string file;
+    CPPBytes content;
     std::string text;
+    std::vector<CPPBytes> image;
 };
 
 #endif /* __COMEX_PODOFO_H__ */
