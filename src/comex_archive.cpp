@@ -679,6 +679,21 @@ ArchiveReader::ArchiveReader(const char* file, const char* pwd)
     {
         this->pwd = pwd;
     }
+    content_size = 0;
+    content = NULL;
+}
+
+ArchiveReader::ArchiveReader(const uint8* content, int content_size, const char* pwd)
+{
+    if(content != NULL && content_size > 0)
+    {
+        this->content = content;
+        this->content_size = content_size;
+    }
+    if(pwd != NULL)
+    {
+        this->pwd = pwd;
+    }
 }
 
 ArchiveReader::~ArchiveReader()
@@ -701,7 +716,15 @@ bool ArchiveReader::open()
         archive_read_add_passphrase((struct archive*)ctx, pwd.c_str());
     }
 
-    int ret = archive_read_open_filename((struct archive*)ctx, file.c_str(), ARCHIVE_READ_BLOCK_SIZE);
+    int ret = ARCHIVE_FATAL;
+    if(content != NULL && content_size > 0)
+    {
+        ret = archive_read_open_memory((struct archive*)ctx, content, content_size);
+    }
+    else if(file.empty() == false)
+    {
+        ret = archive_read_open_filename((struct archive*)ctx, file.c_str(), ARCHIVE_READ_BLOCK_SIZE);
+    }
     if(ret != ARCHIVE_OK)
     {
         LOG_E("open failed,ret=%d", ret);
@@ -786,18 +809,13 @@ int64 ArchiveReader::getFileSize(const char* path)
     return size;
 }
 
-std::set<std::string> ArchiveReader::list(const char* path)
+std::vector<std::string> ArchiveReader::list(const char* path)
 {
     if(path == NULL || open() == false)
     {
-        return std::set<std::string>();
+        return std::vector<std::string>();
     }
-    std::string path_str = path;
-    if(com_string_start_with(path_str.c_str(), "." PATH_DELIM_STR))
-    {
-        path_str.erase(0, 2);
-    }
-    std::set<std::string> results;
+    std::vector<std::string> results;
     struct archive_entry* entry = NULL;
     while(archive_read_next_header((struct archive*)ctx, &entry) == ARCHIVE_OK)
     {
@@ -807,9 +825,9 @@ std::set<std::string> ArchiveReader::list(const char* path)
             continue;
         }
         std::string path_cur_str = PATH_TO_LOCAL(path_cur);
-        if(path_str == path_cur_str)
+        if(com_string_match(path_cur_str.c_str(), path))
         {
-            results.insert(path_cur);
+            results.push_back(path_cur);
         }
     }
     close();
@@ -822,11 +840,6 @@ CPPBytes ArchiveReader::read(const char* path)
     {
         return CPPBytes();
     }
-    std::string path_str = path;
-    if(com_string_start_with(path_str.c_str(), "." PATH_DELIM_STR))
-    {
-        path_str.erase(0, 2);
-    }
     CPPBytes data;
     struct archive_entry* entry = NULL;
     while(archive_read_next_header((struct archive*)ctx, &entry) == ARCHIVE_OK)
@@ -837,7 +850,7 @@ CPPBytes ArchiveReader::read(const char* path)
             continue;
         }
         std::string path_cur_str = PATH_TO_LOCAL(path_cur);
-        if(path_str == path_cur_str
+        if(path_cur_str == path
                 && archive_entry_size_is_set(entry)
                 && archive_entry_size(entry) > 0)
         {
@@ -859,11 +872,6 @@ bool ArchiveReader::readTo(const char* path, const char* to)
     {
         return false;
     }
-    std::string path_str = path;
-    if(com_string_start_with(path_str.c_str(), "." PATH_DELIM_STR))
-    {
-        path_str.erase(0, 2);
-    }
     struct archive_entry* entry = NULL;
     while(archive_read_next_header((struct archive*)ctx, &entry) == ARCHIVE_OK)
     {
@@ -873,7 +881,7 @@ bool ArchiveReader::readTo(const char* path, const char* to)
             continue;
         }
         std::string path_cur_str = PATH_TO_LOCAL(path_cur);
-        if(path_str == path_cur_str
+        if(path_cur_str == path
                 && archive_entry_size_is_set(entry)
                 && archive_entry_size(entry) > 0)
         {
@@ -944,6 +952,58 @@ ArchiveWriter::ArchiveWriter(const char* file, const char* pwd)
     {
         LOG_E("open failed:%s", archive_error_string((struct archive*)ctx));
         return;
+    }
+}
+
+ArchiveWriter::ArchiveWriter(CPPBytes& buffer, const char* suffix, const char* pwd)
+{
+    if(suffix == NULL)
+    {
+        return;
+    }
+    ctx = archive_write_new();
+    if(ctx == NULL)
+    {
+        LOG_E("failed");
+        return;
+    }
+    if(com_string_equal(suffix, "tar.gz"))
+    {
+        archive_write_set_format_ustar((struct archive*)ctx);
+        archive_write_add_filter_gzip((struct archive*)ctx);
+    }
+    else if(com_string_equal(suffix, "tar.bz2"))
+    {
+        archive_write_set_format_ustar((struct archive*)ctx);
+        archive_write_add_filter_bzip2((struct archive*)ctx);
+    }
+    else if(com_string_equal(suffix, "tar.xz"))
+    {
+        archive_write_set_format_ustar((struct archive*)ctx);
+        archive_write_add_filter_xz((struct archive*)ctx);
+    }
+    else if(com_string_equal(suffix, "zip"))
+    {
+        archive_write_set_format_zip((struct archive*)ctx);
+    }
+    else
+    {
+        LOG_E("suffix not support:%s", suffix);
+        return;
+    }
+
+    if(pwd != NULL)
+    {
+        archive_write_set_passphrase((struct archive*)ctx, pwd);
+    }
+
+    if(archive_write_open((struct archive*)ctx, &buffer,
+                          (int (*)(struct archive*, void*))MemOpen,
+                          (ssize_t (*)(struct archive*, void*, const void*, size_t))MemWrite,
+                          (int (*)(struct archive*, void*))MemClose) != ARCHIVE_OK)
+    {
+        LOG_E("open failed:%s", archive_error_string((struct archive*)ctx));
+        return ;
     }
 }
 
@@ -1049,5 +1109,38 @@ bool ArchiveWriter::addDirectory(const char* path, const char* dir, bool recursi
         addFile(path_internal.c_str(), it->first.c_str());
     }
     return true;
+}
+
+int ArchiveWriter::MemOpen(void* ctx, CPPBytes* buffer)
+{
+    if(ctx == NULL || buffer == NULL)
+    {
+        return ARCHIVE_FATAL;
+    }
+    if(archive_write_get_bytes_in_last_block((struct archive*)ctx) == -1)
+    {
+        archive_write_set_bytes_in_last_block((struct archive*)ctx, 1);
+    }
+    return ARCHIVE_OK;
+}
+
+ssize_t ArchiveWriter::MemWrite(void* ctx, CPPBytes* buffer, const void* buff, size_t size)
+{
+    if(ctx == NULL || buffer == NULL)
+    {
+        return ARCHIVE_FATAL;
+    }
+
+    buffer->append((uint8*)buff, size);
+    return size;
+}
+
+int ArchiveWriter::MemClose(void* ctx, CPPBytes* buffer)
+{
+    if(ctx == NULL || buffer == NULL)
+    {
+        return ARCHIVE_FATAL;
+    }
+    return ARCHIVE_OK;
 }
 

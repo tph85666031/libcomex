@@ -61,13 +61,14 @@ class COM_EXPORT ArchiveReader
 {
 public:
     ArchiveReader(const char* file, const char* pwd = NULL);
+    ArchiveReader(const uint8* content, int content_size, const char* pwd = NULL);
     virtual ~ArchiveReader();
 
     bool open();
     void close();
     bool isFileExist(const char* path);
     int64 getFileSize(const char* path);
-    std::set<std::string> list(const char* path);
+    std::vector<std::string> list(const char* path);
     CPPBytes read(const char* path);
     bool readTo(const char* path, const char* to);
 
@@ -75,22 +76,28 @@ private:
     void* ctx;
     std::string file;
     std::string pwd;
+    const uint8* content;
+    int content_size;
 };
 
 class COM_EXPORT ArchiveWriter
 {
 public:
     ArchiveWriter(const char* file, const char* pwd = NULL);
+    ArchiveWriter(CPPBytes& buffer, const char* suffix, const char* pwd = NULL);
     virtual ~ArchiveWriter();
 
     void close();
-    
+
     bool addFile(const char* path, const char* file);
     bool addDirectory(const char* path, const char* dir, bool recursion = false);
+private:
+    static int MemOpen(void* ctx, CPPBytes* buffer);
+    static ssize_t MemWrite(void* ctx, CPPBytes* buffer, const void* buff, size_t size);
+    static int MemClose(void* ctx, CPPBytes* buffer);
 
 private:
     void* ctx;
-    std::string file;
 };
 #endif /* __COMEX_ACHIVE_H__ */
 

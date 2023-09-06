@@ -46,10 +46,12 @@ void comex_archive_unit_test_suit(void** state)
     ASSERT_STR_EQUAL(com_file_readall(PATH_TO_LOCAL("./__t1__.txt").c_str()).toString().c_str(), "A123456");
     com_file_remove(PATH_TO_LOCAL("./__t1__.txt").c_str());
 
-    ArchiveWriter w1(PATH_TO_LOCAL("./w1.tar.xz").c_str());
+    CPPBytes w1_mem;
+    ArchiveWriter w1(w1_mem, "tar.xz");
     w1.addFile("1.txt", PATH_TO_LOCAL("archive_test/1.txt").c_str());
     w1.addDirectory("archive_test", PATH_TO_LOCAL("./archive_test").c_str(), false);
     w1.close();
+    w1_mem.toFile(PATH_TO_LOCAL("./w1.tar.xz").c_str());
 
     ArchiveReader r2(PATH_TO_LOCAL("./w1.tar.xz").c_str());
     ASSERT_INT_EQUAL(r2.getFileSize(PATH_TO_LOCAL("archive_test/1.txt").c_str()), 7);
