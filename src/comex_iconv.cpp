@@ -2,6 +2,15 @@
 #include "com_log.h"
 #include "iconv.h"
 
+static const char* ICONV_ENCODE_ARRAY[] =
+{
+    "UTF-32BE", "UTF-32LE", "UTF-32",
+    "UTF-16BE", "UTF-16LE", "UTF-16",
+    "UTF-8",
+    "GB18030", "GBK", "CP939", "BIG5",
+    "CP949", "CP932", "CP874", "CP1133", "CP1258", "CP864"
+};
+
 CPPBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const CPPBytes& data)
 {
     return comex_iconv_convert(cs_to, cs_from, data.getData(), data.getDataSize());
@@ -45,6 +54,28 @@ CPPBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const void*
     return result;
 }
 
+std::string comex_iconv_dectect(const CPPBytes& data)
+{
+    return comex_iconv_dectect(data.getData(), data.getDataSize());
+}
+
+std::string comex_iconv_dectect(const void* data, int data_size)
+{
+    if(data == NULL || data_size <= 0)
+    {
+        return std::string();
+    }
+
+    for(size_t i = 0; i < sizeof(ICONV_ENCODE_ARRAY) / sizeof(ICONV_ENCODE_ARRAY[0]); i++)
+    {
+        if(comex_iconv_convert("UTF-8", ICONV_ENCODE_ARRAY[i], data, data_size).empty() == false)
+        {
+            return ICONV_ENCODE_ARRAY[i];
+        }
+    }
+
+    return std::string();
+}
 
 CPPBytes comex_iconv_utf8_to_utf16(const CPPBytes& utf8)
 {

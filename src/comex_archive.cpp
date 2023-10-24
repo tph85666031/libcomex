@@ -727,7 +727,7 @@ bool ArchiveReader::open()
     }
     if(ret != ARCHIVE_OK)
     {
-        LOG_E("open failed,ret=%d", ret);
+        LOG_E("open failed,ret=%d,file=%s", ret, file.c_str());
         archive_read_free((struct archive*)ctx);
         ctx = NULL;
         return false;
@@ -834,6 +834,41 @@ std::vector<std::string> ArchiveReader::list(const char* path)
     return results;
 }
 
+void ArchiveReader::list(const char* path, std::function<void(const std::string&, int64)> func)
+{
+    if(path == NULL || open() == false)
+    {
+        return;
+    }
+    struct archive_entry* entry = NULL;
+    while(archive_read_next_header((struct archive*)ctx, &entry) == ARCHIVE_OK)
+    {
+        const char* path_cur = archive_entry_pathname(entry);
+        if(path_cur == NULL)
+        {
+            continue;
+        }
+        std::string path_cur_str = PATH_TO_LOCAL(path_cur);
+        if(com_string_match(path_cur_str.c_str(), path))
+        {
+            func(path_cur_str, archive_entry_size(entry));
+        }
+    }
+    close();
+}
+
+CPPBytes ArchiveReader::read()
+{
+    CPPBytes data;
+    int64 size = 0;
+    uint8 buf[4096];
+    while((size = archive_read_data((struct archive*)ctx, buf, sizeof(buf))) > 0)
+    {
+        data.append(buf, (int)size);
+    }
+    return data;
+}
+
 CPPBytes ArchiveReader::read(const char* path)
 {
     if(path == NULL || open() == false)
@@ -856,10 +891,12 @@ CPPBytes ArchiveReader::read(const char* path)
         {
             int64 size = 0;
             uint8 buf[4096];
+            data.reserve(archive_entry_size(entry));
             while((size = archive_read_data((struct archive*)ctx, buf, sizeof(buf))) > 0)
             {
                 data.append(buf, (int)size);
             }
+            break;
         }
     }
     close();
@@ -905,6 +942,43 @@ bool ArchiveReader::readTo(const char* path, const char* to)
     return false;
 }
 
+bool ArchiveReader::extractTo(const char* dir)
+{
+    if(dir == NULL || open() == false)
+    {
+        return false;
+    }
+    struct archive_entry* entry = NULL;
+    while(archive_read_next_header((struct archive*)ctx, &entry) == ARCHIVE_OK)
+    {
+        const char* path_cur = archive_entry_pathname(entry);
+        if(path_cur == NULL || archive_entry_size(entry) <= 0)
+        {
+            continue;
+        }
+        std::string file_target = PATH_TO_LOCAL(com_string_format("%s/%s", dir, path_cur));
+        if(file_target.back() == '/')
+        {
+            continue;
+        }
+        com_dir_create(com_path_dir(file_target.c_str()).c_str());
+        FILE* fp = com_file_open(file_target.c_str(), "w+");
+        if(fp == NULL)
+        {
+            continue;
+        }
+        int64 size = 0;
+        uint8 buf[4096];
+        while((size = archive_read_data((struct archive*)ctx, buf, sizeof(buf))) > 0)
+        {
+            com_file_write(fp, buf, size);
+        }
+        com_file_flush(fp);
+        com_file_close(fp);
+    }
+    close();
+    return true;
+}
 
 ArchiveWriter::ArchiveWriter(const char* file, const char* pwd)
 {

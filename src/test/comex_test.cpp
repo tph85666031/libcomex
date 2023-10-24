@@ -25,7 +25,7 @@ CMUnitTest test_cases_comex_lib[] =
     cmocka_unit_test(comex_openssl_des3_unit_test_suit),
 	cmocka_unit_test(comex_podofo_unit_test_suit)
 #else
-    cmocka_unit_test(comex_archive_unit_test_suit)
+    cmocka_unit_test(comex_iconv_unit_test_suit)
 #endif
 };
 

@@ -69,8 +69,11 @@ public:
     bool isFileExist(const char* path);
     int64 getFileSize(const char* path);
     std::vector<std::string> list(const char* path);
+    void list(const char* path, std::function<void(const std::string&, int64)> func);
+    CPPBytes read();
     CPPBytes read(const char* path);
     bool readTo(const char* path, const char* to);
+    bool extractTo(const char* dir);
 
 private:
     void* ctx;
