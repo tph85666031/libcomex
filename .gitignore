@@ -26,6 +26,7 @@ dependent/libidn/build
 dependent/fontconfig/build
 dependent/libunistring/build
 dependent/libunistring/lib/libunistring.sym-t1
+dependent/fltk/build
 *.o
 *.d
 *.in
