@@ -51,6 +51,12 @@ public:
     OpensslSHA512() : OpensslHash("SHA512") {};
 };
 
+class COM_EXPORT OpensslSM3 : public OpensslHash
+{
+public:
+    OpensslSM3() : OpensslHash("SM3") {};
+};
+
 class COM_EXPORT OpensslHMAC
 {
 public:
@@ -116,6 +122,7 @@ protected:
     CPPBytes iv;
     CPPBytes tag;
     uint8 buf[4096];
+    int block_size=0;
 };
 
 /*
@@ -187,6 +194,20 @@ class COM_EXPORT Openssl3DES : public OpensslCrypto
 public:
     Openssl3DES();
     virtual ~Openssl3DES();
+private:
+    const void* getCipher();
+};
+
+/*
+    name   key      iv
+    ECB    16B      N/A
+    CBC    16B      16B
+*/
+class COM_EXPORT OpensslSM4 : public OpensslCrypto
+{
+public:
+    OpensslSM4();
+    virtual ~OpensslSM4();
 private:
     const void* getCipher();
 };

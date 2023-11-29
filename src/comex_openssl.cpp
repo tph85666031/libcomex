@@ -489,6 +489,7 @@ bool OpensslCrypto::encryptBegin()
         LOG_E("failed to get cipher");
         return false;
     }
+    block_size = EVP_CIPHER_block_size(cipher);
 
     if(EVP_EncryptInit_ex((EVP_CIPHER_CTX*)ctx, cipher, NULL, NULL, NULL) != 1)
     {
@@ -531,14 +532,14 @@ bool OpensslCrypto::encryptAppend(CPPBytes& result, const uint8* data, int data_
         return false;
     }
     int size_out = 0;
-    std::vector<uint8> buf;
-    buf.reserve(data_size);
-    if(EVP_EncryptUpdate((EVP_CIPHER_CTX*)ctx, buf.data(), &size_out, data, data_size) != 1)
+    uint8* buf = new uint8[data_size + block_size];
+    if(EVP_EncryptUpdate((EVP_CIPHER_CTX*)ctx, buf, &size_out, data, data_size) != 1)
     {
         LOG_E("failed to update");
         return false;
     }
-    result.append(buf.data(), size_out);
+    result.append(buf, size_out);
+    delete[] buf;
     return true;
 }
 
@@ -551,8 +552,7 @@ bool OpensslCrypto::encryptEnd(CPPBytes& result)
     }
     // 结束加密操作
     int size_out = 0;
-    uint8 buf[AES_BLOCK_SIZE];
-    memset(buf, 0, sizeof(buf));
+    uint8* buf = new uint8[block_size * 2];
     if(EVP_EncryptFinal_ex((EVP_CIPHER_CTX*)ctx, buf, &size_out) != 1)
     {
         LOG_W("failed to EVP_EncryptFinal_ex");
@@ -562,6 +562,7 @@ bool OpensslCrypto::encryptEnd(CPPBytes& result)
     {
         result.append(buf, size_out);
     }
+    delete[] buf;
 
     if(engine_mode == "CCM" || engine_mode == "GCM")
     {
@@ -591,6 +592,8 @@ bool OpensslCrypto::decryptBegin()
         LOG_E("failed to get cipher");
         return false;
     }
+    block_size = EVP_CIPHER_block_size(cipher);
+
     if(EVP_DecryptInit_ex((EVP_CIPHER_CTX*)ctx, cipher, NULL, NULL, NULL) != 1)
     {
         LOG_E("failed to int cipher");
@@ -623,14 +626,14 @@ bool OpensslCrypto::decryptAppend(CPPBytes& result, const uint8* data, int data_
         return false;
     }
     int size_out = 0;
-    std::vector<uint8> buf;
-    buf.reserve(data_size);
-    if(EVP_DecryptUpdate((EVP_CIPHER_CTX*)ctx, buf.data(), &size_out, data, data_size) != 1)
+    uint8* buf = new uint8[data_size + block_size];
+    if(EVP_DecryptUpdate((EVP_CIPHER_CTX*)ctx, buf, &size_out, data, data_size) != 1)
     {
         LOG_E("failed to update");
         return false;
     }
-    result.append(buf.data(), size_out);
+    result.append(buf, size_out);
+    delete[] buf;
     return true;
 }
 
@@ -642,17 +645,17 @@ bool OpensslCrypto::decryptEnd(CPPBytes& result)
         return false;
     }
     int size_out = 0;
-    std::vector<uint8> buf;
-    buf.reserve(AES_BLOCK_SIZE);
-    if(EVP_DecryptFinal_ex((EVP_CIPHER_CTX*)ctx, buf.data(), &size_out) != 1)
+    uint8* buf = new uint8[block_size * 2];
+    if(EVP_DecryptFinal_ex((EVP_CIPHER_CTX*)ctx, buf, &size_out) != 1)
     {
         LOG_W("failed,size_out=%d", size_out);
         return false;
     }
     if(size_out > 0)
     {
-        result.append(buf.data(), size_out);
+        result.append(buf, size_out);
     }
+    delete[] buf;
     return true;
 }
 
@@ -977,6 +980,36 @@ const void* Openssl3DES::getCipher()
     else if(engine_mode == "EDE-OFB")
     {
         return EVP_des_ede3_ofb();
+    }
+    else
+    {
+        LOG_E("not support:%s", engine_mode.c_str());
+    }
+    return NULL;
+}
+
+OpensslSM4::OpensslSM4()
+{
+}
+
+OpensslSM4::~OpensslSM4()
+{
+}
+
+const void* OpensslSM4::getCipher()
+{
+    if(key.getDataSize() != 16)
+    {
+        LOG_E("%s key size incorrect:%d,must be 16B", engine_mode.c_str(), key.getDataSize());
+        return NULL;
+    }
+    if(engine_mode == "ECB")
+    {
+        return EVP_sm4_ecb();
+    }
+    else if(engine_mode == "CBC")
+    {
+        return EVP_sm4_cbc();
     }
     else
     {
