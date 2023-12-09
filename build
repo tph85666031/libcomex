@@ -295,7 +295,7 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
 	#编译expat
 	mkdir ${DIR_ROOT}/dependent/expat/build 2>&1 > /dev/null
     pushd ${DIR_ROOT}/dependent/expat/build
-    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DEXPAT_BUILD_DOCS=0 -DEXPAT_BUILD_EXAMPLES=0 -DEXPAT_BUILD_TESTS=0 -DEXPAT_BUILD_TOOLS=0 -DEXPAT_SHARED_LIBS=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DFLAG_VISIBILITY=0 -DEXPAT_BUILD_DOCS=0 -DEXPAT_BUILD_EXAMPLES=0 -DEXPAT_BUILD_TESTS=0 -DEXPAT_BUILD_TOOLS=0 -DEXPAT_SHARED_LIBS=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
     make -j${JOBS} && make install
     if [ $? != 0 ]; then
         show_message "failed to make expat"
@@ -432,6 +432,18 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
     make -j${JOBS} && make install
     if [ $? != 0 ]; then
         show_message "failed to make podofo"
+        popd
+        exit -1
+    fi
+    popd
+	
+	#编译cairo
+	mkdir ${DIR_ROOT}/dependent/cairo/tmp 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/cairo/tmp
+	LIBS="${DIR_ROOT}/out/lib/libbrotlienc.a ${DIR_ROOT}/out/lib/libbrotlidec.a ${DIR_ROOT}/out/lib/libbrotlicommon.a ${DIR_ROOT}/out/lib/libharfbuzz.a ${DIR_ROOT}/out/lib/libbz2.a" CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib" ../configure --disable-xlib --disable-xcb --with-pic --disable-full-testing --enable-test-surfaces=no --enable-static --disable-shared --prefix=${DIR_ROOT}/out
+	make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make cairo"
         popd
         exit -1
     fi

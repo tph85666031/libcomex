@@ -27,6 +27,7 @@ dependent/fontconfig/build
 dependent/libunistring/build
 dependent/libunistring/lib/libunistring.sym-t1
 dependent/fltk/build
+dependent/cairo/tmp
 *.o
 *.d
 *.in
