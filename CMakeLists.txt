@@ -78,6 +78,7 @@ SET(PROJECT_LIB
 	${PROJECT_SOURCE_DIR}/out/lib/libcurl.a
 	${PROJECT_SOURCE_DIR}/out/lib/libpodofo.a
 	${PROJECT_SOURCE_DIR}/out/lib/libpodofo_private.a
+	${PROJECT_SOURCE_DIR}/out/lib/libcairo.a
 	${PROJECT_SOURCE_DIR}/out/lib/libfontconfig.a
 	${PROJECT_SOURCE_DIR}/out/lib/libfreetype.a
 	${PROJECT_SOURCE_DIR}/out/lib/libarchive.a
@@ -103,6 +104,8 @@ SET(PROJECT_LIB
 	${PROJECT_SOURCE_DIR}/out/lib/libpng.a
 	${PROJECT_SOURCE_DIR}/out/lib/liblzma.a
 	${PROJECT_SOURCE_DIR}/out/lib/libz.a
+	${PROJECT_SOURCE_DIR}/out/lib/libqrencode.a
+	${PROJECT_SOURCE_DIR}/out/lib/libpixman-1.a
 	libstdc++fs.a
 )
 ELSE()

@@ -28,6 +28,8 @@ dependent/libunistring/build
 dependent/libunistring/lib/libunistring.sym-t1
 dependent/fltk/build
 dependent/cairo/tmp
+dependent/libqrencode/build
+dependent/libpixman/build
 *.o
 *.d
 *.in

@@ -187,7 +187,7 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
         fi
     fi
 	popd
-    
+	
     #编译libnfs
 	mkdir ${DIR_ROOT}/dependent/libnfs/build 2>&1 > /dev/null
     pushd ${DIR_ROOT}/dependent/libnfs/build
@@ -238,7 +238,7 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
         exit -1
     fi
     popd
-    
+	
     #编译libzip
 	mkdir ${DIR_ROOT}/dependent/libzip/build 2>&1 > /dev/null
     pushd ${DIR_ROOT}/dependent/libzip/build
@@ -276,6 +276,18 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
     fi
     popd
 	
+	#编译libqrencode
+	mkdir ${DIR_ROOT}/dependent/libqrencode/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libqrencode/build
+    cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DBUILD_SHARED_LIBS=0 -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libqrencode"
+        popd
+        exit -1
+    fi
+    popd
+	
 	#编译brotli
 	mkdir ${DIR_ROOT}/dependent/brotli/build 2>&1 > /dev/null
     pushd ${DIR_ROOT}/dependent/brotli/build
@@ -307,7 +319,7 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
 	#编译libidn
 	mkdir ${DIR_ROOT}/dependent/libidn/build 2>&1 > /dev/null
     pushd ${DIR_ROOT}/dependent/libidn/build
-    ../configure --with-pic --prefix=${DIR_ROOT}/out --disable-shared 
+    ../configure --with-pic --prefix=${DIR_ROOT}/out --disable-shared  --disable-doc
     make -j${JOBS} && make install
     if [ $? != 0 ]; then
         show_message "failed to make libidn"
@@ -401,6 +413,18 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
     fi
     popd
 	
+	#编译libpixman
+	mkdir ${DIR_ROOT}/dependent/libpixman/build 2>&1 > /dev/null
+    pushd ${DIR_ROOT}/dependent/libpixman/build
+    CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib" LIBS="${DIR_ROOT}/out/lib/libbrotlienc.a ${DIR_ROOT}/out/lib/libbrotlidec.a ${DIR_ROOT}/out/lib/libbrotlicommon.a ${DIR_ROOT}/out/lib/libharfbuzz.a ${DIR_ROOT}/out/lib/libharfbuzz.a ${DIR_ROOT}/out/lib/libbz2.a" ../configure --enable-static=yes --enable-shared=no --with-pic=yes --prefix=${DIR_ROOT}/out
+    make -j${JOBS} && make install
+    if [ $? != 0 ]; then
+        show_message "failed to make libpixman"
+        popd
+        exit -1
+    fi
+    popd
+	
 	#编译freetype
 	mkdir ${DIR_ROOT}/dependent/freetype/build 2>&1 > /dev/null
     pushd ${DIR_ROOT}/dependent/freetype/build
@@ -416,7 +440,7 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
 	#编译fontconfig
 	mkdir ${DIR_ROOT}/dependent/fontconfig/build 2>&1 > /dev/null
     pushd ${DIR_ROOT}/dependent/fontconfig/build
-    CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib " ../configure --disable-cache-build --disable-docs --with-pic --disable-shared --enable-static --prefix=${DIR_ROOT}/out
+    CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib " ../configure --disable-cache-build --disable-docs --with-pic --disable-shared --enable-static --disable-docs --prefix=${DIR_ROOT}/out
     make -j${JOBS} && make install
     if [ $? != 0 ]; then
         show_message "failed to make freetype"
@@ -488,7 +512,7 @@ if [ x"${OS_TYPE}" != x"Win" -a $BUILD_LIBS == 1 ];then
     #编译mosquitto
 	mkdir ${DIR_ROOT}/dependent/mosquitto/build 2>&1 > /dev/null
     pushd ${DIR_ROOT}/dependent/mosquitto/build
-    cmake -DWITH_TLS=1 -DWITH_LIB_CPP=0 -DWITH_CJSON=0 -DWITH_THREADING=1 -DWITH_STATIC_LIBRARIES=1 -DWITH_SHARED_LIBRARIES=0 -DWITH_PIC=1 -DWITH_SRV=0 -DWITH_SOCKS=0 -DWITH_UNIX_SOCKETS=1 -DWITH_EC=0 -DWITH_BROKER=1 -DWITH_APPS=0 -DWITH_PLUGINS=0 -DDOCUMENTATION=0 -DINC_MEMTRACK=0 -DWITH_SYS_TREE=0 -DWITH_WEBSOCKETS=1 -DSTATIC_WEBSOCKETS=1 -DWITH_CONTROL=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+    cmake -DWITH_TLS=1 -DWITH_LIB_CPP=0 -DWITH_CJSON=0 -DWITH_THREADING=1 -DWITH_STATIC_LIBRARIES=1 -DWITH_SHARED_LIBRARIES=0 -DWITH_PIC=1 -DWITH_SRV=0 -DWITH_SOCKS=0 -DWITH_UNIX_SOCKETS=1 -DWITH_EC=0 -DWITH_CLIENTS=0 -DWITH_BROKER=1 -DWITH_APPS=0 -DWITH_PLUGINS=0 -DDOCUMENTATION=0 -DINC_MEMTRACK=0 -DWITH_SYS_TREE=0 -DWITH_WEBSOCKETS=1 -DSTATIC_WEBSOCKETS=1 -DWITH_CONTROL=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
     make -j${JOBS} && make install
     if [ $? != 0 ]; then
         show_message "failed to make mosquitto"
