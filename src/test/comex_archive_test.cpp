@@ -2,6 +2,9 @@
 
 void comex_archive_unit_test_suit(void** state)
 {
+	ArchiveZip z0;
+	z0.open("D:\\1.zip");
+	z0.extractTo("D:\\2\\");
     com_dir_create(PATH_TO_LOCAL("./archive_test").c_str());
     com_file_writef(PATH_TO_LOCAL("./archive_test/1.txt").c_str(), "A123456");
     com_file_writef(PATH_TO_LOCAL("./archive_test/2.txt").c_str(), "B123456");
@@ -45,6 +48,11 @@ void comex_archive_unit_test_suit(void** state)
     r1.readTo(PATH_TO_LOCAL("archive_test/1.txt").c_str(), "./__t1__.txt");
     ASSERT_STR_EQUAL(com_file_readall(PATH_TO_LOCAL("./__t1__.txt").c_str()).toString().c_str(), "A123456");
     com_file_remove(PATH_TO_LOCAL("./__t1__.txt").c_str());
+
+    ArchiveWriter w1(PATH_TO_LOCAL("./w1.tar.xz").c_str());
+    w1.addFile("1.txt", PATH_TO_LOCAL("archive_test/1.txt").c_str());
+    w1.addDirectory("archive_test", PATH_TO_LOCAL("./archive_test").c_str(), false);
+    w1.close();
 
     CPPBytes w1_mem;
     ArchiveWriter w1(w1_mem, "tar.xz");

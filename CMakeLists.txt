@@ -134,9 +134,9 @@ SET(PROJECT_LIB
     zip.lib
     zlib.lib
     zstd.lib
-	brotlicommon-static.lib
-	brotlidec-static.lib
-	brotlienc-static.lib
+	brotlicommon.lib
+	brotlidec.lib
+	brotlienc.lib
 	freetype.lib
 	jpeg.lib
 	turbojpeg.lib

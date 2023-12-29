@@ -371,7 +371,7 @@ bool ArchiveZip::extractTo(const char* dir)
         {
             continue;
         }
-        std::string file = com_string_format("%s/%s", dir, st.name);
+        std::string file = com_string_format("%s%c%s", dir, PATH_DELIM_CHAR, st.name);
         if(readTo(st.name, file.c_str()) == false)
         {
             LOG_W("extract failed:%s", st.name);

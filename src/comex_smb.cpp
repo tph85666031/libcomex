@@ -231,12 +231,20 @@ bool CPPSmb::putAs(const char* file_path_local, const char* file_path_remote)
     uint8 buf[1024];
     int64 read_size = 0 ;
     int64 write_size = 0;
+    bool write_succeed = true;
     while((read_size = com_file_read(f_local, buf, sizeof(buf))) > 0)
     {
-        write_size += smb2_write((struct smb2_context*)smb_ctx, f_remote, buf, (uint32)read_size);
+        if (smb2_write((struct smb2_context*)smb_ctx, f_remote, buf, (uint32)read_size)) {
+            write_succeed = false;
+            break;
+        }
+        write_size += ret;
     }
     com_file_close(f_local);
-    smb2_fsync((struct smb2_context*)smb_ctx, f_remote);
+    if (write_succeed) 
+    {
+        smb2_fsync((struct smb2_context*)smb_ctx, f_remote);
+    }
     smb2_close((struct smb2_context*)smb_ctx, f_remote);
     return (write_size >= 0);
 }

@@ -1,5 +1,6 @@
 out/
 tmp/
+dependent/out
 dependent/libsmb2/build
 dependent/libnfs/build
 dependent/libwebsockets/build
