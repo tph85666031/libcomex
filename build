@@ -22,7 +22,7 @@ BUILD_TYPE="Release"
 UNIT_TEST="false"
 PROJECT_CLEAN= "false"
 BUILD_LIBS=0
-OS_TYPE=`uname`
+OS_TYPE=`uname -s`
 BUILD_ARCH=`uname -m`
 
 if [ x"${OS_TYPE}" == x"Darwin" ];then
@@ -43,7 +43,8 @@ if [ x"${OS_TYPE}" == x"Darwin" ];then
 elif [ x"${OS_TYPE}" == x"Linux" ];then
     echo "OS_TYPE is Linux"
 else
-    echo "OS_TYPE is Win"
+    echo "OS_TYPE is Windows"
+	OS_TYPE="Windows"
     BUILD_ARCH="x64"
 fi
 
@@ -91,12 +92,12 @@ if [ -z ${JOBS} ];then
 fi
 
 echo "decompress required libs for ${OS_TYPE}_${BUILD_ARCH}"
-tar -xvf dependent/dependent_Linux_x86_64.tar.gz -C ${DIR_ROOT}/out
+tar -xvf 3rd_party/${OS_TYPE}_${BUILD_ARCH}.tar.xz -C ${DIR_ROOT}/out > /dev/null 2>&1
 
 #编译comex
 cd ${DIR_ROOT}/tmp
 if [ -d ${DIR_ROOT} ];then
-  if [ x"$OS_TYPE" == x"Win" ];then
+  if [ x"$OS_TYPE" == x"Windows" ];then
       cmake -A ${BUILD_ARCH} -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} ${DIR_ROOT} && cmake --build . --config ${BUILD_TYPE}
   else
       cmake -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} ${DIR_ROOT} && make -j${JOBS}

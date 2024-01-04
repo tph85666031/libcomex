@@ -39,7 +39,7 @@ Contributors:
 time_t mosquitto_time(void)
 {
 #ifdef WIN32
-	return GetTickCount64()/1000;
+	return GetTickCount()/1000;
 #elif _POSIX_TIMERS>0 && defined(_POSIX_MONOTONIC_CLOCK)
 	struct timespec tp;
 

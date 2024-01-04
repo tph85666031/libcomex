@@ -12,7 +12,6 @@ typedef void (*fp_mqtt_v5_on_message)(struct mosquitto*, void*, const struct mos
 typedef void (*fp_mqtt_v5_on_subscribe)(struct mosquitto*, void*, int, int, const int*, const mosquitto_property* props);
 typedef void (*fp_mqtt_v5_on_unsubscribe)(struct mosquitto*, void*, int, const mosquitto_property* props);
 typedef void (*fp_mqtt_v5_on_log)(struct mosquitto*, void*, int, const char*);
-static MqttInitializer initializer;
 
 MqttInitializer::MqttInitializer()
 {

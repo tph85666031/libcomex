@@ -120,11 +120,7 @@ _zip_win32_named_op_create_temp_output(zip_source_file_context_t *ctx) {
         }
     }
 
-#ifndef MS_UWP
     value = GetTickCount();
-#else
-    value = (zip_uint32_t)(GetTickCount64() & 0xffffffff);
-#endif
 
     if ((tempname = file_ops->allocate_tempname(ctx->fname, 10, &tempname_size)) == NULL) {
         zip_error_set(&ctx->error, ZIP_ER_MEMORY, 0);

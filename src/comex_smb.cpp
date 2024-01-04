@@ -16,14 +16,16 @@ CPPSmb::~CPPSmb()
 {
     disconnect();
 }
+
 CPPSmb& CPPSmb::setShareUrlPath(const char* url)
 {
     if(url != NULL)
     {
-       this->url = url; 
+        this->url = url;
     }
     return *this;
 }
+
 CPPSmb& CPPSmb::setHost(const char* host)
 {
     if(host != NULL)
@@ -234,14 +236,16 @@ bool CPPSmb::putAs(const char* file_path_local, const char* file_path_remote)
     bool write_succeed = true;
     while((read_size = com_file_read(f_local, buf, sizeof(buf))) > 0)
     {
-        if (smb2_write((struct smb2_context*)smb_ctx, f_remote, buf, (uint32)read_size)) {
+        int ret = smb2_write((struct smb2_context*)smb_ctx, f_remote, buf, (uint32)read_size);
+        if(ret < 0)
+        {
             write_succeed = false;
             break;
         }
         write_size += ret;
     }
     com_file_close(f_local);
-    if (write_succeed) 
+    if(write_succeed)
     {
         smb2_fsync((struct smb2_context*)smb_ctx, f_remote);
     }

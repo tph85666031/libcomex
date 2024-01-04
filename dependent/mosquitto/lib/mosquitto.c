@@ -58,7 +58,7 @@ int mosquitto_lib_init(void)
 
 	if (init_refcount == 0) {
 #ifdef WIN32
-		srand((unsigned int)GetTickCount64());
+	srand((unsigned int)GetTickCount());
 #elif _POSIX_TIMERS>0 && defined(_POSIX_MONOTONIC_CLOCK)
 		struct timespec tp;
 

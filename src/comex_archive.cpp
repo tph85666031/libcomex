@@ -2,7 +2,10 @@
 #include <zlib.h>
 #include <bzlib.h>
 #include <fcntl.h>
-#if !defined(_WIN32) && !defined(_WIN64)
+#if defined(_WIN32) || defined(_WIN64)
+#include <BaseTsd.h>
+typedef SSIZE_T ssize_t;
+#else
 #include <libtar.h>
 #endif
 #include <archive.h>
@@ -17,6 +20,40 @@
 #define COMPRESS_TYPE_BZ2       2
 
 #define ARCHIVE_READ_BLOCK_SIZE  (10*1024)
+
+static int Archive_Mem_Open(struct archive* ctx, void* buffer)
+{
+    if(ctx == NULL || buffer == NULL)
+    {
+        return ARCHIVE_FATAL;
+    }
+    if(archive_write_get_bytes_in_last_block((struct archive*)ctx) == -1)
+    {
+        archive_write_set_bytes_in_last_block((struct archive*)ctx, 1);
+    }
+    return ARCHIVE_OK;
+}
+
+static ssize_t Archive_Mem_Write(struct archive* ctx, void* buffer, const void* data, size_t size)
+{
+    if(ctx == NULL || buffer == NULL)
+    {
+        return ARCHIVE_FATAL;
+    }
+
+    CPPBytes* bytes = (CPPBytes*)buffer;
+    bytes->append((uint8*)data, size);
+    return size;
+}
+
+static int Archive_Mem_Close(struct archive* ctx, void* buffer)
+{
+    if(ctx == NULL || buffer == NULL)
+    {
+        return ARCHIVE_FATAL;
+    }
+    return ARCHIVE_OK;
+}
 
 ArchiveZip::ArchiveZip()
 {
@@ -1072,9 +1109,9 @@ ArchiveWriter::ArchiveWriter(CPPBytes& buffer, const char* suffix, const char* p
     }
 
     if(archive_write_open((struct archive*)ctx, &buffer,
-                          (int (*)(struct archive*, void*))MemOpen,
-                          (ssize_t (*)(struct archive*, void*, const void*, size_t))MemWrite,
-                          (int (*)(struct archive*, void*))MemClose) != ARCHIVE_OK)
+                          Archive_Mem_Open,
+                          Archive_Mem_Write,
+                          Archive_Mem_Close) != ARCHIVE_OK)
     {
         LOG_E("open failed:%s", archive_error_string((struct archive*)ctx));
         return ;
@@ -1183,38 +1220,5 @@ bool ArchiveWriter::addDirectory(const char* path, const char* dir, bool recursi
         addFile(path_internal.c_str(), it->first.c_str());
     }
     return true;
-}
-
-int ArchiveWriter::MemOpen(void* ctx, CPPBytes* buffer)
-{
-    if(ctx == NULL || buffer == NULL)
-    {
-        return ARCHIVE_FATAL;
-    }
-    if(archive_write_get_bytes_in_last_block((struct archive*)ctx) == -1)
-    {
-        archive_write_set_bytes_in_last_block((struct archive*)ctx, 1);
-    }
-    return ARCHIVE_OK;
-}
-
-ssize_t ArchiveWriter::MemWrite(void* ctx, CPPBytes* buffer, const void* buff, size_t size)
-{
-    if(ctx == NULL || buffer == NULL)
-    {
-        return ARCHIVE_FATAL;
-    }
-
-    buffer->append((uint8*)buff, size);
-    return size;
-}
-
-int ArchiveWriter::MemClose(void* ctx, CPPBytes* buffer)
-{
-    if(ctx == NULL || buffer == NULL)
-    {
-        return ARCHIVE_FATAL;
-    }
-    return ARCHIVE_OK;
 }
 

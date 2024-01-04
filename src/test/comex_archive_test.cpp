@@ -55,10 +55,10 @@ void comex_archive_unit_test_suit(void** state)
     w1.close();
 
     CPPBytes w1_mem;
-    ArchiveWriter w1(w1_mem, "tar.xz");
-    w1.addFile("1.txt", PATH_TO_LOCAL("archive_test/1.txt").c_str());
-    w1.addDirectory("archive_test", PATH_TO_LOCAL("./archive_test").c_str(), false);
-    w1.close();
+    ArchiveWriter w2(w1_mem, "tar.xz");
+    w2.addFile("1.txt", PATH_TO_LOCAL("archive_test/1.txt").c_str());
+    w2.addDirectory("archive_test", PATH_TO_LOCAL("./archive_test").c_str(), false);
+    w2.close();
     w1_mem.toFile(PATH_TO_LOCAL("./w1.tar.xz").c_str());
 
     ArchiveReader r2(PATH_TO_LOCAL("./w1.tar.xz").c_str());

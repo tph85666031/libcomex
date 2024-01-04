@@ -95,11 +95,6 @@ public:
     bool addFile(const char* path, const char* file);
     bool addDirectory(const char* path, const char* dir, bool recursion = false);
 private:
-    static int MemOpen(void* ctx, CPPBytes* buffer);
-    static ssize_t MemWrite(void* ctx, CPPBytes* buffer, const void* buff, size_t size);
-    static int MemClose(void* ctx, CPPBytes* buffer);
-
-private:
     void* ctx;
 };
 #endif /* __COMEX_ACHIVE_H__ */

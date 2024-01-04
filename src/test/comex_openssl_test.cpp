@@ -330,5 +330,6 @@ void comex_openssl_unit_test_suit(void** state)
     cert_params.set("ip", "192.168.0.11,192.168.0.12");
     ASSERT_TRUE(OpensslCert::CreateCert(cert_params));
     com_file_remove("./test.p12");
+    com_file_remove("./test.crt");
 }
 

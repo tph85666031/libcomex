@@ -3,10 +3,16 @@
 #include "comex_podofo.h"
 
 #include "jpeglib.h"
+#ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include "podofo/podofo.h"
+
+#ifdef __GNUC__
 #pragma GCC diagnostic pop
+#endif
 
 using namespace PoDoFo;
 
@@ -58,7 +64,7 @@ CPPBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm
 
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
-    jpeg_mem_dest(&cinfo, &dst, &dst_size);
+    jpeg_mem_dest(&cinfo, &dst, (unsigned long*)&dst_size);
     cinfo.image_width = width;
     cinfo.image_height = height;
     cinfo.input_components = 3;
@@ -69,7 +75,7 @@ CPPBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm
     jpeg_start_compress(&cinfo, TRUE);
 
     JSAMPROW row_pointer[1] = {0};
-    unsigned char bytes[width * 3] = {0};
+    unsigned char* bytes = new unsigned char[width * 3];
     int ppm_pos = 0;
     while(cinfo.next_scanline < cinfo.image_height)
     {
@@ -82,6 +88,7 @@ CPPBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm
         row_pointer[0] = bytes;
         (void) jpeg_write_scanlines(&cinfo, row_pointer, 1);
     }
+    delete[] bytes;
 
     jpeg_finish_compress(&cinfo);
 

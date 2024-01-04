@@ -1,8 +1,4 @@
-#if defined(_WIN32) || defined(_WIN64)
-#include <cairo.h>
-#else
 #include <cairo/cairo.h>
-#endif
 
 #define M_PI       3.14159265358979323846   // pi
 
@@ -637,6 +633,7 @@ CPPBytes WaterMark::createWatermarkAsDot()
     std::string text_tmp = getText();
     if(text_tmp.length() < 9 || text_tmp.at(0) != 's')
     {
+        LOG_E("text incorrect:%s", text_tmp.c_str());
         return CPPBytes();
     }
     com_string_to_lower(text_tmp);
@@ -752,6 +749,7 @@ CPPBytes WaterMark::createWatermarkAsDot()
                 p = dot_f;
                 break;
             default:
+                LOG_E("text incorrect:%c", text_tmp.at(i));
                 return false;
         }
         //将3x3点阵按序拷贝到9x9中指定的3x3区域

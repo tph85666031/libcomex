@@ -486,14 +486,14 @@ bool OpensslCrypto::encryptBegin()
     EVP_CIPHER* cipher = (EVP_CIPHER*)getCipher();
     if(cipher == NULL)
     {
-        LOG_E("failed to get cipher");
+        LOG_E("failed to get cipher:%s", engine_mode.c_str());
         return false;
     }
     block_size = EVP_CIPHER_block_size(cipher);
-
+    
     if(EVP_EncryptInit_ex((EVP_CIPHER_CTX*)ctx, cipher, NULL, NULL, NULL) != 1)
     {
-        LOG_E("failed to int cipher");
+        LOG_E("failed to int cipher:%s,error=%s", engine_mode.c_str(), ERR_error_string(ERR_get_error(), NULL));
         return false;
     }
 
@@ -596,7 +596,7 @@ bool OpensslCrypto::decryptBegin()
 
     if(EVP_DecryptInit_ex((EVP_CIPHER_CTX*)ctx, cipher, NULL, NULL, NULL) != 1)
     {
-        LOG_E("failed to int cipher");
+        LOG_E("failed to int cipher:%s,error=%s", engine_mode.c_str(), ERR_error_string(ERR_get_error(), NULL));
         return false;
     }
     if(engine_mode == "CCM" || engine_mode == "GCM")

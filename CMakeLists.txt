@@ -4,11 +4,18 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 PROJECT("comex")
 
+MESSAGE("CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
+MESSAGE("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
+MESSAGE("CMAKE_SYSTEM_NAME: ${CMAKE_SYSTEM_NAME}")
+MESSAGE("CMAKE_SYSTEM: ${CMAKE_SYSTEM}")
+MESSAGE("CMAKE_LIBRARY_ARCHITECTURE: ${CMAKE_LIBRARY_ARCHITECTURE}")
+
 IF (MSVC)
   ADD_DEFINITIONS("-DWIN32_LEAN_AND_MEAN")
   ADD_DEFINITIONS("-DLIBARCHIVE_STATIC")
   ADD_DEFINITIONS("-DLIBMOSQUITTO_STATIC")
   ADD_DEFINITIONS("-DPODOFO_STATIC")
+  ADD_DEFINITIONS("-D_WIN32_WINNT=0x0501")
 ENDIF()
 
 IF ("${UNIT_TEST}" STREQUAL "true")
@@ -134,9 +141,12 @@ SET(PROJECT_LIB
     zip.lib
     zlib.lib
     zstd.lib
+	libexpatMD.lib
+	pixman-1.lib
 	brotlicommon.lib
 	brotlidec.lib
 	brotlienc.lib
+	fontconfig.lib
 	freetype.lib
 	jpeg.lib
 	turbojpeg.lib
@@ -144,6 +154,9 @@ SET(PROJECT_LIB
 	podofo.lib
 	podofo_private.lib
 	tiff.lib
+	qrencode.lib
+	cairo.lib
+	Crypt32.lib
 )
 ENDIF()
 
