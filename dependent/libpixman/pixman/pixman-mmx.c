@@ -30,7 +30,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include <pixman-config.h>
 #endif
 
 #if defined USE_X86_MMX || defined USE_ARM_IWMMXT || defined USE_LOONGSON_MMI
@@ -60,7 +60,7 @@ _mm_empty (void)
 #endif
 
 #ifdef USE_X86_MMX
-# if (defined(__SUNPRO_C) || defined(_MSC_VER) || defined(_WIN64))
+# if (defined(__SSE2__) || defined(__SUNPRO_C) || defined(_MSC_VER) || defined(_WIN64))
 #  include <xmmintrin.h>
 # else
 /* We have to compile with -msse to use xmmintrin.h, but that causes SSE
@@ -103,7 +103,7 @@ _mm_mulhi_pu16 (__m64 __A, __m64 __B)
 # endif
 #endif
 
-#ifndef _MSC_VER
+#ifndef _MM_SHUFFLE
 #define _MM_SHUFFLE(fp3,fp2,fp1,fp0) \
  (((fp3) << 6) | ((fp2) << 4) | ((fp1) << 2) | (fp0))
 #endif
@@ -387,8 +387,10 @@ in_over (__m64 src, __m64 srca, __m64 mask, __m64 dest)
 static force_inline __m64 ldq_u(__m64 *p)
 {
 #ifdef USE_X86_MMX
-    /* x86's alignment restrictions are very relaxed. */
-    return *(__m64 *)p;
+    /* x86's alignment restrictions are very relaxed, but that's no excuse */
+    __m64 r;
+    memcpy(&r, p, sizeof(__m64));
+    return r;
 #elif defined USE_ARM_IWMMXT
     int align = (uintptr_t)p & 7;
     __m64 *aligned_p;
@@ -407,7 +409,9 @@ static force_inline uint32_t ldl_u(const uint32_t *p)
 {
 #ifdef USE_X86_MMX
     /* x86's alignment restrictions are very relaxed. */
-    return *p;
+    uint32_t r;
+    memcpy(&r, p, sizeof(uint32_t));
+    return r;
 #else
     struct __una_u32 { uint32_t x __attribute__((packed)); };
     const struct __una_u32 *ptr = (const struct __una_u32 *) p;
@@ -3950,7 +3954,7 @@ mmx_fetch_a8 (pixman_iter_t *iter, const uint32_t *mask)
 
     while (w && (((uintptr_t)dst) & 15))
     {
-        *dst++ = *(src++) << 24;
+        *dst++ = (uint32_t)*(src++) << 24;
         w--;
     }
 
@@ -3977,7 +3981,7 @@ mmx_fetch_a8 (pixman_iter_t *iter, const uint32_t *mask)
 
     while (w)
     {
-	*dst++ = *(src++) << 24;
+	*dst++ = (uint32_t)*(src++) << 24;
 	w--;
     }
 

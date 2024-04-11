@@ -22,7 +22,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include <pixman-config.h>
 #endif
 #include "pixman-private.h"
 
@@ -30,10 +30,10 @@ static uint32_t
 color_to_uint32 (const pixman_color_t *color)
 {
     return
-        (color->alpha >> 8 << 24) |
-        (color->red >> 8 << 16) |
-        (color->green & 0xff00) |
-        (color->blue >> 8);
+        ((unsigned int) color->alpha >> 8 << 24) |
+        ((unsigned int) color->red >> 8 << 16) |
+        ((unsigned int) color->green & 0xff00) |
+        ((unsigned int) color->blue >> 8);
 }
 
 static argb_t

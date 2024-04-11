@@ -25,7 +25,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include <pixman-config.h>
 #endif
 
 #include <stdlib.h>
@@ -68,14 +68,14 @@
 
 #ifdef WORDS_BIGENDIAN
 #define FETCH_24(img,l,o)                                              \
-    ((READ (img, (((uint8_t *)(l)) + ((o) * 3) + 0)) << 16)    |       \
-     (READ (img, (((uint8_t *)(l)) + ((o) * 3) + 1)) << 8)     |       \
-     (READ (img, (((uint8_t *)(l)) + ((o) * 3) + 2)) << 0))
+    ((uint32_t)(READ (img, (((uint8_t *)(l)) + ((o) * 3) + 0)) << 16)    |       \
+     (uint32_t)(READ (img, (((uint8_t *)(l)) + ((o) * 3) + 1)) << 8)     |       \
+     (uint32_t)(READ (img, (((uint8_t *)(l)) + ((o) * 3) + 2)) << 0))
 #else
 #define FETCH_24(img,l,o)						\
-    ((READ (img, (((uint8_t *)(l)) + ((o) * 3) + 0)) << 0)	|	\
-     (READ (img, (((uint8_t *)(l)) + ((o) * 3) + 1)) << 8)	|	\
-     (READ (img, (((uint8_t *)(l)) + ((o) * 3) + 2)) << 16))
+    ((uint32_t)(READ (img, (((uint8_t *)(l)) + ((o) * 3) + 0)) << 0)	|	\
+     (uint32_t)(READ (img, (((uint8_t *)(l)) + ((o) * 3) + 1)) << 8)	|	\
+     (uint32_t)(READ (img, (((uint8_t *)(l)) + ((o) * 3) + 2)) << 16))
 #endif
 
 /* Store macros */
@@ -87,7 +87,7 @@
 	uint32_t  *__d = ((uint32_t *)(l)) + ((o) >> 5);		\
 	uint32_t __m, __v;						\
 									\
-	__m = 1 << (0x1f - ((o) & 0x1f));				\
+	__m = 1U << (0x1f - ((o) & 0x1f));				\
 	__v = (v)? __m : 0;						\
 									\
 	WRITE((img), __d, (READ((img), __d) & ~__m) | __v);		\
@@ -100,7 +100,7 @@
 	uint32_t  *__d = ((uint32_t *)(l)) + ((o) >> 5);		\
 	uint32_t __m, __v;						\
 									\
-	__m = 1 << ((o) & 0x1f);					\
+	__m = 1U << ((o) & 0x1f);					\
 	__v = (v)? __m : 0;						\
 									\
 	WRITE((img), __d, (READ((img), __d) & ~__m) | __v);		\
@@ -465,7 +465,7 @@ convert_and_store_pixel (bits_image_t *		image,
 	    image, bits, offset, PIXMAN_ ## format);			\
     }									\
 									\
-    static const void *const __dummy__ ## format
+    static const void *const __dummy__ ## format MAYBE_UNUSED
 
 MAKE_ACCESSORS(a8r8g8b8);
 MAKE_ACCESSORS(x8r8g8b8);
@@ -610,6 +610,32 @@ fetch_scanline_a8r8g8b8_sRGB_float (bits_image_t *  image,
     }
 }
 
+static void
+fetch_scanline_r8g8b8_sRGB_float (bits_image_t *  image,
+				  int             x,
+				  int             y,
+				  int             width,
+				  uint32_t *      b,
+				  const uint32_t *mask)
+{
+    const uint8_t *bits = (uint8_t *)(image->bits + y * image->rowstride);
+    argb_t *buffer = (argb_t *)b;
+    int i;
+    for (i = x; i < width; ++i)
+    {
+	uint32_t p = FETCH_24 (image, bits, i);
+	argb_t *argb = buffer;
+
+	argb->a = 1.0f;
+
+	argb->r = to_linear[(p >> 16) & 0xff];
+	argb->g = to_linear[(p >>  8) & 0xff];
+	argb->b = to_linear[(p >>  0) & 0xff];
+
+	buffer++;
+    }
+}
+
 /* Expects a float buffer */
 static void
 fetch_scanline_a2r10g10b10_float (bits_image_t *  image,
@@ -642,6 +668,48 @@ fetch_scanline_a2r10g10b10_float (bits_image_t *  image,
 }
 
 /* Expects a float buffer */
+#ifndef PIXMAN_FB_ACCESSORS
+static void
+fetch_scanline_rgbf_float (bits_image_t   *image,
+			   int             x,
+			   int             y,
+			   int             width,
+			   uint32_t *      b,
+			   const uint32_t *mask)
+{
+    const float *bits = (float *)image->bits + y * image->rowstride;
+    const float *pixel = bits + x * 3;
+    argb_t *buffer = (argb_t *)b;
+
+    for (; width--; buffer++) {
+	buffer->r = *pixel++;
+	buffer->g = *pixel++;
+	buffer->b = *pixel++;
+	buffer->a = 1.f;
+    }
+}
+
+static void
+fetch_scanline_rgbaf_float (bits_image_t   *image,
+			    int             x,
+			    int             y,
+			    int             width,
+			    uint32_t *      b,
+			    const uint32_t *mask)
+{
+    const float *bits = (float *)image->bits + y * image->rowstride;
+    const float *pixel = bits + x * 4;
+    argb_t *buffer = (argb_t *)b;
+
+    for (; width--; buffer++) {
+	buffer->r = *pixel++;
+	buffer->g = *pixel++;
+	buffer->b = *pixel++;
+	buffer->a = *pixel++;
+    }
+}
+#endif
+
 static void
 fetch_scanline_x2r10g10b10_float (bits_image_t   *image,
 				  int             x,
@@ -805,6 +873,40 @@ fetch_scanline_yv12 (bits_image_t   *image,
 
 /**************************** Pixel wise fetching *****************************/
 
+#ifndef PIXMAN_FB_ACCESSORS
+static argb_t
+fetch_pixel_rgbf_float (bits_image_t *image,
+			int	    offset,
+			int	    line)
+{
+    float *bits = (float *)image->bits + line * image->rowstride;
+    argb_t argb;
+
+    argb.r = bits[offset * 3];
+    argb.g = bits[offset * 3 + 1];
+    argb.b = bits[offset * 3 + 2];
+    argb.a = 1.f;
+
+    return argb;
+}
+
+static argb_t
+fetch_pixel_rgbaf_float (bits_image_t *image,
+			 int	    offset,
+			 int	    line)
+{
+    float *bits = (float *)image->bits + line * image->rowstride;
+    argb_t argb;
+
+    argb.r = bits[offset * 4];
+    argb.g = bits[offset * 4 + 1];
+    argb.b = bits[offset * 4 + 2];
+    argb.a = bits[offset * 4 + 3];
+
+    return argb;
+}
+#endif
+
 static argb_t
 fetch_pixel_x2r10g10b10_float (bits_image_t *image,
 			       int	   offset,
@@ -905,6 +1007,24 @@ fetch_pixel_a8r8g8b8_sRGB_float (bits_image_t *image,
     return argb;
 }
 
+static argb_t
+fetch_pixel_r8g8b8_sRGB_float (bits_image_t *image,
+			       int	     offset,
+			       int           line)
+{
+    uint8_t *bits = (uint8_t *)(image->bits + line * image->rowstride);
+    uint32_t p = FETCH_24 (image, bits, offset);
+    argb_t argb;
+
+    argb.a = 1.0f;
+
+    argb.r = to_linear[(p >> 16) & 0xff];
+    argb.g = to_linear[(p >>  8) & 0xff];
+    argb.b = to_linear[(p >>  0) & 0xff];
+
+    return argb;
+}
+
 static uint32_t
 fetch_pixel_yuy2 (bits_image_t *image,
 		  int           offset,
@@ -962,6 +1082,45 @@ fetch_pixel_yv12 (bits_image_t *image,
 
 /*********************************** Store ************************************/
 
+#ifndef PIXMAN_FB_ACCESSORS
+static void
+store_scanline_rgbaf_float (bits_image_t *  image,
+			    int             x,
+			    int             y,
+			    int             width,
+			    const uint32_t *v)
+{
+    float *bits = (float *)image->bits + image->rowstride * y + 4 * x;
+    const argb_t *values = (argb_t *)v;
+
+    for (; width; width--, values++)
+    {
+	*bits++ = values->r;
+	*bits++ = values->g;
+	*bits++ = values->b;
+	*bits++ = values->a;
+    }
+}
+
+static void
+store_scanline_rgbf_float (bits_image_t *  image,
+			   int             x,
+			   int             y,
+			   int             width,
+			   const uint32_t *v)
+{
+    float *bits = (float *)image->bits + image->rowstride * y + 3 * x;
+    const argb_t *values = (argb_t *)v;
+
+    for (; width; width--, values++)
+    {
+	*bits++ = values->r;
+	*bits++ = values->g;
+	*bits++ = values->b;
+    }
+}
+#endif
+
 static void
 store_scanline_a2r10g10b10_float (bits_image_t *  image,
 				  int             x,
@@ -976,7 +1135,7 @@ store_scanline_a2r10g10b10_float (bits_image_t *  image,
 
     for (i = 0; i < width; ++i)
     {
-	uint16_t a, r, g, b;
+	uint32_t a, r, g, b;
 
 	a = pixman_float_to_unorm (values[i].a, 2);
 	r = pixman_float_to_unorm (values[i].r, 10);
@@ -1002,7 +1161,7 @@ store_scanline_x2r10g10b10_float (bits_image_t *  image,
 
     for (i = 0; i < width; ++i)
     {
-	uint16_t r, g, b;
+	uint32_t r, g, b;
 
 	r = pixman_float_to_unorm (values[i].r, 10);
 	g = pixman_float_to_unorm (values[i].g, 10);
@@ -1027,7 +1186,7 @@ store_scanline_a2b10g10r10_float (bits_image_t *  image,
 
     for (i = 0; i < width; ++i)
     {
-	uint16_t a, r, g, b;
+	uint32_t a, r, g, b;
 
 	a = pixman_float_to_unorm (values[i].a, 2);
 	r = pixman_float_to_unorm (values[i].r, 10);
@@ -1053,7 +1212,7 @@ store_scanline_x2b10g10r10_float (bits_image_t *  image,
 
     for (i = 0; i < width; ++i)
     {
-	uint16_t r, g, b;
+	uint32_t r, g, b;
 
 	r = pixman_float_to_unorm (values[i].r, 10);
 	g = pixman_float_to_unorm (values[i].g, 10);
@@ -1078,7 +1237,7 @@ store_scanline_a8r8g8b8_sRGB_float (bits_image_t *  image,
 
     for (i = 0; i < width; ++i)
     {
-	uint8_t a, r, g, b;
+	uint32_t a, r, g, b;
 
 	a = pixman_float_to_unorm (values[i].a, 8);
 	r = to_srgb (values[i].r);
@@ -1087,6 +1246,31 @@ store_scanline_a8r8g8b8_sRGB_float (bits_image_t *  image,
 
 	WRITE (image, pixel++,
 	       (a << 24) | (r << 16) | (g << 8) | b);
+    }
+}
+
+static void
+store_scanline_r8g8b8_sRGB_float (bits_image_t *  image,
+				  int             x,
+				  int             y,
+				  int             width,
+				  const uint32_t *v)
+{
+    uint8_t *bits = (uint8_t *)(image->bits + image->rowstride * y) + 3 * x;
+    argb_t *values = (argb_t *)v;
+    int i;
+
+    for (i = 0; i < width; ++i)
+    {
+	uint32_t r, g, b, rgb;
+
+	r = to_srgb (values[i].r);
+	g = to_srgb (values[i].g);
+	b = to_srgb (values[i].b);
+
+	rgb = (r << 16) | (g << 8) | b;
+
+	STORE_24 (image, bits, i, rgb);
     }
 }
 
@@ -1151,11 +1335,42 @@ fetch_scanline_a8r8g8b8_32_sRGB (bits_image_t   *image,
     
     while (pixel < end)
     {
-	uint8_t a, r, g, b;
+	uint32_t a, r, g, b;
 
 	tmp = READ (image, pixel++);
 
 	a = (tmp >> 24) & 0xff;
+	r = (tmp >> 16) & 0xff;
+	g = (tmp >> 8) & 0xff;
+	b = (tmp >> 0) & 0xff;
+
+	r = to_linear[r] * 255.0f + 0.5f;
+	g = to_linear[g] * 255.0f + 0.5f;
+	b = to_linear[b] * 255.0f + 0.5f;
+
+	*buffer++ = (a << 24) | (r << 16) | (g << 8) | (b << 0);
+    }
+}
+
+static void
+fetch_scanline_r8g8b8_32_sRGB (bits_image_t   *image,
+                               int             x,
+                               int             y,
+                               int             width,
+                               uint32_t       *buffer,
+                               const uint32_t *mask)
+{
+    const uint8_t *bits = (uint8_t *)(image->bits + y * image->rowstride) + 3 * x;
+    uint32_t tmp;
+    int i;
+
+    for (i = 0; i < width; ++i)
+    {
+	uint32_t a, r, g, b;
+
+	tmp = FETCH_24 (image, bits, i);
+
+	a = 0xff;
 	r = (tmp >> 16) & 0xff;
 	g = (tmp >> 8) & 0xff;
 	b = (tmp >> 0) & 0xff;
@@ -1175,9 +1390,30 @@ fetch_pixel_a8r8g8b8_32_sRGB (bits_image_t *image,
 {
     uint32_t *bits = image->bits + line * image->rowstride;
     uint32_t tmp = READ (image, bits + offset);
-    uint8_t a, r, g, b;
+    uint32_t a, r, g, b;
 
     a = (tmp >> 24) & 0xff;
+    r = (tmp >> 16) & 0xff;
+    g = (tmp >> 8) & 0xff;
+    b = (tmp >> 0) & 0xff;
+
+    r = to_linear[r] * 255.0f + 0.5f;
+    g = to_linear[g] * 255.0f + 0.5f;
+    b = to_linear[b] * 255.0f + 0.5f;
+
+    return (a << 24) | (r << 16) | (g << 8) | (b << 0);
+}
+
+static uint32_t
+fetch_pixel_r8g8b8_32_sRGB (bits_image_t *image,
+			    int           offset,
+			    int           line)
+{
+    uint8_t *bits = (uint8_t *)(image->bits + line * image->rowstride);
+    uint32_t tmp = FETCH_24 (image, bits, offset);
+    uint32_t a, r, g, b;
+
+    a = 0xff;
     r = (tmp >> 16) & 0xff;
     g = (tmp >> 8) & 0xff;
     b = (tmp >> 0) & 0xff;
@@ -1204,7 +1440,7 @@ store_scanline_a8r8g8b8_32_sRGB (bits_image_t   *image,
     
     for (i = 0; i < width; ++i)
     {
-	uint8_t a, r, g, b;
+	uint32_t a, r, g, b;
 
 	tmp = values[i];
 
@@ -1218,6 +1454,36 @@ store_scanline_a8r8g8b8_32_sRGB (bits_image_t   *image,
 	b = to_srgb (b * (1/255.0f));
 	
 	WRITE (image, pixel++, a | (r << 16) | (g << 8) | (b << 0));
+    }
+}
+
+static void
+store_scanline_r8g8b8_32_sRGB (bits_image_t   *image,
+			       int             x,
+                               int             y,
+                               int             width,
+                               const uint32_t *v)
+{
+    uint8_t *bits = (uint8_t *)(image->bits + image->rowstride * y) + 3 * x;
+    uint64_t *values = (uint64_t *)v;
+    uint64_t tmp;
+    int i;
+
+    for (i = 0; i < width; ++i)
+    {
+	uint32_t r, g, b;
+
+	tmp = values[i];
+
+	r = (tmp >> 16) & 0xff;
+	g = (tmp >> 8) & 0xff;
+	b = (tmp >> 0) & 0xff;
+
+	r = to_srgb (r * (1/255.0f));
+	g = to_srgb (g * (1/255.0f));
+	b = to_srgb (b * (1/255.0f));
+
+	STORE_24 (image, bits, i, (r << 16) | (g << 8) | (b << 0));
     }
 }
 
@@ -1294,6 +1560,11 @@ static const format_info_t accessors[] =
     fetch_pixel_a8r8g8b8_32_sRGB, fetch_pixel_a8r8g8b8_sRGB_float,
     store_scanline_a8r8g8b8_32_sRGB, store_scanline_a8r8g8b8_sRGB_float,
   },
+  { PIXMAN_r8g8b8_sRGB,
+    fetch_scanline_r8g8b8_32_sRGB, fetch_scanline_r8g8b8_sRGB_float,
+    fetch_pixel_r8g8b8_32_sRGB, fetch_pixel_r8g8b8_sRGB_float,
+    store_scanline_r8g8b8_32_sRGB, store_scanline_r8g8b8_sRGB_float,
+  },
 
 /* 24bpp formats */
     FORMAT_INFO (r8g8b8),
@@ -1351,7 +1622,18 @@ static const format_info_t accessors[] =
     FORMAT_INFO (g1),
     
 /* Wide formats */
-    
+#ifndef PIXMAN_FB_ACCESSORS
+    { PIXMAN_rgba_float,
+      NULL, fetch_scanline_rgbaf_float,
+      fetch_pixel_generic_lossy_32, fetch_pixel_rgbaf_float,
+      NULL, store_scanline_rgbaf_float },
+
+    { PIXMAN_rgb_float,
+      NULL, fetch_scanline_rgbf_float,
+      fetch_pixel_generic_lossy_32, fetch_pixel_rgbf_float,
+      NULL, store_scanline_rgbf_float },
+#endif
+
     { PIXMAN_a2r10g10b10,
       NULL, fetch_scanline_a2r10g10b10_float,
       fetch_pixel_generic_lossy_32, fetch_pixel_a2r10g10b10_float,

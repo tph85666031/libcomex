@@ -23,7 +23,7 @@
  */
 
 #ifdef HAVE_CONFIG_H
-#include <config.h>
+#include <pixman-config.h>
 #endif
 #include <stdio.h>
 #include <stdlib.h>
@@ -206,7 +206,7 @@ pixman_contract_from_float (uint32_t     *dst,
 
     for (i = 0; i < width; ++i)
     {
-	uint8_t a, r, g, b;
+	uint32_t a, r, g, b;
 
 	a = float_to_unorm (src[i].a, 8);
 	r = float_to_unorm (src[i].r, 8);
@@ -238,7 +238,7 @@ _pixman_iter_init_bits_stride (pixman_iter_t *iter, const pixman_iter_info_t *in
 
 pixman_bool_t
 pixman_region16_copy_from_region32 (pixman_region16_t *dst,
-                                    pixman_region32_t *src)
+                                    const pixman_region32_t *src)
 {
     int n_boxes, i;
     pixman_box32_t *boxes32;
@@ -268,7 +268,7 @@ pixman_region16_copy_from_region32 (pixman_region16_t *dst,
 
 pixman_bool_t
 pixman_region32_copy_from_region16 (pixman_region32_t *dst,
-                                    pixman_region16_t *src)
+                                    const pixman_region16_t *src)
 {
     int n_boxes, i;
     pixman_box16_t *boxes16;

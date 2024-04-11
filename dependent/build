@@ -53,56 +53,38 @@ done
 shift $(($OPTIND - 1))
 
 #清理环境
+rm -rf ${DIR_ROOT}/openssl/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libiconv/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libsmb2/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libnfs/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/bzip2/build 2>&1 > /dev/null 
+rm -rf ${DIR_ROOT}/zlib/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libtar/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libzip/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libjpeg/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libpng/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libqrencode/tmp 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/brotli/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/expat/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libidn/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libunistring/build 2>&1 > /dev/null
+pushd ${DIR_ROOT}/libjbig
+make clean
+popd
+rm -rf ${DIR_ROOT}/xz/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libtiff/tmp 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libxml2/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libarchive/tmp 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/harfbuzz/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libpixman/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/freetype/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/fontconfig/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/podofo/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/cairo/tmp 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/fltk/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/curl/tmp 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libwebsockets/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/mosquitto/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/curl/tmp 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/zlib/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/bzip2/build 2>&1 > /dev/null 
-rm -rf ${DIR_ROOT}/libzip/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/libarchive/tmp 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/libpng/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/libjpeg/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/libtiff/tmp 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/brotli/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/freetype/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/expat/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/harfbuzz/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/libxml2/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/podofo/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/xz/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/fltk/build 2>&1 > /dev/null
-
-pushd ${DIR_ROOT}/libiconv/build
-make distclean
-popd
-rm -rf ${DIR_ROOT}/libiconv/build 2>&1 > /dev/null
-
-pushd ${DIR_ROOT}/openssl/build
-make distclean
-popd
-rm -rf ${DIR_ROOT}/openssl/build 2>&1 > /dev/null
-
-pushd ${DIR_ROOT}/libtar/build
-make distclean
-popd
-rm -rf ${DIR_ROOT}/libtar/build 2>&1 > /dev/null
-
-pushd ${DIR_ROOT}/libidn/build
-make distclean
-popd
-rm -rf ${DIR_ROOT}/libidn/build 2>&1 > /dev/null
-
-pushd ${DIR_ROOT}/fontconfig/build
-make distclean
-popd
-rm -rf ${DIR_ROOT}/fontconfig/build 2>&1 > /dev/null
-
-pushd ${DIR_ROOT}/libunistring/build
-make distclean
-popd
-rm -rf ${DIR_ROOT}/libunistring/build 2>&1 > /dev/null
 
 rm -rf ${DIR_ROOT}/out 2>&1 > /dev/null
 mkdir -pv ${DIR_ROOT}/out 2>&1 > /dev/null
@@ -392,8 +374,8 @@ popd
 #编译libpixman
 mkdir ${DIR_ROOT}/libpixman/build 2>&1 > /dev/null
 pushd ${DIR_ROOT}/libpixman/build
-CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib" LIBS="${DIR_ROOT}/out/lib/libbrotlienc.a ${DIR_ROOT}/out/lib/libbrotlidec.a ${DIR_ROOT}/out/lib/libbrotlicommon.a ${DIR_ROOT}/out/lib/libharfbuzz.a ${DIR_ROOT}/out/lib/libharfbuzz.a ${DIR_ROOT}/out/lib/libbz2.a" ../configure --enable-static=yes --enable-shared=no --with-pic=yes --prefix=${DIR_ROOT}/out
-make -j${JOBS} && make install
+CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib" LIBS="${DIR_ROOT}/out/lib/libbrotlienc.a ${DIR_ROOT}/out/lib/libbrotlidec.a ${DIR_ROOT}/out/lib/libbrotlicommon.a ${DIR_ROOT}/out/lib/libharfbuzz.a ${DIR_ROOT}/out/lib/libharfbuzz.a ${DIR_ROOT}/out/lib/libbz2.a" meson setup --prefix=${DIR_ROOT}/out --default-library=static --libdir=lib ..
+ninja -j${JOBS} && ninja install
 if [ $? != 0 ]; then
     show_message "failed to make libpixman"
     popd
@@ -419,7 +401,7 @@ pushd ${DIR_ROOT}/fontconfig/build
 CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib " ../configure --disable-cache-build --disable-docs --with-pic --disable-shared --enable-static --disable-docs --prefix=${DIR_ROOT}/out
 make -j${JOBS} && make install
 if [ $? != 0 ]; then
-    show_message "failed to make freetype"
+    show_message "failed to make fontconfig"
     popd
     exit -1
 fi
