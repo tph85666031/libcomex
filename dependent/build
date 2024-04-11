@@ -63,7 +63,7 @@ rm -rf ${DIR_ROOT}/libtar/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libzip/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libjpeg/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libpng/build 2>&1 > /dev/null
-rm -rf ${DIR_ROOT}/libqrencode/tmp 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libqrencode/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/brotli/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/expat/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libidn/build 2>&1 > /dev/null
