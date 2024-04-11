@@ -645,7 +645,6 @@ X_LIBS
 X_PRE_LIBS
 X_CFLAGS
 XMKMF
-UNAME
 HAVE_PTHREAD_MUTEX_RECURSIVE
 PTHREAD_FLAGS
 ZLIBINC
@@ -674,24 +673,25 @@ INSTALL_PROGRAM
 FLTK_OPTIONS
 FLUID_BUILD
 FLUID
-LINKSHARED
 SHAREDSUFFIX
 CAIRODSONAME
 IMGDSONAME
 GLDSONAME
-FLDSONAME
 DSONAME
 DSOLINK
 DSOFLAGS
 DSOCOMMAND
+LINKSHARED
+LINKFLTKFORMS
+FLDSONAME
+FLLIBBASENAME
+FLLIBNAME
 CAIROLIBBASENAME
 IMGLIBBASENAME
 GLLIBBASENAME
-FLLIBBASENAME
 LIBBASENAME
 LINKFLTKIMG
 LINKFLTKGL
-LINKFLTKFORMS
 LINKFLTK
 LIBNAME
 LIBEXT
@@ -699,12 +699,12 @@ CAIROLIBNAME
 IMGLIBNAME
 GLLIBNAME
 GLDEMOS
-FLLIBNAME
 FLTKCAIROOPTION
 LINKFLTKCAIRO
 CAIROLIBS
 CAIROFLAGS
 CAIRODIR
+TESTDIR
 OPTIM
 ARCHFLAGS
 PKGCONFIG
@@ -781,6 +781,8 @@ enable_cairoext
 enable_cp936
 enable_cygwin
 enable_debug
+enable_test
+enable_forms
 enable_gl
 enable_localjpeg
 enable_localpng
@@ -1450,8 +1452,10 @@ Optional Features:
   --enable-cairo          add support for Fl_Cairo_Window
   --enable-cairoext       use FLTK code instrumentation for Cairo extended use
   --enable-cp936          turn on CP936
-  --enable-cygwin         use the Cygwin libraries (default=no)
+  --enable-cygwin         use the Cygwin DLL (default=no)
   --enable-debug          turn on debugging
+  --disable-test          build test programs (default=yes)
+  --disable-forms         build Forms compatibility library (default=yes)
   --disable-gl            turn off OpenGL support
   --enable-localjpeg      use local JPEG library (default=auto)
   --enable-localpng       use local PNG library (default=auto)
@@ -3858,6 +3862,28 @@ else
 
 fi
 
+# Check whether --enable-test was given.
+if test "${enable_test+set}" = set; then :
+  enableval=$enable_test;
+fi
+
+if test x$enable_test = xno; then :
+
+    TESTDIR=""
+
+else
+
+    TESTDIR="test"
+
+fi
+
+
+# Check whether --enable-forms was given.
+if test "${enable_forms+set}" = set; then :
+  enableval=$enable_forms;
+fi
+
+
 # Check whether --enable-gl was given.
 if test "${enable_gl+set}" = set; then :
   enableval=$enable_gl;
@@ -3987,13 +4013,13 @@ fi
 case $host_os in #(
   cygwin* | mingw*) :
 
-  # Check whether --enable-gdiplus was given.
+    # Check whether --enable-gdiplus was given.
 if test "${enable_gdiplus+set}" = set; then :
   enableval=$enable_gdiplus;
 fi
 
 
- gdiplus_found=no
+    gdiplus_found=no
     if test x$enable_gdiplus != xno; then :
 
         for ac_header in wtypes.h gdiplus.h
@@ -4037,7 +4063,6 @@ if test "x$with_archflags" != x; then :
 
 fi
 
-
 BUILD=""
 
 
@@ -4078,23 +4103,38 @@ esac
 
 
 LINKFLTK="../lib/libfltk.a"
-LINKFLTKFORMS="../lib/libfltk_forms.a"
 LINKFLTKGL="../lib/libfltk_gl.a"
 LINKFLTKIMG="../lib/libfltk_images.a"
 GLDEMOS="gldemos"
 
 LIBEXT=".a"
 LIBNAME="../lib/libfltk.a"
-FLLIBNAME="../lib/libfltk_forms.a"
 GLLIBNAME="../lib/libfltk_gl.a"
 IMGLIBNAME="../lib/libfltk_images.a"
 CAIROLIBNAME="../lib/libfltk_cairo.a"
 
 LIBBASENAME="libfltk.a"
-FLLIBBASENAME="libfltk_forms.a"
 GLLIBBASENAME="libfltk_gl.a"
 IMGLIBBASENAME="libfltk_images.a"
 CAIROLIBBASENAME="libfltk_cairo.a"
+
+if test x$enable_forms != xno; then :
+
+    build_forms="yes"
+    LINKFLTKFORMS="../lib/libfltk_forms.a"
+    FLLIBNAME="../lib/libfltk_forms.a"
+    FLLIBBASENAME="libfltk_forms.a"
+    $as_echo "#define FLTK_HAVE_FORMS 1" >>confdefs.h
+
+
+else
+
+    build_forms="no"
+    LINKFLTKFORMS=""
+    FLLIBNAME=""
+    FLLIBBASENAME=""
+
+fi
 
 
 CAIRODIR=""
@@ -4146,9 +4186,6 @@ else
 fi
 
 fi
-
-
-
 
 
 
@@ -4442,7 +4479,7 @@ $as_echo "$as_me: WARNING: Shared libraries may not be supported. Trying -shared
      ;;
 esac
 
-    LINKSHARED="-L../src $FLTKCAIROOPTION -lfltk_images$SHAREDSUFFIX -lfltk_forms$SHAREDSUFFIX -lfltk$SHAREDSUFFIX"
+    LINKSHARED="-L../src $FLTKCAIROOPTION -lfltk_images$SHAREDSUFFIX -lfltk$SHAREDSUFFIX"
 
 else
 
@@ -4457,9 +4494,21 @@ else
     SHAREDSUFFIX=""
     FLUID="fluid"
     FLTK_OPTIONS="fltk-options"
-    LINKSHARED="$LINKFLTKCAIRO ../lib/libfltk_images.a ../lib/libfltk_forms.a ../lib/libfltk.a"
+    LINKSHARED="$LINKFLTKCAIRO ../lib/libfltk_images.a ../lib/libfltk.a"
 
 fi
+
+if test x$build_forms = xno; then :
+
+    FLDSONAME=""
+
+fi
+
+
+
+
+
+
 
 
 if test "x$fltk_cross_compiling" = xyes; then :
@@ -4471,8 +4520,6 @@ else
     FLUID_BUILD="../fluid/fluid$EXEEXT"
 
 fi
-
-
 
 
 
@@ -6104,6 +6151,18 @@ fi
 done
 
 
+for ac_func in setenv
+do :
+  ac_fn_c_check_func "$LINENO" "setenv" "ac_cv_func_setenv"
+if test "x$ac_cv_func_setenv" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_SETENV 1
+_ACEOF
+
+fi
+done
+
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing pow" >&5
 $as_echo_n "checking for library containing pow... " >&6; }
@@ -6160,6 +6219,30 @@ if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
 
 fi
+
+
+for ac_header in math.h
+do :
+  ac_fn_c_check_header_mongrel "$LINENO" "math.h" "ac_cv_header_math_h" "$ac_includes_default"
+if test "x$ac_cv_header_math_h" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_MATH_H 1
+_ACEOF
+
+fi
+
+done
+
+for ac_func in trunc
+do :
+  ac_fn_c_check_func "$LINENO" "trunc" "ac_cv_func_trunc"
+if test "x$ac_cv_func_trunc" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_TRUNC 1
+_ACEOF
+
+fi
+done
 
 
 
@@ -7333,8 +7416,6 @@ case $host_os_gui in #(
     # but never used, see STR #2147)
     # CFLAGS="-mwindows -D_WIN32 -DUSE_OPENGL32 $CFLAGS"
     # CXXFLAGS="-mwindows -D_WIN32 -DUSE_OPENGL32 $CXXFLAGS"
-    CFLAGS="-mwindows $CFLAGS"
-    CXXFLAGS="-mwindows $CXXFLAGS"
     LDFLAGS="-mwindows $LDFLAGS"
     DSOFLAGS="-mwindows $DSOFLAGS"
     LIBS="$LIBS -lole32 -luuid -lcomctl32 -lws2_32"
@@ -7400,6 +7481,12 @@ fi
 
     # MacOS X uses Cocoa for graphics.
     LIBS="$LIBS -framework Cocoa"
+    macosversion_maj=$(sw_vers -productVersion | cut -d. -f1)
+    if test $macosversion_maj -ge 11; then :
+
+      LIBS="$LIBS -framework UniformTypeIdentifiers"
+
+fi
 
     if test x$have_pthread = xyes; then :
 
@@ -7541,14 +7628,22 @@ $as_echo "$as_me: Turning on the usecairo option" >&6;}
        graphics="Wayland or X11 with cairo"
 
 fi
-#     CFLAGS="$CFLAGS -DUSE_SYSTEM_LIBDECOR=0"
-#     CXXFLAGS="$CXXFLAGS -DUSE_SYSTEM_LIBDECOR=0"
+      if $PKGCONFIG --exists 'libdecor-0 > 0.2.2'; then :
+
+        plugin_dir="$($PKGCONFIG --variable=libdir libdecor-0)/libdecor/plugins-1"
+        CFLAGS="$CFLAGS -DUSE_SYSTEM_LIBDECOR"
+        CFLAGS="$CFLAGS -DLIBDECOR_PLUGIN_DIR=\\\"$plugin_dir\\\" "
+        LIBS="$LIBS $($PKGCONFIG --libs libdecor-0)"
+
+else
+  CFLAGS="$CFLAGS -DUSE_SYSTEM_LIBDECOR=0 -DLIBDECOR_PLUGIN_DIR=\\\"\\\" "
+
+fi
       LIBS="$LIBS $($PKGCONFIG --libs wayland-cursor) $($PKGCONFIG --libs wayland-client) $($PKGCONFIG --libs xkbcommon) $($PKGCONFIG --libs pangocairo) "
       if test x$enable_x11 != xno; then :
   LIBS="$LIBS $($PKGCONFIG --libs x11)"
 fi
       LIBS="$LIBS -ldl"
-#     CXXFLAGS="$CXXFLAGS -I../libdecor/src"
       DSOFLAGS="$LIBS $DSOFLAGS"
       enable_pango=yes
       LIBDECORDIR="libdecor/build"
@@ -7557,15 +7652,6 @@ fi
 
 fi
       LDFLAGS="$LDFLAGS -rdynamic"
-
-      UNAME="$(uname -s)"
-      case $UNAME in #(
-  Linux) :
-    LDFLAGS="$LDFLAGS -no-pie"
-       ;; #(
-  *) :
-     ;;
-esac
 
       { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlopen" >&5
 $as_echo_n "checking for library containing dlopen... " >&6; }
@@ -9932,12 +10018,27 @@ else
 
 fi
 
-echo "Cross-compiling: $fltk_cross_compiling"
-if test "$fltk_cross_compiling" = "yes"; then :
+if test x$enable_test != xno; then :
 
-    echo "          Build: $build -> Host: $host"
+    echo "    Build tests: YES"
+
+else
+
+    echo "    Build tests: NO"
 
 fi
+
+if test "$fltk_cross_compiling" = "yes"; then :
+
+    echo "Cross-compiling: YES"
+    echo "          Build: $build -> Host: $host"
+
+else
+
+    echo "Cross-compiling: NO"
+
+fi
+
 echo "       Graphics: $graphics"
 if test x$JPEG = x; then :
 
@@ -9966,6 +10067,17 @@ else
     echo "                 ZLIB=Builtin"
 
 fi
+
+if test x$build_forms = xyes; then :
+
+    echo "Forms library:   YES"
+
+else
+
+    echo "Forms library:   NO"
+
+fi
+
 if test x$enable_cairo = xyes; then :
 
     echo "                 CAIRO=lib"
@@ -11313,3 +11425,23 @@ fi
 
 
 chmod +x fltk-config
+
+echo ""
+echo "-------------------------------------------------------------------------"
+echo "  IMPORTANT NOTE:"
+echo "-------------------------------------------------------------------------"
+echo ""
+echo "  FLTK 1.4.x will be the last version(s) of FLTK supporting"
+echo "  autotools (configure + provided Makefiles) to build FLTK."
+echo "  FLTK 1.5.0 and higher will only support FLTK builds using CMake."
+echo ""
+echo "  We suggest to explore and use the CMake build system generators"
+echo "  for your own FLTK builds as soon as possible. Some new FLTK build"
+echo "  options will only be supported by CMake based builds."
+echo "  Please see README.CMake.txt for details and instructions."
+echo ""
+echo "  User projects that use CMake for their own build can benefit"
+echo "  substantially if the FLTK library has been built using CMake."
+echo ""
+echo "-------------------------------------------------------------------------"
+echo ""

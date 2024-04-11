@@ -859,7 +859,7 @@ CPPBytes WaterMark::ExpandWaterMark(const CPPBytes& block, int width, int height
         if(block_width <= 0 || block_height <= 0)
         {
             cairo_surface_destroy(surface_block);
-            return false;
+            return CPPBytes();
         }
         cairo_surface_t* surface_block_margin = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, block_width + space_x, block_height + space_y);
         cairo_t* cr_block_margin = cairo_create(surface_block_margin);

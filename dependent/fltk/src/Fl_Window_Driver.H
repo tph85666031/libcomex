@@ -2,7 +2,7 @@
 // A base class for platform specific window handling code
 // for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 2010-2023 by Bill Spitzak and others.
+// Copyright 2010-2024 by Bill Spitzak and others.
 //
 // This library is free software. Distribution and use rights are outlined in
 // the file "COPYING" which should have been included with this file.  If this
@@ -114,8 +114,8 @@ public:
   void x(int X);
   void y(int Y);
   void current(Fl_Window *c);
-  char show_iconic() { return Fl_Window::show_iconic_; }
-  void show_iconic(char c) { Fl_Window::show_iconic_ = c; }
+  char show_iconic() { return Fl_Window::show_next_window_iconic(); }
+  void show_iconic(char c) { Fl_Window::show_next_window_iconic(c); }
   void flx(Fl_X *x) { pWindow->flx_ = x; }
   Fl_Cursor cursor_default() { return pWindow->cursor_default; }
   void destroy_double_buffer();
@@ -129,6 +129,8 @@ public:
   }
 
   void resize_after_scale_change(int ns, float old_f, float new_f);
+  void set_popup_window() { pWindow->set_flag(Fl_Window::POPUP); }
+  bool popup_window() const {return pWindow->flags() & Fl_Window::POPUP;}
 
   // --- window data
   virtual int decorated_w() { return w(); } // default, should be overidden by driver
@@ -211,7 +213,6 @@ public:
   static int *menu_offset_y(Fl_Window*);
   static bool is_floating_title(Fl_Window *);
   static void scroll_to_selected_item(Fl_Window *);
-  static bool is_menutitle(Fl_Window *);
 
   virtual fl_uintptr_t os_id() { return 0; }
 };

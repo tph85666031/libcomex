@@ -1,7 +1,7 @@
 //
 // Enumerations for the Fast Light Tool Kit (FLTK).
 //
-// Copyright 1998-2023 by Bill Spitzak and others.
+// Copyright 1998-2024 by Bill Spitzak and others.
 //
 // This library is free software. Distribution and use rights are outlined in
 // the file "COPYING" which should have been included with this file.  If this
@@ -499,7 +499,7 @@ enum Fl_Callback_Reason {
 #define FL_Menu         0xff67  ///< The menu key.
 #define FL_Help         0xff68  ///< The 'help' key on Mac keyboards
 #define FL_Num_Lock     0xff7f  ///< The num lock key.
-#define FL_KP           0xff80  ///< One of the keypad numbers; use FL_KP + n' for digit n.
+#define FL_KP           0xff80  ///< One of the keypad numbers; use FL_KP + 'n' for digit n.
 #define FL_KP_Enter     0xff8d  ///< The enter key on the keypad, same as Fl_KP+'\\r'.
 #define FL_KP_Last      0xffbd  ///< The last keypad key; use to range-check keypad.
 #define FL_F            0xffbd  ///< One of the function keys; use FL_F + n for function key n.
@@ -514,6 +514,7 @@ enum Fl_Callback_Reason {
 #define FL_Alt_L        0xffe9  ///< The left alt key.
 #define FL_Alt_R        0xffea  ///< The right alt key.
 #define FL_Delete       0xffff  ///< The delete key.
+#define FL_Alt_Gr       0xfe03  ///< The AltGr key on some international keyboards.
 
 // These use the Private Use Area (PUA) of the Basic Multilingual Plane
 // of Unicode. Guaranteed not to conflict with a proper Unicode character.

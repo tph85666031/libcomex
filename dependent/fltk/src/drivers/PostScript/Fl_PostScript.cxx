@@ -145,12 +145,11 @@ Fl_PostScript_Graphics_Driver::Fl_PostScript_Graphics_Driver(void)
   //lang_level_ = 3;
   lang_level_ = 2;
   mask = 0;
-#endif
-  ps_filename_ = NULL;
-  scale_x = scale_y = 1.;
   bg_r = bg_g = bg_b = 255;
   clip_ = NULL;
-  what = NONE;
+  scale_x = scale_y = 1.;
+#endif
+  ps_filename_ = NULL;
 }
 
 /** \brief The destructor. */
@@ -1646,6 +1645,7 @@ int Fl_PostScript_File_Device::begin_page (void)
   char feature[200];
   snprintf(feature, 200, "%%%%PageOrientation: %s", ps->pw_ > ps->ph_ ? "Landscape" : "Portrait");
   cairo_ps_surface_dsc_comment(cairo_get_target(ps->cr()), feature);
+  cairo_save(ps->cr());
   if (ps->pw_ > ps->ph_) {
     cairo_translate(ps->cr(), 0, ps->pw_);
     cairo_rotate(ps->cr(), -M_PI/2);
@@ -1653,7 +1653,6 @@ int Fl_PostScript_File_Device::begin_page (void)
   cairo_translate(ps->cr(), ps->left_margin, ps->top_margin);
   cairo_set_line_width(ps->cr(), 1);
   cairo_set_source_rgb(ps->cr(), 1.0, 1.0, 1.0); // white background
-  cairo_save(ps->cr());
   cairo_save(ps->cr());
   cairo_save(ps->cr());
   ps->check_status();
@@ -1750,9 +1749,9 @@ Fl_EPS_File_Surface::Fl_EPS_File_Surface(int width, int height, FILE *eps, Fl_Co
     if (s != 1) {
       ps->clocale_printf("GR GR GS %f %f SC GS\n", s, s);
     }
+    Fl::get_color(background, ps->bg_r, ps->bg_g, ps->bg_b);
 #endif
     ps->scale_x = ps->scale_y = s;
-    Fl::get_color(background, ps->bg_r, ps->bg_g, ps->bg_b);
   }
 }
 

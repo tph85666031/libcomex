@@ -530,8 +530,14 @@ void Fl_X11_Screen_Driver::disable_im() {
   xim_deactivate();
 }
 
+static void delayed_create_print_window(void *) {
+  Fl::remove_check(delayed_create_print_window);
+  fl_create_print_window();
+}
+
 void Fl_X11_Screen_Driver::open_display_platform() {
-  if (fl_display) return;
+  static Display *d = NULL;
+  if (d) return;
 
   setlocale(LC_CTYPE, "");
   XSetLocaleModifiers("");
@@ -539,7 +545,7 @@ void Fl_X11_Screen_Driver::open_display_platform() {
   XSetIOErrorHandler(io_error_handler);
   XSetErrorHandler(xerror_handler);
 
-  Display *d = XOpenDisplay(0);
+  d = (fl_display ? fl_display : XOpenDisplay(0));
   if (!d) {
     Fl::fatal("Can't open display: %s", XDisplayName(0)); // does not return
     return; // silence static code analyzer
@@ -549,7 +555,7 @@ void Fl_X11_Screen_Driver::open_display_platform() {
   // the unique GC used by all X windows
   GC gc = XCreateGC(fl_display, RootWindow(fl_display, fl_screen), 0, 0);
   Fl_Graphics_Driver::default_driver().gc(gc);
-  fl_create_print_window();
+  Fl::add_check(delayed_create_print_window);
 }
 
 
@@ -1204,7 +1210,7 @@ static void react_to_screen_reconfiguration() {
     float new_scale = Fl::screen_driver()->scale(0);
     for (int screen = 0; screen < Fl::screen_count(); screen++) {
       Fl::screen_driver()->scale(screen, 1);
-      Fl::screen_driver()->rescale_all_windows_from_screen(screen, new_scale);
+      Fl::screen_driver()->rescale_all_windows_from_screen(screen, new_scale, 1);
     }
   }
   delete[] scales;
@@ -1214,26 +1220,45 @@ static void react_to_screen_reconfiguration() {
 
 #if USE_XFT
 static void after_display_rescale(float *p_current_xft_dpi) {
-  FILE *pipe = popen("xrdb -query", "r");
-  if (!pipe) return;
-  char line[100];
-  while (fgets(line, sizeof(line), pipe) != NULL) {
-    if (memcmp(line, "Xft.dpi:", 8)) continue;
-    float dpi;
-    if (sscanf(line+8, "%f", &dpi) == 1) {
-      //fprintf(stderr," previous=%g dpi=%g \n", *p_current_xft_dpi, dpi);
-      if (fabs(dpi - *p_current_xft_dpi) > 0.01) {
-        *p_current_xft_dpi = dpi;
-        float f = dpi/96.;
-        for (int i = 0; i < Fl::screen_count(); i++)
-          Fl::screen_driver()->rescale_all_windows_from_screen(i, f);
-      }
+  Display *new_dpy = XOpenDisplay(XDisplayString(fl_display));
+  if (!new_dpy) return;
+  char *s = XGetDefault(new_dpy, "Xft", "dpi");
+  float dpi;
+  if (s && sscanf(s, "%f", &dpi) == 1) {
+    //printf("%s previous=%g dpi=%g \n", s, *p_current_xft_dpi, dpi);
+    if (fabs(dpi - *p_current_xft_dpi) > 0.1) {
+      *p_current_xft_dpi = dpi;
+      float f = dpi / 96.;
+      for (int i = 0; i < Fl::screen_count(); i++)
+        Fl::screen_driver()->rescale_all_windows_from_screen(i, f, f);
     }
-    break;
   }
-  pclose(pipe);
+  XCloseDisplay(new_dpy);
 }
 #endif // USE_XFT
+
+
+static Window *xid_vector = NULL; // list of FLTK-created xid's (see issue #935)
+static int xid_vector_size = 0;
+static int xid_vector_count = 0;
+
+static void add_xid_vector(Window xid) {
+  if (xid_vector_count >= xid_vector_size) {
+    xid_vector_size += 10;
+    xid_vector = (Window*)realloc(xid_vector, xid_vector_size * sizeof(Window));
+  }
+  xid_vector[xid_vector_count++] = xid;
+}
+
+static bool remove_xid_vector(Window xid) {
+  for (int pos = xid_vector_count - 1; pos >= 0; pos--) {
+    if (xid_vector[pos] == xid) {
+      if (pos != --xid_vector_count) xid_vector[pos] = xid_vector[xid_vector_count];
+      return true;
+    }
+  }
+  return false;
+}
 
 int fl_handle(const XEvent& thisevent)
 {
@@ -1241,9 +1266,23 @@ int fl_handle(const XEvent& thisevent)
   fl_xevent = &thisevent;
   Window xid = xevent.xany.window;
 
+  // For each DestroyNotify event, determine whether an FLTK-created window
+  // is being destroyed (see issue #935).
+  bool xid_is_from_fltk_win = false;
+  if (xevent.type == DestroyNotify) {
+    xid_is_from_fltk_win = remove_xid_vector(xid);
+  }
+
+  // The following if statement is limited to cases when event DestroyNotify
+  // concerns a non-FLTK window. Thus, the possibly slow call to XOpenIM()
+  // is not performed when an FLTK-created window is closed. This fixes issue #935.
   if (Fl_X11_Screen_Driver::xim_ic && xevent.type == DestroyNotify &&
-        xid != Fl_X11_Screen_Driver::xim_win && !fl_find(xid))
+        xid != Fl_X11_Screen_Driver::xim_win && !fl_find(xid) && !xid_is_from_fltk_win)
   {
+// When using menus or tooltips: xid is a just hidden top-level FLTK win, xim_win is non-FLTK;
+// after XIM crash: xid is non-FLTK.
+// Trigger XIM crash under Debian: kill process containing "ibus-daemon"
+// Restart XIM after triggered crash: "ibus-daemon --panel disable --xim &"
     XIM xim_im;
     xim_im = XOpenIM(fl_display, NULL, NULL, NULL);
     if (!xim_im) {
@@ -2068,8 +2107,11 @@ int fl_handle(const XEvent& thisevent)
         // resize_after_screen_change() works also if called here, but calling it
         // a second later gives a more pleasant user experience when moving windows between distinct screens
         Fl::add_timeout(1, Fl_X11_Window_Driver::resize_after_screen_change, window);
-      }
-      wd->screen_num(num);
+      } else if (!Fl_X11_Window_Driver::data_for_resize_window_between_screens_.busy)
+        wd->screen_num(num);
+    } else if (Fl_X11_Window_Driver::data_for_resize_window_between_screens_.busy) {
+      Fl::remove_timeout(Fl_X11_Window_Driver::resize_after_screen_change, window);
+      Fl_X11_Window_Driver::data_for_resize_window_between_screens_.busy = false;
     }
 #else // ! USE_XFT
     Fl_Window_Driver::driver(window)->screen_num( Fl::screen_num(X, Y, W, H) );
@@ -2181,7 +2223,7 @@ void Fl_X11_Window_Driver::resize(int X,int Y,int W,int H) {
   if (resize_from_program && shown()) {
     float s = Fl::screen_driver()->scale(screen_num());
     if (is_a_resize) {
-      if (!pWindow->resizable()) pWindow->size_range(w(),h(),w(),h());
+      if (!is_resizable()) pWindow->size_range(w(),h(),w(),h());
       if (is_a_move) {
         XMoveResizeWindow(fl_display, fl_xid(pWindow), rint(X*s), rint(Y*s), W>0 ? W*s : 1, H>0 ? H*s : 1);
       } else {
@@ -2280,8 +2322,10 @@ void Fl_X11_Window_Driver::activate_window() {
     prev = x->xid;
   }
 
-  send_wm_event(w, fl_NET_ACTIVE_WINDOW, 1 /* application */,
-                0 /* timestamp */, prev /* previously active window */);
+  send_wm_event(w, fl_NET_ACTIVE_WINDOW,
+                1,              // source: 1 = application
+                fl_event_time,  // time of client's last user activity (STR 3396)
+                prev);          // previously active window
 }
 
 /* Change an existing window to fullscreen */
@@ -2370,6 +2414,7 @@ void Fl_X11_Window_Driver::un_maximize() {
 void fl_fix_focus(); // in Fl.cxx
 
 Fl_X* Fl_X::set_xid(Fl_Window* win, Window winxid) {
+  if (!win->parent()) add_xid_vector(winxid); // store xid's of top-level FLTK windows
   Fl_X *xp = new Fl_X;
   xp->xid = winxid;
   Fl_Window_Driver::driver(win)->other_xid = 0;
@@ -2619,10 +2664,10 @@ void Fl_X::make_xid(Fl_Window* win, XVisualInfo *visual, Colormap colormap)
     XWMHints *hints = XAllocWMHints();
     hints->input = True;
     hints->flags = InputHint;
-    if (Fl_Window::show_iconic_) {
+    if (Fl_Window::show_next_window_iconic()) {
       hints->flags |= StateHint;
       hints->initial_state = IconicState;
-      Fl_Window::show_iconic_ = 0;
+      Fl_Window::show_next_window_iconic(0);
       showit = 0;
     }
     if (Fl_X11_Window_Driver::driver(win)->icon_ &&

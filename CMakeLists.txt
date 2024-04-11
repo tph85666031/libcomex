@@ -80,6 +80,7 @@ SET(PROJECT_LIB
 	pthread
     dl
     m
+	-Wl,--start-group
     ${PROJECT_SOURCE_DIR}/out/lib/libmosquitto.a
 	${PROJECT_SOURCE_DIR}/out/lib/libwebsockets.a
 	${PROJECT_SOURCE_DIR}/out/lib/libcurl.a
@@ -114,6 +115,7 @@ SET(PROJECT_LIB
 	${PROJECT_SOURCE_DIR}/out/lib/libqrencode.a
 	${PROJECT_SOURCE_DIR}/out/lib/libpixman-1.a
 	libstdc++fs.a
+	-Wl,--end-group
 )
 ELSE()
 ADD_COMPILE_OPTIONS( /W3 /wd4819 /wd4251 /wd4200 /wd4996)

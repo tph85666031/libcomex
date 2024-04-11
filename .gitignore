@@ -34,3 +34,4 @@ dependent/libpixman/build
 *.o
 *.d
 *.in
+autom4te.cache

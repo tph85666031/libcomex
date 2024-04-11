@@ -78,6 +78,7 @@ CPPFILES =\
 	glut_test.cxx \
 	grid_alignment \
 	grid_buttons \
+	grid_dialog \
 	grid_login \
 	hello.cxx \
 	help_dialog.cxx \
@@ -134,6 +135,7 @@ CPPFILES =\
 	utf8.cxx \
 	valuators.cxx \
 	windowfocus.cxx \
+	wizard.cxx \
 	$(CPPUNITTEST)
 
 ALL =	\
@@ -167,6 +169,7 @@ ALL =	\
 	forms$(EXEEXT) \
 	grid_alignment$(EXEEXT) \
 	grid_buttons$(EXEEXT) \
+	grid_dialog$(EXEEXT) \
 	grid_login$(EXEEXT) \
 	hello$(EXEEXT) \
 	help_dialog$(EXEEXT) \
@@ -213,7 +216,8 @@ ALL =	\
 	tiled_image$(EXEEXT) \
 	twowin$(EXEEXT) \
 	utf8$(EXEEXT) \
-	windowfocus$(EXEEXT)
+	windowfocus$(EXEEXT) \
+	wizard$(EXEEXT)
 
 ALLFLUID = \
 	checkers$(EXEEXT) \
@@ -449,6 +453,8 @@ forms$(EXEEXT): forms.o
 grid_alignment$(EXEEXT): grid_alignment.o
 
 grid_buttons$(EXEEXT): grid_buttons.o
+
+grid_dialog$(EXEEXT): grid_dialog.o
 
 grid_login$(EXEEXT): grid_login.o
 

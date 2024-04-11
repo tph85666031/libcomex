@@ -434,7 +434,7 @@ popd
 #编译fltk
 mkdir ${DIR_ROOT}/fltk/build 2>&1 > /dev/null
 pushd ${DIR_ROOT}/fltk/build
-cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DFLTK_BUILD_FLUID=0 -DFLTK_BUILD_FLTK_OPTIONS=0 -DFLTK_BUILD_TEST=0 -DFLTK_BUILD_EXAMPLES=0 -DOPTION_USE_SYSTEM_ZLIB=1 -DOPTION_USE_SYSTEM_LIBJPEG=1 -DOPTION_USE_SYSTEM_LIBPNG=1 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DFLTK_BUILD_FLUID=0 -DFLTK_BUILD_FLTK_OPTIONS=0 -DFLTK_BUILD_TEST=0 -DFLTK_BUILD_EXAMPLES=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
 make -j${JOBS} && make install
 if [ $? != 0 ]; then
     show_message "failed to make fltk"
@@ -483,7 +483,7 @@ rm -f ${DIR_ROOT}/out/lib/libmosquitto.so*
 
 #打包
 pushd ${DIR_ROOT}/out
-tar -zcvf ../dependent_${OS_TYPE}_${BUILD_ARCH}.tar.gz ./*
+tar -Jcvf ../dependent_${OS_TYPE}_${BUILD_ARCH}.tar.xz ./*
 popd
 
 rm -rf ${DIR_ROOT}/out > /dev/null 2>&1

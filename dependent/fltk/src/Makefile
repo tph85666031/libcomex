@@ -1,7 +1,7 @@
 #
 # Library Makefile for the Fast Light Tool Kit (FLTK).
 #
-# Copyright 1998-2023 by Bill Spitzak and others.
+# Copyright 1998-2024 by Bill Spitzak and others.
 #
 # This library is free software. Distribution and use rights are outlined in
 # the file "COPYING" which should have been included with this file.  If this
@@ -84,7 +84,6 @@ CPPFILES = \
 	Fl_Scrollbar.cxx \
 	Fl_Shared_Image.cxx \
 	Fl_Shortcut_Button.cxx \
-	Fl_Simple_Terminal.cxx \
 	Fl_Single_Window.cxx \
 	Fl_Slider.cxx \
 	Fl_Spinner.cxx \
@@ -242,9 +241,11 @@ IMGCPPFILES = \
 	Fl_PNM_Image.cxx \
 	Fl_Image_Reader.cxx \
 	Fl_SVG_Image.cxx \
+	nanosvg.cxx \
 	drivers/SVG/Fl_SVG_File_Surface.cxx
 
-CFILES = fl_call_main.c flstring.c numericsort.c vsnprintf.c
+CFILES = flstring.c numericsort.c vsnprintf.c
+CFILES_WIN = fl_call_main.c
 
 UTF8CFILES = \
 	xutf8/case.c \
@@ -331,7 +332,7 @@ WLX11CPPFILES = \
 	fl_dnd_x.cxx \
 	Fl_get_key.cxx
 
-      
+
 #   fl_dnd_x.cxx  Fl_Native_File_Chooser_GTK.cxx
 
 # This C file is used under condition: BUILD_X11
@@ -341,6 +342,7 @@ XLIBCFILES = \
 
 # These C files are used under condition: BUILD_X11 AND NOT BUILD_XFT
 XLIBXCFILES = \
+        xutf8/utf8Input.c \
         xutf8/utf8Utils.c \
         xutf8/utf8Wrap.c
 
@@ -352,7 +354,7 @@ XLIBFONTFILES = \
 XLIBXFTFILES = \
 	drivers/Xlib/Fl_Xlib_Graphics_Driver_font_xft.cxx \
 	drivers/Cairo/Fl_Cairo_Graphics_Driver.cxx
-	
+
 # This C file is used under condition: BUILD_WAYLAND
 WLCFILES = \
         xutf8/keysym2Ucs.c \
@@ -431,7 +433,7 @@ EXTRA_OBJECTS_WAYLANDX11 = $(EXTRA_OBJECTS_WAYLAND)
 EXTRA_CXXFLAGS_WAYLAND = -I.
 EXTRA_CXXFLAGS_WAYLANDX11 = $(EXTRA_CXXFLAGS_WAYLAND)
 
-CFILES_WIN = $(GDICFILES)
+CFILES_WIN += $(GDICFILES)
 
 CFILES += $(CFILES_$(BUILD))
 CXXFLAGS += $(EXTRA_CXXFLAGS_$(BUILD))
