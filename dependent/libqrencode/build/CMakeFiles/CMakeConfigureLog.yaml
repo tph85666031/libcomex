@@ -1,0 +1,786 @@
+
+---
+events:
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineSystem.cmake:233 (message)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      The system is: Linux - 4.19.0-desktop-amd64 - x86_64
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:17 (message)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerId.cmake:64 (__determine_compiler_id_test)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCCompiler.cmake:123 (CMAKE_DETERMINE_COMPILER_ID)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Compiling the C compiler identification source file "CMakeCCompilerId.c" succeeded.
+      Compiler: /usr/bin/cc 
+      Build flags: 
+      Id flags:  
+      
+      The output was:
+      0
+      
+      
+      Compilation of the C compiler identification source "CMakeCCompilerId.c" produced "a.out"
+      
+      The C compiler identification is GNU, found in:
+        /data/libcomex/dependent/libqrencode/build/CMakeFiles/3.28.0-rc5/CompilerIdC/a.out
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:57 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    checks:
+      - "Detecting C compiler ABI info"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-pwCfgW"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-pwCfgW"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "CMAKE_C_ABI_COMPILED"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-pwCfgW'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_95a0a/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_95a0a.dir/build.make CMakeFiles/cmTC_95a0a.dir/build
+        make[1]: Entering directory '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-pwCfgW'
+        Building C object CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o
+        /usr/bin/cc   -fPIE   -v -o CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o -c /usr/local/share/cmake-3.28/Modules/CMakeCCompilerABI.c
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/cc
+        OFFLOAD_TARGET_NAMES=nvptx-none
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Uos 8.3.0.10-deepin1' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+        Thread model: posix
+        gcc version 8.3.0 (Uos 8.3.0.10-deepin1) 
+        COLLECT_GCC_OPTIONS='-fPIE' '-v' '-o' 'CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64'
+         /usr/lib/gcc/x86_64-linux-gnu/8/cc1 -quiet -v -imultiarch x86_64-linux-gnu /usr/local/share/cmake-3.28/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o -version -fPIE -o /tmp/cc7tXxv4.s
+        GNU C17 (Uos 8.3.0.10-deepin1) version 8.3.0 (x86_64-linux-gnu)
+        	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP
+        
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"
+        ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/include"
+        #include "..." search starts here:
+        #include <...> search starts here:
+         /usr/lib/gcc/x86_64-linux-gnu/8/include
+         /usr/local/include
+         /usr/lib/gcc/x86_64-linux-gnu/8/include-fixed
+         /usr/include/x86_64-linux-gnu
+         /usr/include
+        End of search list.
+        GNU C17 (Uos 8.3.0.10-deepin1) version 8.3.0 (x86_64-linux-gnu)
+        	compiled by GNU C version 8.3.0, GMP version 6.1.2, MPFR version 4.0.2, MPC version 1.1.0, isl version isl-0.20-GMP
+        
+        GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072
+        Compiler executable checksum: 438cd996e4baa4748ad8a851aa45b444
+        COLLECT_GCC_OPTIONS='-fPIE' '-v' '-o' 'CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64'
+         as -v --64 -o CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o /tmp/cc7tXxv4.s
+        GNU assembler version 2.31.1 (x86_64-linux-gnu) using BFD version (GNU Binutils for Uos) 2.31.1
+        COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-fPIE' '-v' '-o' 'CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64'
+        Linking C executable cmTC_95a0a
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_95a0a.dir/link.txt --verbose=1
+        /usr/bin/cc  -v -rdynamic CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o -o cmTC_95a0a 
+        Using built-in specs.
+        COLLECT_GCC=/usr/bin/cc
+        COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper
+        OFFLOAD_TARGET_NAMES=nvptx-none
+        OFFLOAD_TARGET_DEFAULT=1
+        Target: x86_64-linux-gnu
+        Configured with: ../src/configure -v --with-pkgversion='Uos 8.3.0.10-deepin1' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c,ada,c++,go,brig,d,fortran,objc,obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32,m64,mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu
+        Thread model: posix
+        gcc version 8.3.0 (Uos 8.3.0.10-deepin1) 
+        COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/
+        LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/
+        COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_95a0a' '-mtune=generic' '-march=x86-64'
+         /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/cc9Z8LV9.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_95a0a /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/8/crtend.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o
+        COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_95a0a' '-mtune=generic' '-march=x86-64'
+        make[1]: Leaving directory '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-pwCfgW'
+        
+      exitCode: 0
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:127 (message)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit include dir info: rv=done
+        found start of include info
+        found start of implicit include info
+          add: [/usr/lib/gcc/x86_64-linux-gnu/8/include]
+          add: [/usr/local/include]
+          add: [/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed]
+          add: [/usr/include/x86_64-linux-gnu]
+          add: [/usr/include]
+        end of search list found
+        collapse include dir [/usr/lib/gcc/x86_64-linux-gnu/8/include] ==> [/usr/lib/gcc/x86_64-linux-gnu/8/include]
+        collapse include dir [/usr/local/include] ==> [/usr/local/include]
+        collapse include dir [/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed] ==> [/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed]
+        collapse include dir [/usr/include/x86_64-linux-gnu] ==> [/usr/include/x86_64-linux-gnu]
+        collapse include dir [/usr/include] ==> [/usr/include]
+        implicit include dirs: [/usr/lib/gcc/x86_64-linux-gnu/8/include;/usr/local/include;/usr/lib/gcc/x86_64-linux-gnu/8/include-fixed;/usr/include/x86_64-linux-gnu;/usr/include]
+      
+      
+  -
+    kind: "message-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CMakeDetermineCompilerABI.cmake:159 (message)"
+      - "/usr/local/share/cmake-3.28/Modules/CMakeTestCCompiler.cmake:26 (CMAKE_DETERMINE_COMPILER_ABI)"
+      - "CMakeLists.txt:3 (project)"
+    message: |
+      Parsed C implicit link information:
+        link line regex: [^( *|.*[/\\])(ld|CMAKE_LINK_STARTFILE-NOTFOUND|([^/\\]+-)?ld|collect2)[^/\\]*( |$)]
+        ignore line: [Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-pwCfgW']
+        ignore line: []
+        ignore line: [Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_95a0a/fast]
+        ignore line: [/usr/bin/make  -f CMakeFiles/cmTC_95a0a.dir/build.make CMakeFiles/cmTC_95a0a.dir/build]
+        ignore line: [make[1]: Entering directory '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-pwCfgW']
+        ignore line: [Building C object CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o]
+        ignore line: [/usr/bin/cc   -fPIE   -v -o CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o -c /usr/local/share/cmake-3.28/Modules/CMakeCCompilerABI.c]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/cc]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Uos 8.3.0.10-deepin1' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c ada c++ go brig d fortran objc obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [gcc version 8.3.0 (Uos 8.3.0.10-deepin1) ]
+        ignore line: [COLLECT_GCC_OPTIONS='-fPIE' '-v' '-o' 'CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64']
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/8/cc1 -quiet -v -imultiarch x86_64-linux-gnu /usr/local/share/cmake-3.28/Modules/CMakeCCompilerABI.c -quiet -dumpbase CMakeCCompilerABI.c -mtune=generic -march=x86-64 -auxbase-strip CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o -version -fPIE -o /tmp/cc7tXxv4.s]
+        ignore line: [GNU C17 (Uos 8.3.0.10-deepin1) version 8.3.0 (x86_64-linux-gnu)]
+        ignore line: [	compiled by GNU C version 8.3.0  GMP version 6.1.2  MPFR version 4.0.2  MPC version 1.1.0  isl version isl-0.20-GMP]
+        ignore line: []
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [ignoring nonexistent directory "/usr/local/include/x86_64-linux-gnu"]
+        ignore line: [ignoring nonexistent directory "/usr/lib/gcc/x86_64-linux-gnu/8/../../../../x86_64-linux-gnu/include"]
+        ignore line: [#include "..." search starts here:]
+        ignore line: [#include <...> search starts here:]
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/8/include]
+        ignore line: [ /usr/local/include]
+        ignore line: [ /usr/lib/gcc/x86_64-linux-gnu/8/include-fixed]
+        ignore line: [ /usr/include/x86_64-linux-gnu]
+        ignore line: [ /usr/include]
+        ignore line: [End of search list.]
+        ignore line: [GNU C17 (Uos 8.3.0.10-deepin1) version 8.3.0 (x86_64-linux-gnu)]
+        ignore line: [	compiled by GNU C version 8.3.0  GMP version 6.1.2  MPFR version 4.0.2  MPC version 1.1.0  isl version isl-0.20-GMP]
+        ignore line: []
+        ignore line: [GGC heuristics: --param ggc-min-expand=100 --param ggc-min-heapsize=131072]
+        ignore line: [Compiler executable checksum: 438cd996e4baa4748ad8a851aa45b444]
+        ignore line: [COLLECT_GCC_OPTIONS='-fPIE' '-v' '-o' 'CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64']
+        ignore line: [ as -v --64 -o CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o /tmp/cc7tXxv4.s]
+        ignore line: [GNU assembler version 2.31.1 (x86_64-linux-gnu) using BFD version (GNU Binutils for Uos) 2.31.1]
+        ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-fPIE' '-v' '-o' 'CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o' '-c' '-mtune=generic' '-march=x86-64']
+        ignore line: [Linking C executable cmTC_95a0a]
+        ignore line: [/usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_95a0a.dir/link.txt --verbose=1]
+        ignore line: [/usr/bin/cc  -v -rdynamic CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o -o cmTC_95a0a ]
+        ignore line: [Using built-in specs.]
+        ignore line: [COLLECT_GCC=/usr/bin/cc]
+        ignore line: [COLLECT_LTO_WRAPPER=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper]
+        ignore line: [OFFLOAD_TARGET_NAMES=nvptx-none]
+        ignore line: [OFFLOAD_TARGET_DEFAULT=1]
+        ignore line: [Target: x86_64-linux-gnu]
+        ignore line: [Configured with: ../src/configure -v --with-pkgversion='Uos 8.3.0.10-deepin1' --with-bugurl=file:///usr/share/doc/gcc-8/README.Bugs --enable-languages=c ada c++ go brig d fortran objc obj-c++ --prefix=/usr --with-gcc-major-version-only --program-suffix=-8 --program-prefix=x86_64-linux-gnu- --enable-shared --enable-linker-build-id --libexecdir=/usr/lib --without-included-gettext --enable-threads=posix --libdir=/usr/lib --enable-nls --enable-bootstrap --enable-clocale=gnu --enable-libstdcxx-debug --enable-libstdcxx-time=yes --with-default-libstdcxx-abi=new --enable-gnu-unique-object --disable-vtable-verify --enable-libmpx --enable-plugin --with-system-zlib --with-target-system-zlib --enable-objc-gc=auto --enable-multiarch --disable-werror --with-arch-32=i686 --with-abi=m64 --with-multilib-list=m32 m64 mx32 --enable-multilib --with-tune=generic --enable-offload-targets=nvptx-none --without-cuda-driver --enable-checking=release --build=x86_64-linux-gnu --host=x86_64-linux-gnu --target=x86_64-linux-gnu]
+        ignore line: [Thread model: posix]
+        ignore line: [gcc version 8.3.0 (Uos 8.3.0.10-deepin1) ]
+        ignore line: [COMPILER_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/]
+        ignore line: [LIBRARY_PATH=/usr/lib/gcc/x86_64-linux-gnu/8/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib/:/lib/x86_64-linux-gnu/:/lib/../lib/:/usr/lib/x86_64-linux-gnu/:/usr/lib/../lib/:/usr/lib/gcc/x86_64-linux-gnu/8/../../../:/lib/:/usr/lib/]
+        ignore line: [COLLECT_GCC_OPTIONS='-v' '-rdynamic' '-o' 'cmTC_95a0a' '-mtune=generic' '-march=x86-64']
+        link line: [ /usr/lib/gcc/x86_64-linux-gnu/8/collect2 -plugin /usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so -plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper -plugin-opt=-fresolution=/tmp/cc9Z8LV9.res -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s -plugin-opt=-pass-through=-lc -plugin-opt=-pass-through=-lgcc -plugin-opt=-pass-through=-lgcc_s --build-id --eh-frame-hdr -m elf_x86_64 --hash-style=gnu -export-dynamic -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o cmTC_95a0a /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crt1.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o /usr/lib/gcc/x86_64-linux-gnu/8/crtbegin.o -L/usr/lib/gcc/x86_64-linux-gnu/8 -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu -L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib -L/lib/x86_64-linux-gnu -L/lib/../lib -L/usr/lib/x86_64-linux-gnu -L/usr/lib/../lib -L/usr/lib/gcc/x86_64-linux-gnu/8/../../.. CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o -lgcc --push-state --as-needed -lgcc_s --pop-state -lc -lgcc --push-state --as-needed -lgcc_s --pop-state /usr/lib/gcc/x86_64-linux-gnu/8/crtend.o /usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/8/collect2] ==> ignore
+          arg [-plugin] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/8/liblto_plugin.so] ==> ignore
+          arg [-plugin-opt=/usr/lib/gcc/x86_64-linux-gnu/8/lto-wrapper] ==> ignore
+          arg [-plugin-opt=-fresolution=/tmp/cc9Z8LV9.res] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [-plugin-opt=-pass-through=-lc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc] ==> ignore
+          arg [-plugin-opt=-pass-through=-lgcc_s] ==> ignore
+          arg [--build-id] ==> ignore
+          arg [--eh-frame-hdr] ==> ignore
+          arg [-m] ==> ignore
+          arg [elf_x86_64] ==> ignore
+          arg [--hash-style=gnu] ==> ignore
+          arg [-export-dynamic] ==> ignore
+          arg [-dynamic-linker] ==> ignore
+          arg [/lib64/ld-linux-x86-64.so.2] ==> ignore
+          arg [-o] ==> ignore
+          arg [cmTC_95a0a] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crt1.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crt1.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtbegin.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/8/crtbegin.o]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/8] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib]
+          arg [-L/lib/x86_64-linux-gnu] ==> dir [/lib/x86_64-linux-gnu]
+          arg [-L/lib/../lib] ==> dir [/lib/../lib]
+          arg [-L/usr/lib/x86_64-linux-gnu] ==> dir [/usr/lib/x86_64-linux-gnu]
+          arg [-L/usr/lib/../lib] ==> dir [/usr/lib/../lib]
+          arg [-L/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..]
+          arg [CMakeFiles/cmTC_95a0a.dir/CMakeCCompilerABI.c.o] ==> ignore
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [-lc] ==> lib [c]
+          arg [-lgcc] ==> lib [gcc]
+          arg [--push-state] ==> ignore
+          arg [--as-needed] ==> ignore
+          arg [-lgcc_s] ==> lib [gcc_s]
+          arg [--pop-state] ==> ignore
+          arg [/usr/lib/gcc/x86_64-linux-gnu/8/crtend.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/8/crtend.o]
+          arg [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o] ==> obj [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crt1.o] ==> [/usr/lib/x86_64-linux-gnu/crt1.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crti.o] ==> [/usr/lib/x86_64-linux-gnu/crti.o]
+        collapse obj [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu/crtn.o] ==> [/usr/lib/x86_64-linux-gnu/crtn.o]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8] ==> [/usr/lib/gcc/x86_64-linux-gnu/8]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../../../lib] ==> [/usr/lib]
+        collapse library dir [/lib/x86_64-linux-gnu] ==> [/lib/x86_64-linux-gnu]
+        collapse library dir [/lib/../lib] ==> [/lib]
+        collapse library dir [/usr/lib/x86_64-linux-gnu] ==> [/usr/lib/x86_64-linux-gnu]
+        collapse library dir [/usr/lib/../lib] ==> [/usr/lib]
+        collapse library dir [/usr/lib/gcc/x86_64-linux-gnu/8/../../..] ==> [/usr/lib]
+        implicit libs: [gcc;gcc_s;c;gcc;gcc_s]
+        implicit objs: [/usr/lib/x86_64-linux-gnu/crt1.o;/usr/lib/x86_64-linux-gnu/crti.o;/usr/lib/gcc/x86_64-linux-gnu/8/crtbegin.o;/usr/lib/gcc/x86_64-linux-gnu/8/crtend.o;/usr/lib/x86_64-linux-gnu/crtn.o]
+        implicit dirs: [/usr/lib/gcc/x86_64-linux-gnu/8;/usr/lib/x86_64-linux-gnu;/usr/lib;/lib/x86_64-linux-gnu;/lib]
+        implicit fwks: []
+      
+      
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/Internal/CheckSourceCompiles.cmake:101 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/CheckCSourceCompiles.cmake:52 (cmake_check_source_compiles)"
+      - "/usr/local/share/cmake-3.28/Modules/FindThreads.cmake:97 (CHECK_C_SOURCE_COMPILES)"
+      - "/usr/local/share/cmake-3.28/Modules/FindThreads.cmake:163 (_threads_check_libc)"
+      - "CMakeLists.txt:21 (find_package)"
+    checks:
+      - "Performing Test CMAKE_HAVE_LIBC_PTHREAD"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9NhbGd"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9NhbGd"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "CMAKE_HAVE_LIBC_PTHREAD"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9NhbGd'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_d8dbf/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_d8dbf.dir/build.make CMakeFiles/cmTC_d8dbf.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9NhbGd”
+        Building C object CMakeFiles/cmTC_d8dbf.dir/src.c.o
+        /usr/bin/cc -DCMAKE_HAVE_LIBC_PTHREAD  -fPIE -o CMakeFiles/cmTC_d8dbf.dir/src.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9NhbGd/src.c
+        Linking C executable cmTC_d8dbf
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d8dbf.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_d8dbf.dir/src.c.o -o cmTC_d8dbf 
+        /usr/bin/ld: CMakeFiles/cmTC_d8dbf.dir/src.c.o: in function `main':
+        src.c:(.text+0x2f): undefined reference to `pthread_create'
+        /usr/bin/ld: src.c:(.text+0x3b): undefined reference to `pthread_detach'
+        /usr/bin/ld: src.c:(.text+0x47): undefined reference to `pthread_cancel'
+        /usr/bin/ld: src.c:(.text+0x58): undefined reference to `pthread_join'
+        collect2: error: ld returned 1 exit status
+        make[1]: *** [CMakeFiles/cmTC_d8dbf.dir/build.make:99：cmTC_d8dbf] 错误 1
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9NhbGd”
+        make: *** [Makefile:127：cmTC_d8dbf/fast] 错误 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "/usr/local/share/cmake-3.28/Modules/FindThreads.cmake:175 (_threads_check_lib)"
+      - "CMakeLists.txt:21 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthreads"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JOfqKv"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JOfqKv"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREADS_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JOfqKv'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_bea7a/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_bea7a.dir/build.make CMakeFiles/cmTC_bea7a.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JOfqKv”
+        Building C object CMakeFiles/cmTC_bea7a.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create -fPIE -o CMakeFiles/cmTC_bea7a.dir/CheckFunctionExists.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JOfqKv/CheckFunctionExists.c
+        Linking C executable cmTC_bea7a
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_bea7a.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create -rdynamic CMakeFiles/cmTC_bea7a.dir/CheckFunctionExists.c.o -o cmTC_bea7a  -lpthreads 
+        /usr/bin/ld: 找不到 -lpthreads
+        collect2: error: ld returned 1 exit status
+        make[1]: *** [CMakeFiles/cmTC_bea7a.dir/build.make:99：cmTC_bea7a] 错误 1
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JOfqKv”
+        make: *** [Makefile:127：cmTC_bea7a/fast] 错误 2
+        
+      exitCode: 2
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckLibraryExists.cmake:69 (try_compile)"
+      - "/usr/local/share/cmake-3.28/Modules/FindThreads.cmake:112 (CHECK_LIBRARY_EXISTS)"
+      - "/usr/local/share/cmake-3.28/Modules/FindThreads.cmake:176 (_threads_check_lib)"
+      - "CMakeLists.txt:21 (find_package)"
+    checks:
+      - "Looking for pthread_create in pthread"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-198gnO"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-198gnO"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "CMAKE_HAVE_PTHREAD_CREATE"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-198gnO'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_585ed/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_585ed.dir/build.make CMakeFiles/cmTC_585ed.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-198gnO”
+        Building C object CMakeFiles/cmTC_585ed.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=pthread_create -fPIE -o CMakeFiles/cmTC_585ed.dir/CheckFunctionExists.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-198gnO/CheckFunctionExists.c
+        Linking C executable cmTC_585ed
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_585ed.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=pthread_create -rdynamic CMakeFiles/cmTC_585ed.dir/CheckFunctionExists.c.o -o cmTC_585ed  -lpthread 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-198gnO”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "cmake/FindIconv.cmake:66 (check_function_exists)"
+      - "CMakeLists.txt:23 (find_package)"
+    checks:
+      - "Looking for iconv_open"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XX6we9"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XX6we9"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "ICONV_IN_GLIBC"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XX6we9'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_a158e/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_a158e.dir/build.make CMakeFiles/cmTC_a158e.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XX6we9”
+        Building C object CMakeFiles/cmTC_a158e.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=iconv_open -fPIE -o CMakeFiles/cmTC_a158e.dir/CheckFunctionExists.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XX6we9/CheckFunctionExists.c
+        Linking C executable cmTC_a158e
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_a158e.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=iconv_open -rdynamic CMakeFiles/cmTC_a158e.dir/CheckFunctionExists.c.o -o cmTC_a158e 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XX6we9”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:35 (check_include_file)"
+    checks:
+      - "Looking for dlfcn.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LBMgIu"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LBMgIu"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_DLFCN_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LBMgIu'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_2e7b9/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_2e7b9.dir/build.make CMakeFiles/cmTC_2e7b9.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LBMgIu”
+        Building C object CMakeFiles/cmTC_2e7b9.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_2e7b9.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LBMgIu/CheckIncludeFile.c
+        Linking C executable cmTC_2e7b9
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_2e7b9.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_2e7b9.dir/CheckIncludeFile.c.o -o cmTC_2e7b9 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LBMgIu”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:36 (check_include_file)"
+    checks:
+      - "Looking for inttypes.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-jNoATQ"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-jNoATQ"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_INTTYPES_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-jNoATQ'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_b3312/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_b3312.dir/build.make CMakeFiles/cmTC_b3312.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-jNoATQ”
+        Building C object CMakeFiles/cmTC_b3312.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_b3312.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-jNoATQ/CheckIncludeFile.c
+        Linking C executable cmTC_b3312
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b3312.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_b3312.dir/CheckIncludeFile.c.o -o cmTC_b3312 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-jNoATQ”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:37 (check_include_file)"
+    checks:
+      - "Looking for memory.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LVKCQd"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LVKCQd"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_MEMORY_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LVKCQd'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_3b8e7/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_3b8e7.dir/build.make CMakeFiles/cmTC_3b8e7.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LVKCQd”
+        Building C object CMakeFiles/cmTC_3b8e7.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_3b8e7.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LVKCQd/CheckIncludeFile.c
+        Linking C executable cmTC_3b8e7
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_3b8e7.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_3b8e7.dir/CheckIncludeFile.c.o -o cmTC_3b8e7 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-LVKCQd”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:38 (check_include_file)"
+    checks:
+      - "Looking for stdint.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JgV7xB"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JgV7xB"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_STDINT_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JgV7xB'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_5b775/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_5b775.dir/build.make CMakeFiles/cmTC_5b775.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JgV7xB”
+        Building C object CMakeFiles/cmTC_5b775.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_5b775.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JgV7xB/CheckIncludeFile.c
+        Linking C executable cmTC_5b775
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_5b775.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_5b775.dir/CheckIncludeFile.c.o -o cmTC_5b775 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-JgV7xB”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:39 (check_include_file)"
+    checks:
+      - "Looking for stdlib.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XXGYYZ"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XXGYYZ"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_STDLIB_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XXGYYZ'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_0b82e/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_0b82e.dir/build.make CMakeFiles/cmTC_0b82e.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XXGYYZ”
+        Building C object CMakeFiles/cmTC_0b82e.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_0b82e.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XXGYYZ/CheckIncludeFile.c
+        Linking C executable cmTC_0b82e
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0b82e.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_0b82e.dir/CheckIncludeFile.c.o -o cmTC_0b82e 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-XXGYYZ”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:40 (check_include_file)"
+    checks:
+      - "Looking for strings.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hivsbp"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hivsbp"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_STRINGS_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hivsbp'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_d3bc5/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_d3bc5.dir/build.make CMakeFiles/cmTC_d3bc5.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hivsbp”
+        Building C object CMakeFiles/cmTC_d3bc5.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_d3bc5.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hivsbp/CheckIncludeFile.c
+        Linking C executable cmTC_d3bc5
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_d3bc5.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_d3bc5.dir/CheckIncludeFile.c.o -o cmTC_d3bc5 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hivsbp”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:41 (check_include_file)"
+    checks:
+      - "Looking for string.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hQfF6O"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hQfF6O"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_STRING_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hQfF6O'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_74af2/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_74af2.dir/build.make CMakeFiles/cmTC_74af2.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hQfF6O”
+        Building C object CMakeFiles/cmTC_74af2.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_74af2.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hQfF6O/CheckIncludeFile.c
+        Linking C executable cmTC_74af2
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_74af2.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_74af2.dir/CheckIncludeFile.c.o -o cmTC_74af2 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-hQfF6O”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:42 (check_include_file)"
+    checks:
+      - "Looking for getopt.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-BQxGMf"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-BQxGMf"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_GETOPT_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-BQxGMf'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_b1144/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_b1144.dir/build.make CMakeFiles/cmTC_b1144.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-BQxGMf”
+        Building C object CMakeFiles/cmTC_b1144.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_b1144.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-BQxGMf/CheckIncludeFile.c
+        Linking C executable cmTC_b1144
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_b1144.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_b1144.dir/CheckIncludeFile.c.o -o cmTC_b1144 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-BQxGMf”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:43 (check_include_file)"
+    checks:
+      - "Looking for sys/time.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-ntvLbH"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-ntvLbH"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_SYS_TIME_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-ntvLbH'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_61046/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_61046.dir/build.make CMakeFiles/cmTC_61046.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-ntvLbH”
+        Building C object CMakeFiles/cmTC_61046.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_61046.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-ntvLbH/CheckIncludeFile.c
+        Linking C executable cmTC_61046
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_61046.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_61046.dir/CheckIncludeFile.c.o -o cmTC_61046 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-ntvLbH”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:44 (check_include_file)"
+    checks:
+      - "Looking for time.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9zOvn9"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9zOvn9"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_TIME_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9zOvn9'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_c3e88/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_c3e88.dir/build.make CMakeFiles/cmTC_c3e88.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9zOvn9”
+        Building C object CMakeFiles/cmTC_c3e88.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_c3e88.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9zOvn9/CheckIncludeFile.c
+        Linking C executable cmTC_c3e88
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_c3e88.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_c3e88.dir/CheckIncludeFile.c.o -o cmTC_c3e88 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-9zOvn9”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckIncludeFile.cmake:90 (try_compile)"
+      - "CMakeLists.txt:45 (check_include_file)"
+    checks:
+      - "Looking for pthread.h"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-RQMLjC"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-RQMLjC"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_PTHREAD_H"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-RQMLjC'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_0c35f/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_0c35f.dir/build.make CMakeFiles/cmTC_0c35f.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-RQMLjC”
+        Building C object CMakeFiles/cmTC_0c35f.dir/CheckIncludeFile.c.o
+        /usr/bin/cc   -fPIE -o CMakeFiles/cmTC_0c35f.dir/CheckIncludeFile.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-RQMLjC/CheckIncludeFile.c
+        Linking C executable cmTC_0c35f
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_0c35f.dir/link.txt --verbose=1
+        /usr/bin/cc -rdynamic CMakeFiles/cmTC_0c35f.dir/CheckIncludeFile.c.o -o cmTC_0c35f 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-RQMLjC”
+        
+      exitCode: 0
+  -
+    kind: "try_compile-v1"
+    backtrace:
+      - "/usr/local/share/cmake-3.28/Modules/CheckFunctionExists.cmake:86 (try_compile)"
+      - "CMakeLists.txt:47 (check_function_exists)"
+    checks:
+      - "Looking for strdup"
+    directories:
+      source: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-diES55"
+      binary: "/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-diES55"
+    cmakeVariables:
+      CMAKE_C_FLAGS: ""
+      CMAKE_MODULE_PATH: "/data/libcomex/dependent/libqrencode/cmake"
+      CMAKE_POSITION_INDEPENDENT_CODE: "1"
+    buildResult:
+      variable: "HAVE_STRDUP"
+      cached: true
+      stdout: |
+        Change Dir: '/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-diES55'
+        
+        Run Build Command(s): /usr/local/bin/cmake -E env VERBOSE=1 /usr/bin/make -f Makefile cmTC_e16a0/fast
+        /usr/bin/make  -f CMakeFiles/cmTC_e16a0.dir/build.make CMakeFiles/cmTC_e16a0.dir/build
+        make[1]: 进入目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-diES55”
+        Building C object CMakeFiles/cmTC_e16a0.dir/CheckFunctionExists.c.o
+        /usr/bin/cc   -DCHECK_FUNCTION_EXISTS=strdup -fPIE -o CMakeFiles/cmTC_e16a0.dir/CheckFunctionExists.c.o -c /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-diES55/CheckFunctionExists.c
+        <command-line>: warning: conflicting types for built-in function ‘strdup’ [-Wbuiltin-declaration-mismatch]
+        /data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-diES55/CheckFunctionExists.c:7:3: note: in expansion of macro ‘CHECK_FUNCTION_EXISTS’
+           CHECK_FUNCTION_EXISTS(void);
+           ^~~~~~~~~~~~~~~~~~~~~
+        Linking C executable cmTC_e16a0
+        /usr/local/bin/cmake -E cmake_link_script CMakeFiles/cmTC_e16a0.dir/link.txt --verbose=1
+        /usr/bin/cc  -DCHECK_FUNCTION_EXISTS=strdup -rdynamic CMakeFiles/cmTC_e16a0.dir/CheckFunctionExists.c.o -o cmTC_e16a0 
+        make[1]: 离开目录“/data/libcomex/dependent/libqrencode/build/CMakeFiles/CMakeScratch/TryCompile-diES55”
+        
+      exitCode: 0
+...
