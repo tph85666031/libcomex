@@ -28,8 +28,6 @@
 #include "com_log.h"
 #include "comex_cairo_watermark.h"
 
-// #define WATER_MARK_DEBUG
-
 int dot_s[3][3] =
 {
     {1, 1, 1},
@@ -722,12 +720,6 @@ CPPBytes WaterMark::createWatermarkAsDot()
     float G = 0;
     float B = 0;
 
-#ifdef WATER_MARK_DEBUG
-    // 测试背景颜色 RGB(0 197 205)
-    alpha_backgound = 1;
-    color_background = (0 << 24) | (197 << 16) | (205 << 8);
-#endif
-
     if(alpha_backgound > 0)//绘制背景色
     {
         cairo_set_operator(cr_block, CAIRO_OPERATOR_SOURCE);
@@ -742,12 +734,6 @@ CPPBytes WaterMark::createWatermarkAsDot()
     G = (float)(color >> 16 & 0xFF) / 255;
     B = (float)(color >> 8 & 0xFF) / 255;
 
-#ifdef WATER_MARK_DEBUG
-    R = 1;
-    G = 0;
-    B = 0;
-#endif
-
     //以中心点旋转
     cairo_translate(cr_block, block_width / 2, block_height / 2);
     cairo_rotate(cr_block, 2 * M_PI * angle / 360);
@@ -760,7 +746,7 @@ CPPBytes WaterMark::createWatermarkAsDot()
     cairo_set_line_width(cr_block, 0.1);
     cairo_set_operator(cr_block, CAIRO_OPERATOR_SOURCE);
     cairo_set_source_rgba(cr_block, R, G, B, alpha); /* 设置颜色 */
-    //float space_dot = ((float)width - 11.0f * pix_size) / 8.0f;
+    float space_dot = ((float)width - 11.0f * pix_size) / 8.0f;//累计11个点(包含3x3区域间隔空点)8个空位间距
 
     int dot_9x9[9][9];
     memset(dot_9x9, 0, sizeof(dot_9x9));
@@ -821,7 +807,7 @@ CPPBytes WaterMark::createWatermarkAsDot()
                 p = dot_f;
                 break;
             default:
-                LOG_E("text incorrect:%c", text_tmp.at(i));
+                LOG_E("text incorrect:text[i]=%c", text_tmp.at(i));
                 return false;
         }
         //将3x3点阵按序拷贝到9x9中指定的3x3区域
@@ -840,55 +826,28 @@ CPPBytes WaterMark::createWatermarkAsDot()
         dot_9x9[x_start + 2][y_start + 2] = p[2][2];
     }
 
-    int rows = 9; // 行数
-    int cols = 9; // 列数
-    // 计算每个方格的宽度和高度
-    double cellWidth = static_cast<double>(block_width - space_x * 2) / cols;
-    double cellHeight = static_cast<double>(block_height - space_y * 2) / rows;
-
-#ifdef WATER_MARK_DEBUG
-    // 绘制网格
-    do
+    float pos_y = (float)space_y / 2 + r; //pos_x,pos_y是圆心位置，需要加半径偏移防止图像绘制在边界外
+    for(int i = 0; i < 9; i++)
     {
-
-        // 设置方格的颜色和线宽
-        cairo_set_source_rgb(cr_block, 0.0, 0.0, 0.0); // 黑色
-        cairo_set_line_width(cr_block, 2.0);
-
-        // 绘制方格
-        for(int i = 0; i < rows; i++)
-        {
-            for(int j = 0; j < cols; j++)
-            {
-                double x = j * cellWidth + space_x * (j % 3);
-                double y = i * cellHeight + space_y * (i % 3);
-
-                // 绘制方格的边框
-                cairo_rectangle(cr_block, x, y, cellWidth, cellHeight);
-                cairo_stroke(cr_block);
-            }
-        }
-    }
-    while(false);
-#endif
-
-    // 绘制圆点
-    for(int i = 0; i < cols; i++)
-    {
-        for(int j = 0; j < rows; j++)
+        float pos_x = (float)space_x / 2 + r; //pos_x,pos_y是圆心位置，需要加半径偏移防止图像绘制在边界外
+        for(int j = 0; j < 9; j++)
         {
             int val = dot_9x9[i][j];
             if(val & 0x01)
             {
-                cairo_set_source_rgba(cr_block, R, G, B, alpha); /* 设置颜色 */
-
-                double x = j * cellWidth + space_x * (j % 3) + cellWidth * 0.5;
-                double y = i * cellHeight + space_y * (i % 3) + cellHeight * 0.5;
-
-                cairo_arc(cr_block, x, y, r, 0, 2 * M_PI); // 设置圆点路径
-                cairo_fill(cr_block); // 绘制圆点
+                cairo_arc(cr_block, pos_x, pos_y, r, 0, 2 * M_PI);
+                cairo_fill(cr_block);
             }
-
+            pos_x += (space_dot + pix_size);
+            if(j == 2 || j == 5)
+            {
+                pos_x += pix_size;//添加3x3分隔间隔
+            }
+        }
+        pos_y += (space_dot + pix_size);
+        if(i == 2 || i == 5)
+        {
+            pos_y += pix_size;//添加3x3分隔间隔
         }
     }
 

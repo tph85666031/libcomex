@@ -16,7 +16,12 @@ void comex_cairo_watermark_unit_test_suit(void** state)
     wm.createWatermark().toFile("./2.png");
 
     wm.setType(WATER_MARK_TYPE_DOT);
-    wm.setText("s12345678");
+    wm.setText("s0D345678");
+    wm.setBackgroundColor(0xFF000000);
+    wm.setBackgroundAlpha(0.3);
+    wm.setWidth(100);
+    wm.setPixSize(3);
+    wm.setSpace(0, 100);
     wm.createWatermark().toFile("./3.png");
 
     //com_file_remove("./1.png");
