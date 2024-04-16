@@ -181,13 +181,7 @@ static cairo_status_t cairo_png_read_func(void* ctx, unsigned char* data, unsign
 
 WaterMark::WaterMark()
 {
-#if defined(_WIN32) || defined(_WIN64)
-    font_name = "Microsoft YaHei";
-#elif defined(__APPLE__)
-    font_name = "Arial Unicode MS";
-#else
     font_name = detectFontNameFromLang();
-#endif
 }
 
 WaterMark::~WaterMark()
@@ -276,10 +270,6 @@ double WaterMark::getDPI()
 
 std::string WaterMark::detectFontNameFromLang(const char* lang)
 {
-#if defined(_WIN32) || defined(_WIN64)
-    LOG_E("api not support");
-    return std::string();
-#else
     std::string lang_str;
     if(lang == NULL)
     {
@@ -289,11 +279,11 @@ std::string WaterMark::detectFontNameFromLang(const char* lang)
     {
         lang_str = lang;
     }
+    LOG_I("lang_str=%s", lang_str.c_str());
     com_string_replace(lang_str, "_", "-");
     lang_str = lang_str.substr(0, lang_str.find("."));
 
     FcInit();
-    //setenv("FONTCONFIG_PATH", "/etc/fonts", 0);//set fontconfig config file if necessary
     std::string pattern_filter = com_string_format(":lang=%s", lang_str.c_str());
     FcConfig* config = FcInitLoadConfigAndFonts();
     if(config == NULL)
@@ -343,7 +333,6 @@ std::string WaterMark::detectFontNameFromLang(const char* lang)
     FcObjectSetDestroy(os);
     FcFontSetDestroy(fs);
     return font_name;
-#endif
 }
 
 WaterMark& WaterMark::setType(int type)
@@ -430,28 +419,12 @@ WaterMark& WaterMark::setSpace(int space_x, int space_y)
 
 WaterMark& WaterMark::setAlpha(double alpha)
 {
-    // if((int)(alpha * 10000) < (int)(0.004f * 10000))
-    // {
-    //     alpha = 0.004;
-    // }
-    // else if((int)(alpha * 10000) > 10000)
-    // {
-    //     alpha = 1;
-    // }
     this->alpha = alpha;
     return *this;
 }
 
 WaterMark& WaterMark::setBackgroundAlpha(double alpha)
 {
-    // if((int)(alpha * 10000) < (int)(0.004f * 10000))
-    // {
-    //     alpha = 0.004;
-    // }
-    // else if((int)(alpha * 10000) > 10000)
-    // {
-    //     alpha = 1;
-    // }
     this->alpha_backgound = alpha;
     return *this;
 }
@@ -489,6 +462,12 @@ WaterMark& WaterMark::setDPI(double dpi)
 WaterMark& WaterMark::setTimestampRequired(bool required)
 {
     this->timestamp_required = required;
+    return *this;
+}
+
+WaterMark& WaterMark::setQRCodeCombineBackground(bool combine)
+{
+    this->qrcode_combinebackground = combine;
     return *this;
 }
 
@@ -550,22 +529,22 @@ CPPBytes WaterMark::createWatermarkAsQRCode()
     int block_height = width + space_y;
     cairo_surface_t* surface_block = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, block_width, block_height); //创建一个图像外观
     cairo_t* cr_block = cairo_create(surface_block);
-    float R = 0;
-    float G = 0;
-    float B = 0;
+
+    float R_background = (float)(color_background >> 24 & 0xFF) / 255;
+    float G_background = (float)(color_background >> 16 & 0xFF) / 255;
+    float B_background = (float)(color_background >> 8 & 0xFF) / 255;
+
+    float R = (float)(color >> 24 & 0xFF) / 255;
+    float G = (float)(color >> 16 & 0xFF) / 255;
+    float B = (float)(color >> 8 & 0xFF) / 255;
+
     if(alpha_backgound > 0)//绘制背景色
     {
         cairo_set_operator(cr_block, CAIRO_OPERATOR_SOURCE);
-        R = (float)(color_background >> 24 & 0xFF) / 255;
-        G = (float)(color_background >> 16 & 0xFF) / 255;
-        B = (float)(color_background >> 8 & 0xFF) / 255;
-        cairo_set_source_rgba(cr_block, R, G, B, alpha_backgound);
-        cairo_paint_with_alpha(cr_block, alpha_backgound);
+        cairo_set_source_rgba(cr_block, R_background, G_background, B_background, alpha_backgound);
+        cairo_paint(cr_block);
     }
 
-    R = (float)(color >> 24 & 0xFF) / 255;
-    G = (float)(color >> 16 & 0xFF) / 255;
-    B = (float)(color >> 8 & 0xFF) / 255;
     //以中心点旋转
     cairo_translate(cr_block, block_width / 2, block_height / 2);
     cairo_rotate(cr_block, 2 * M_PI * angle / 360);
@@ -587,14 +566,20 @@ CPPBytes WaterMark::createWatermarkAsQRCode()
             if(bit & 0x01)
             {
                 cairo_set_source_rgba(cr_block, R, G, B, alpha); /* 设置颜色 */
-                //cairo_set_source_rgb(cr_block, R, G, B); /* 设置颜色 */
                 cairo_rectangle(cr_block,  space_x / 2 + x * pix_size,  space_y / 2 + y * pix_size, pix_size, pix_size);
             }
             else
             {
-                cairo_set_source_rgba(cr_block, 255 - R, 255 - R, 255 - R, alpha); /* 设置反色全透明 */
-                //cairo_set_source_rgb(cr_block, 255 - R, 255 - R, 255 - R); /* 设置反色 */
-                cairo_rectangle(cr_block,  space_x / 2 + x * pix_size,  space_y / 2 + y * pix_size, pix_size, pix_size);
+                if(qrcode_combinebackground)
+                {
+                    cairo_set_source_rgba(cr_block, R_background, G_background, B_background, alpha_backgound);
+                    cairo_rectangle(cr_block,  space_x / 2 + x * pix_size,  space_y / 2 + y * pix_size, pix_size, pix_size);
+                }
+                else
+                {
+                    cairo_set_source_rgba(cr_block, 1 - R, 1 - G, 1 - B, alpha);
+                    cairo_rectangle(cr_block,  space_x / 2 + x * pix_size,  space_y / 2 + y * pix_size, pix_size, pix_size);
+                }
             }
 
             cairo_fill(cr_block);
@@ -647,7 +632,7 @@ CPPBytes WaterMark::createWatermarkAsText()
         G = (float)(color_background >> 16 & 0xFF) / 255;
         B = (float)(color_background >> 8 & 0xFF) / 255;
         cairo_set_source_rgba(cr_block, R, G, B, alpha_backgound);
-        cairo_paint_with_alpha(cr_block, alpha_backgound);
+        cairo_paint(cr_block);
     }
 
     R = (float)(color >> 24 & 0xFF) / 255;
@@ -750,7 +735,7 @@ CPPBytes WaterMark::createWatermarkAsDot()
         G = (float)(color_background >> 16 & 0xFF) / 255;
         B = (float)(color_background >> 8 & 0xFF) / 255;
         cairo_set_source_rgba(cr_block, R, G, B, alpha_backgound);
-        cairo_paint_with_alpha(cr_block, alpha_backgound);
+        cairo_paint(cr_block);
     }
 
     R = (float)(color >> 24 & 0xFF) / 255;

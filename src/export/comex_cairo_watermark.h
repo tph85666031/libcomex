@@ -61,6 +61,7 @@ public:
     WaterMark& setBinarize(unsigned char binarize = 100); //水印像素二值化
     WaterMark& setTimestampRequired(bool required);//水印是否叠加当前时间戳
     WaterMark& setDPI(double dpi);//设置屏幕DPI
+    WaterMark& setQRCodeCombineBackground(bool combine);//二维码0点位置使用背景配色
 
     bool createWatermark(const char* file);
     CPPBytes createWatermark();
@@ -107,6 +108,7 @@ private:
     double alpha_backgound = 0.0f;//默认全透明
     unsigned char binarize = 0;//默认不做二值化
     bool timestamp_required = false;
+    bool qrcode_combinebackground = false;
 };
 
 #endif /* __COMEX_CAIRO_WATERMARK_H__ */

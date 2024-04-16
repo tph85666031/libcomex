@@ -1,4 +1,5 @@
 #include <stack>
+#include <cwctype>
 #include "com_log.h"
 #include "com_file.h"
 #include "comex_cairo_watermark.h"
