@@ -29,6 +29,7 @@ public:
     ~WaterMark();
     int getType();
     double getFontSize();
+    std::string getFontName();
     unsigned int getColor();
     unsigned int getBackgroundColor();
     int getPixSize();
@@ -45,6 +46,7 @@ public:
 
     WaterMark& setType(int type);//水印类型
     WaterMark& setFontSize(double size);//字体大小
+    WaterMark& setFontName(const char* name);//字体名字
     WaterMark& setColor(unsigned int color);//颜色
     WaterMark& setBackgroundColor(unsigned int color);//背景颜色
     WaterMark& setPixSize(int pix_size);//单颗像素大小(二维码和DOT有效)
@@ -84,6 +86,8 @@ private:
     CPPBytes createWatermarkAsText();
     CPPBytes createWatermarkAsDot();
 
+    std::string detectFontNameFromLang(const char* lang = NULL);
+    
     static COLOR_HSV RGB2HSV(COLOR_RGB& rgb);
     static COLOR_RGB HSV2RGB(COLOR_HSV& hsv);
 private:

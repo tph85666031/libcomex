@@ -26,7 +26,7 @@ CMUnitTest test_cases_comex_lib[] =
 	cmocka_unit_test(comex_podofo_unit_test_suit),
 	cmocka_unit_test(comex_cairo_watermark_unit_test_suit)
 #else
-    cmocka_unit_test(comex_podofo_unit_test_suit)
+    cmocka_unit_test(comex_cairo_watermark_unit_test_suit)
 #endif
 };
 

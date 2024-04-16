@@ -1,4 +1,5 @@
 #include <cairo/cairo.h>
+#include <fontconfig/fontconfig.h>
 
 #define M_PI       3.14159265358979323846   // pi
 
@@ -185,7 +186,7 @@ WaterMark::WaterMark()
 #elif defined(__APPLE__)
     font_name = "Arial Unicode MS";
 #else
-    font_name = "serif";
+    font_name = detectFontNameFromLang();
 #endif
 }
 
@@ -201,6 +202,11 @@ int WaterMark::getType()
 double WaterMark::getFontSize()
 {
     return this->font_size;
+}
+
+std::string WaterMark::getFontName()
+{
+    return this->font_name;
 }
 
 unsigned int WaterMark::getColor()
@@ -268,6 +274,78 @@ double WaterMark::getDPI()
     return this->dpi;
 }
 
+std::string WaterMark::detectFontNameFromLang(const char* lang)
+{
+#if defined(_WIN32) || defined(_WIN64)
+    LOG_E("api not support");
+    return std::string();
+#else
+    std::string lang_str;
+    if(lang == NULL)
+    {
+        lang_str = com_user_get_language();
+    }
+    else
+    {
+        lang_str = lang;
+    }
+    com_string_replace(lang_str, "_", "-");
+    lang_str = lang_str.substr(0, lang_str.find("."));
+
+    FcInit();
+    //setenv("FONTCONFIG_PATH", "/etc/fonts", 0);//set fontconfig config file if necessary
+    std::string pattern_filter = com_string_format(":lang=%s", lang_str.c_str());
+    FcConfig* config = FcInitLoadConfigAndFonts();
+    if(config == NULL)
+    {
+        return std::string();
+    }
+    FcPattern* pat = FcNameParse((FcChar8*)pattern_filter.c_str());
+    if(pat == NULL)
+    {
+        FcConfigDestroy(config);
+        return std::string();
+    }
+    FcObjectSet* os = FcObjectSetBuild(FC_FAMILY, FC_STYLE, FC_LANG, FC_FILE, (char*) 0);
+    if(os == NULL)
+    {
+        FcPatternDestroy(pat);
+        FcConfigDestroy(config);
+        return std::string();
+    }
+    FcFontSet* fs = FcFontList(config, pat, os);
+    if(fs == NULL)
+    {
+        FcPatternDestroy(pat);
+        FcConfigDestroy(config);
+        FcObjectSetDestroy(os);
+        return std::string();
+    }
+    LOG_D("total matching fonts: %d,lang=%s", fs->nfont, lang_str.c_str());
+    std::string font_name;
+    for(int i = 0; i < fs->nfont; i++)
+    {
+        FcPattern* font = fs->fonts[i];
+        FcChar8* file = NULL;
+        FcChar8* style = NULL;
+        FcChar8* family = NULL;
+        if(FcPatternGetString(font, FC_FILE, 0, &file) == FcResultMatch
+                && FcPatternGetString(font, FC_STYLE, 0, &style) == FcResultMatch
+                && FcPatternGetString(font, FC_FAMILY, 0, &family) == FcResultMatch)
+        {
+            LOG_D("Filename: %s (family %s, style %s)", (char*)file, (char*)family, (char*)style);
+            font_name = (char*)family;
+            break;
+        }
+    }
+    FcPatternDestroy(pat);
+    FcConfigDestroy(config);
+    FcObjectSetDestroy(os);
+    FcFontSetDestroy(fs);
+    return font_name;
+#endif
+}
+
 WaterMark& WaterMark::setType(int type)
 {
     if(type == WATER_MARK_TYPE_TEXT
@@ -285,6 +363,15 @@ WaterMark& WaterMark::setFontSize(double size)
     if(size >= 0)
     {
         this->font_size = size;
+    }
+    return *this;
+}
+
+WaterMark& WaterMark::setFontName(const char* name)
+{
+    if(name != NULL)
+    {
+        this->font_name = name;
     }
     return *this;
 }
