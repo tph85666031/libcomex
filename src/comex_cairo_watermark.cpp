@@ -1,4 +1,8 @@
+#if defined(_WIN32) || defined(_WIN64)
+#include <cairo.h>
+#else
 #include <cairo/cairo.h>
+#endif
 #include <fontconfig/fontconfig.h>
 
 #define M_PI       3.14159265358979323846   // pi
@@ -363,13 +367,13 @@ WaterMark& WaterMark::setFontName(const char* name)
     return *this;
 }
 
-WaterMark& WaterMark::setColor(uint32_t color)
+WaterMark& WaterMark::setColor(uint32 color)
 {
     this->color = color;
     return *this;
 }
 
-WaterMark& WaterMark::setBackgroundColor(uint32_t color)
+WaterMark& WaterMark::setBackgroundColor(uint32 color)
 {
     this->color_background = color;
     return *this;
@@ -442,7 +446,7 @@ WaterMark& WaterMark::setText(const std::string& text)
     return *this;
 }
 
-WaterMark& WaterMark::setBinarize(unsigned char binarize)
+WaterMark& WaterMark::setBinarize(uint8 binarize)
 {
     this->binarize = binarize;
     return *this;
@@ -560,7 +564,7 @@ CPPBytes WaterMark::createWatermarkAsQRCode()
     {
         for(int x = 0; x < qr->width; x++)
         {
-            uint8_t bit = qr->data[y * qr->width + x];
+            uint8 bit = qr->data[y * qr->width + x];
             if(bit & 0x01)
             {
                 cairo_set_source_rgba(cr_block, R, G, B, alpha); /* 设置颜色 */
@@ -588,7 +592,7 @@ CPPBytes WaterMark::createWatermarkAsQRCode()
     //二值化
     if(getBinarize() > 0)
     {
-        uint8_t* data = cairo_image_surface_get_data(surface_block);
+        uint8* data = cairo_image_surface_get_data(surface_block);
         int stride = cairo_image_surface_get_stride(surface_block);
         for(int y = 0; y < block_height; y++)
         {
@@ -661,7 +665,7 @@ CPPBytes WaterMark::createWatermarkAsText()
     //二值化
     if(getBinarize() > 0)
     {
-        uint8_t* data = cairo_image_surface_get_data(surface_block);
+        uint8* data = cairo_image_surface_get_data(surface_block);
         int stride = cairo_image_surface_get_stride(surface_block);
         for(int y = 0; y < block_height; y++)
         {
@@ -854,7 +858,7 @@ CPPBytes WaterMark::createWatermarkAsDot()
     //二值化
     if(getBinarize() > 0)
     {
-        uint8_t* data = cairo_image_surface_get_data(surface_block);
+        uint8* data = cairo_image_surface_get_data(surface_block);
         int stride = cairo_image_surface_get_stride(surface_block);
         for(int y = 0; y < block_height; y++)
         {
@@ -937,7 +941,7 @@ int WaterMark::GetPNGAlphaValueMax(const char* file)
         return -1;
     }
     cairo_surface_t* surface = cairo_image_surface_create_from_png(file);
-    uint8_t* data = cairo_image_surface_get_data(surface);
+    uint8* data = cairo_image_surface_get_data(surface);
     int width = cairo_image_surface_get_width(surface);
     int height = cairo_image_surface_get_height(surface);
     int stride = cairo_image_surface_get_stride(surface);
@@ -953,7 +957,7 @@ int WaterMark::GetPNGAlphaValueMax(const char* file)
     {
         for(int x = 0; x < stride; x = x + 4)
         {
-            uint8_t alpha = data[y * stride + x + 3];
+            uint8 alpha = data[y * stride + x + 3];
             if(value < alpha)
             {
                 value = alpha;
@@ -976,7 +980,7 @@ bool WaterMark::SetPNGAlphaValue(const char* file_to, const char* file_from, int
     value = value < 0 ? 0 : value;
     value = value > 255 ? 255 : value;
     cairo_surface_t* surface = cairo_image_surface_create_from_png(file_from);
-    uint8_t* data = cairo_image_surface_get_data(surface);
+    uint8* data = cairo_image_surface_get_data(surface);
     int width = cairo_image_surface_get_width(surface);
     int height = cairo_image_surface_get_height(surface);
     int stride = cairo_image_surface_get_stride(surface);
@@ -991,7 +995,7 @@ bool WaterMark::SetPNGAlphaValue(const char* file_to, const char* file_from, int
     {
         for(int x = 0; x < stride; x = x + 4)
         {
-            uint8_t alpha = data[y * stride + x + 3];
+            uint8 alpha = data[y * stride + x + 3];
             if(alpha >= threshold_begin && alpha <= threshold_end)
             {
                 data[y * stride + x + 3] = value;
@@ -1020,7 +1024,7 @@ bool WaterMark::SetPNGBrighValue(const char* file_to, const char* file_from, dou
         brightness = 1;
     }
     cairo_surface_t* surface = cairo_image_surface_create_from_png(file_from);
-    uint8_t* data = cairo_image_surface_get_data(surface);
+    uint8* data = cairo_image_surface_get_data(surface);
     int width = cairo_image_surface_get_width(surface);
     int height = cairo_image_surface_get_height(surface);
     int stride = cairo_image_surface_get_stride(surface);
