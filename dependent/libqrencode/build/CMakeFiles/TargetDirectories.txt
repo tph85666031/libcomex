@@ -1,8 +1,0 @@
-/data/libcomex/dependent/libqrencode/build/CMakeFiles/qrencode.dir
-/data/libcomex/dependent/libqrencode/build/CMakeFiles/qrenc.dir
-/data/libcomex/dependent/libqrencode/build/CMakeFiles/edit_cache.dir
-/data/libcomex/dependent/libqrencode/build/CMakeFiles/rebuild_cache.dir
-/data/libcomex/dependent/libqrencode/build/CMakeFiles/list_install_components.dir
-/data/libcomex/dependent/libqrencode/build/CMakeFiles/install.dir
-/data/libcomex/dependent/libqrencode/build/CMakeFiles/install/local.dir
-/data/libcomex/dependent/libqrencode/build/CMakeFiles/install/strip.dir

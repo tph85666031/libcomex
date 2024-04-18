@@ -60,9 +60,10 @@ public:
 class COM_EXPORT OpensslHMAC
 {
 public:
-    OpensslHMAC(const char* type);
+    OpensslHMAC();
     virtual ~OpensslHMAC();
 
+    bool setType(const char* type);
     bool setKey(const char* key);
     bool setKey(const uint8* key, int key_size);
     bool append(const void* data, int data_size);
@@ -70,9 +71,10 @@ public:
 public:
     static CPPBytes Digest(const char* type, const void* data, int data_size, const void* key = NULL, int key_size = 0);
 private:
-    std::vector<uint8> key;
+    CPPBytes key;
+    std::string type;
+    void* mac = NULL;
     void* ctx = NULL;
-    const void* digest = NULL;
 };
 
 class COM_EXPORT OpensslCrypto
@@ -101,7 +103,7 @@ public:
     CPPBytes encrypt(const uint8* data, int data_size);
     CPPBytes decrypt(const uint8* data, int data_size);
 
-    bool encryptFile(const char* file_src, const char* file_dst, bool attach_tag= false);
+    bool encryptFile(const char* file_src, const char* file_dst, bool attach_tag = false);
     bool decryptFile(const char* file_src, const char* file_dst);
 
     bool encryptBegin();
@@ -122,7 +124,7 @@ protected:
     CPPBytes iv;
     CPPBytes tag;
     uint8 buf[4096];
-    int block_size=0;
+    int block_size = 0;
 };
 
 /*
@@ -241,7 +243,7 @@ public:
     void setPaddingX931();
     CPPBytes encryptWithPublicKey(uint8* data, int data_size);
     CPPBytes decryptWithPrivateKey(uint8* data, int data_size);
-    CPPBytes encryptWithPrivaeKey(uint8* data, int data_size);
+    CPPBytes encryptWithPrivateKey(uint8* data, int data_size);
     CPPBytes decryptWithPublicKey(uint8* data, int data_size);
     void cleanPublicKey();
     void cleanPrivateKey();
@@ -250,8 +252,8 @@ public:
 private:
     std::string file_public_key;
     std::string file_private_key;
-    void* rsa_pub;
-    void* rsa_priv;
+    void* key_pub;
+    void* key_pri;
     int padding_mode;
 };
 

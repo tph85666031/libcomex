@@ -9,6 +9,10 @@
 #include <openssl/evp.h>
 #include <openssl/pkcs12.h>
 #include <openssl/x509v3.h>
+#include <openssl/evp.h>
+#include <openssl/params.h>
+#include <openssl/decoder.h>
+#include <openssl/provider.h>
 
 #include "comex_openssl.h"
 
@@ -26,6 +30,8 @@ static int openssl_password_cb(char* buf, int size, int rwflag, void* userdata)
 
 OpensslHash::OpensslHash(const char* type)
 {
+    OSSL_PROVIDER_try_load(NULL, "legacy", 1);
+    //OSSL_PROVIDER_try_load(NULL, "default", 1);
     ctx = EVP_MD_CTX_create();
     if(ctx == NULL)
     {
@@ -102,41 +108,38 @@ CPPBytes OpensslHash::Digest(const char* type, const void* data, int data_size)
     return CPPBytes(buf, size_out);
 }
 
-OpensslHMAC::OpensslHMAC(const char* type)
+OpensslHMAC::OpensslHMAC()
 {
-    ctx = HMAC_CTX_new();
-    if(ctx == NULL)
-    {
-        LOG_E("failed to create ctx");
-        return;
-    }
-
     OpenSSL_add_all_digests();
-    digest = EVP_get_digestbyname(type);
-    if(digest == NULL)
-    {
-        LOG_E("not support:%s", type);
-        return;
-    }
-
-    if(HMAC_Init_ex((HMAC_CTX*)ctx, key.empty() ? NULL : key.data(), (int)key.size(), (const EVP_MD*)digest, NULL) != 1)
-    {
-        LOG_E("failed to int digest");
-    }
 }
 
 OpensslHMAC::~OpensslHMAC()
 {
     if(ctx != NULL)
     {
-        HMAC_CTX_free((HMAC_CTX*)ctx);
+        EVP_MAC_CTX_free((EVP_MAC_CTX*)ctx);
         ctx = NULL;
     }
+    if(mac != NULL)
+    {
+        EVP_MAC_free((EVP_MAC*)mac);
+        mac = NULL;
+    }
+}
+
+bool OpensslHMAC::setType(const char* type)
+{
+    if(type == NULL)
+    {
+        return false;
+    }
+    this->type = type;
+    return true;
 }
 
 bool OpensslHMAC::setKey(const char* key)
 {
-    return setKey((const uint8*)key, com_string_size(key));
+    return setKey((const uint8*)key, com_string_len(key));
 }
 
 bool OpensslHMAC::setKey(const uint8* key, int key_size)
@@ -145,21 +148,41 @@ bool OpensslHMAC::setKey(const uint8* key, int key_size)
     {
         return false;
     }
-    this->key.clear();
-    for(int i = 0; i < key_size; i++)
-    {
-        this->key.push_back(key[i]);
-    }
+    this->key.append(key, key_size);
     return true;
 }
 
 bool OpensslHMAC::append(const void* data, int data_size)
 {
-    if(ctx == NULL || digest == NULL || data == NULL || data_size <= 0)
+    if(data == NULL || data_size <= 0)
     {
         return false;
     }
-    if(HMAC_Update((HMAC_CTX*)ctx, (const uint8*)data, data_size) != 1)
+    if(ctx == NULL)
+    {
+        mac = EVP_MAC_fetch(NULL, "HMAC", NULL);
+        if(mac == NULL)
+        {
+            LOG_I("failed to get hamc");
+            return false;
+        }
+        ctx = EVP_MAC_CTX_new((EVP_MAC*)mac);
+        if(ctx == NULL)
+        {
+            LOG_E("failed to create ctx");
+        }
+        OSSL_PARAM params[2] =
+        {
+            OSSL_PARAM_utf8_string("digest", (void*)type.c_str(), type.length()),
+            OSSL_PARAM_END
+        };
+        if(EVP_MAC_init((EVP_MAC_CTX*)ctx, key.getData(), key.getDataSize(), params) != 1)
+        {
+            LOG_E("failed to int hamc");
+            return false;
+        }
+    }
+    if(EVP_MAC_update((EVP_MAC_CTX*)ctx, (const uint8*)data, data_size) != 1)
     {
         LOG_E("failed to update");
         return false;
@@ -169,42 +192,58 @@ bool OpensslHMAC::append(const void* data, int data_size)
 
 CPPBytes OpensslHMAC::finish()
 {
-    if(ctx == NULL || digest == NULL)
+    if(ctx == NULL)
     {
         return CPPBytes();
     }
-    unsigned int size_out = 0;
+    size_t size_out = 0;
     uint8 buf[EVP_MAX_MD_SIZE];
     memset(buf, 0, sizeof(buf));
-    if(HMAC_Final((HMAC_CTX*)ctx, buf, &size_out) != 1)
+    if(EVP_MAC_final((EVP_MAC_CTX*)ctx, buf, &size_out, sizeof(buf)) != 1)
     {
         LOG_E("failed to finalize");
         return false;
     }
     CPPBytes hash = CPPBytes(buf, size_out);
-    if(digest != NULL && digest != NULL)
+    if(ctx != NULL)
     {
-        HMAC_Init_ex((HMAC_CTX*)ctx, key.empty() ? NULL : key.data(), (int)key.size(), (const EVP_MD*)digest, NULL);
+        EVP_MAC_CTX_free((EVP_MAC_CTX*)ctx);
+        ctx = NULL;
+    }
+    if(mac != NULL)
+    {
+        EVP_MAC_free((EVP_MAC*)mac);
+        mac = NULL;
     }
     return hash;
 }
 
 CPPBytes OpensslHMAC::Digest(const char* type, const void* data, int data_size, const void* key, int key_size)
 {
-    uint32 size_out = 0;
-    uint8 buf[EVP_MAX_MD_SIZE];
-    memset(buf, 0, sizeof(buf));
     if(key_size == 0)
     {
         key_size = com_string_len((const char*)key);
     }
+#if 0
+    OpensslHMAC hmac;
+    hmac.setType(type);
+    hmac.setKey((const uint8*)key, key_size);
+    hmac.append(data, data_size);
+    return hmac.finish();
+#else
+    uint32 size_out = 0;
+    uint8 buf[EVP_MAX_MD_SIZE * 2];
+    memset(buf, 0, sizeof(buf));
     OpenSSL_add_all_digests();
     HMAC(EVP_get_digestbyname(type), key, key_size, (const uint8*)data, data_size, buf, &size_out);
     return CPPBytes(buf, size_out);
+#endif
 }
 
 OpensslCrypto::OpensslCrypto()
 {
+    OSSL_PROVIDER_try_load(NULL, "legacy", 1);
+    //OSSL_PROVIDER_try_load(NULL, "default", 1);
     ctx = EVP_CIPHER_CTX_new();
     EVP_CIPHER_CTX_init((EVP_CIPHER_CTX*)ctx);
 }
@@ -490,7 +529,7 @@ bool OpensslCrypto::encryptBegin()
         return false;
     }
     block_size = EVP_CIPHER_block_size(cipher);
-    
+
     if(EVP_EncryptInit_ex((EVP_CIPHER_CTX*)ctx, cipher, NULL, NULL, NULL) != 1)
     {
         LOG_E("failed to int cipher:%s,error=%s", engine_mode.c_str(), ERR_error_string(ERR_get_error(), NULL));
@@ -1021,8 +1060,8 @@ const void* OpensslSM4::getCipher()
 OpensslRSA::OpensslRSA()
 {
     padding_mode = 1;
-    rsa_pub = NULL;
-    rsa_priv = NULL;
+    key_pub = NULL;
+    key_pri = NULL;
 }
 
 OpensslRSA::~OpensslRSA()
@@ -1051,13 +1090,20 @@ bool OpensslRSA::setPublicKey(const char* public_key_pem, const char* pwd)
         return false;
     }
     cleanPublicKey();
-    rsa_pub = PEM_read_bio_RSAPublicKey(b, NULL, pwd == NULL ? NULL : openssl_password_cb, (void*)pwd);
-    if(rsa_pub == NULL)
+    OSSL_DECODER_CTX* dctx = OSSL_DECODER_CTX_new_for_pkey((EVP_PKEY**)&key_pub,
+                             "PEM", NULL, "RSA", OSSL_KEYMGMT_SELECT_PUBLIC_KEY, NULL, NULL);
+    if(dctx == NULL)
     {
         BIO_free(b);
-        LOG_E("failed load key from bio");
+        LOG_E("failed to decode key");
         return false;
     }
+    if(pwd != NULL)
+    {
+        OSSL_DECODER_CTX_set_passphrase(dctx, (const uint8*)pwd, strlen(pwd));
+    }
+    OSSL_DECODER_from_bio(dctx, b);
+    OSSL_DECODER_CTX_free(dctx);
     BIO_free(b);
     return true;
 }
@@ -1082,13 +1128,16 @@ bool OpensslRSA::setPrivateKey(const char* private_key_pem, const char* pwd)
         return false;
     }
     cleanPrivateKey();
-    rsa_priv = PEM_read_bio_RSAPrivateKey(b, NULL, pwd == NULL ? NULL : openssl_password_cb, (void*)pwd);
-    if(rsa_priv == NULL)
+    OSSL_DECODER_CTX* dctx = OSSL_DECODER_CTX_new_for_pkey((EVP_PKEY**)&key_pri,
+                             "PEM", NULL, "RSA", OSSL_KEYMGMT_SELECT_PRIVATE_KEY, NULL, NULL);
+    if(dctx == NULL)
     {
-        BIO_free(b);
-        LOG_E("failed load key from bio");
+        LOG_E("failed to decode key");
         return false;
     }
+    OSSL_DECODER_CTX_set_passphrase(dctx, (const uint8*)pwd, strlen(pwd));
+    OSSL_DECODER_from_bio(dctx, b);
+    OSSL_DECODER_CTX_free(dctx);
     BIO_free(b);
     return true;
 }
@@ -1099,20 +1148,8 @@ bool OpensslRSA::setPublicKeyFromFile(const char* file_public_key, const char* p
     {
         return false;
     }
-    cleanPublicKey();
-    FILE* file = com_file_open(PATH_TO_LOCAL(file_public_key).c_str(), "r");
-    if(file == NULL)
-    {
-        return false;
-    }
-    rsa_pub = PEM_read_RSA_PUBKEY(file, NULL, openssl_password_cb, (void*)pwd);
-    com_file_close(file);
-    if(rsa_pub == NULL)
-    {
-        LOG_E("load public key failed");
-        return false;
-    }
-    return true;
+    CPPBytes content = com_file_readall(file_public_key);
+    return setPublicKey(content.toString().c_str(), pwd);
 }
 
 bool OpensslRSA::setPrivateKeyFromFile(const char* file_private_key, const char* pwd)
@@ -1121,20 +1158,8 @@ bool OpensslRSA::setPrivateKeyFromFile(const char* file_private_key, const char*
     {
         return false;
     }
-    cleanPrivateKey();
-    FILE* file = com_file_open(PATH_TO_LOCAL(file_private_key).c_str(), "r");
-    if(file == NULL)
-    {
-        return false;
-    }
-    rsa_priv = PEM_read_RSAPrivateKey(file, NULL, openssl_password_cb, (void*)pwd);
-    com_file_close(file);
-    if(rsa_priv == NULL)
-    {
-        LOG_E("load priv key failed");
-        return false;
-    }
-    return true;
+    CPPBytes content = com_file_readall(file_public_key);
+    return setPrivateKey(content.toString().c_str(), pwd);
 }
 
 void OpensslRSA::setPaddingPKCS1()
@@ -1164,181 +1189,192 @@ void OpensslRSA::setPaddingX931()
 
 CPPBytes OpensslRSA::encryptWithPublicKey(uint8* data, int data_size)
 {
-    CPPBytes bytes;
-    if(data == NULL || data_size <= 0 || rsa_pub == NULL)
+    if(data == NULL || data_size <= 0 || key_pub == NULL)
     {
-        LOG_E("arg incorrect");
+        LOG_E("arg incorrect,data=%p,data_size=%d,key_pub=%p", data, data_size, key_pub);
         return CPPBytes();
     }
-    int rsa_size = RSA_size((RSA*)rsa_pub);
-    if(rsa_size <= 0)
+    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new((EVP_PKEY*)key_pub, NULL);
+    EVP_PKEY_encrypt_init(ctx);
+    EVP_PKEY_CTX_set_rsa_padding(ctx, padding_mode);
+
+    size_t out_size = 0;
+    if(EVP_PKEY_encrypt(ctx, NULL, &out_size, data, data_size) != 1)
     {
+        EVP_PKEY_CTX_free(ctx);
+        LOG_E("failed to get encrypt data size");
         return CPPBytes();
     }
     std::vector<uint8> buf;
-    buf.reserve(rsa_size);
-    int ret = RSA_public_encrypt(data_size, data, buf.data(), (RSA*)rsa_pub, padding_mode);
-    if(ret <= 0)
+    buf.reserve(out_size);
+    int ret = EVP_PKEY_encrypt(ctx, buf.data(), &out_size, data, data_size);
+    EVP_PKEY_CTX_free(ctx);
+    if(ret != 1)
     {
         LOG_E("rsa public encrypt failed,ret=%d,err=0x%lX", ret, ERR_get_error());
         return CPPBytes();
     }
-    return CPPBytes(buf.data(), rsa_size);;
+    return CPPBytes(buf.data(), out_size);
 }
 
 CPPBytes OpensslRSA::decryptWithPrivateKey(uint8* data, int data_size)
 {
-    CPPBytes bytes;
-    if(data == NULL || data_size <= 0 || rsa_priv == NULL)
-    {
-        return bytes;
-    }
-    int rsa_size = RSA_size((RSA*)rsa_priv);
-    if(rsa_size <= 0)
+    if(data == NULL || data_size <= 0 || key_pri == NULL)
     {
         return CPPBytes();
     }
+    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new((EVP_PKEY*)key_pri, NULL);
+    EVP_PKEY_decrypt_init(ctx);
+    EVP_PKEY_CTX_set_rsa_padding(ctx, padding_mode);
+
+    size_t out_size = 0;
+    if(EVP_PKEY_decrypt(ctx, NULL, &out_size, data, data_size) != 1)
+    {
+        EVP_PKEY_CTX_free(ctx);
+        LOG_E("failed to get decrypt data size");
+        return CPPBytes();
+    }
     std::vector<uint8> buf;
-    buf.reserve(rsa_size);
-    int ret = RSA_private_decrypt(data_size, data, buf.data(), (RSA*)rsa_priv, padding_mode);
-    if(ret <= 0)
+    buf.reserve(out_size);
+    int ret = EVP_PKEY_decrypt(ctx, buf.data(), &out_size, data, data_size);
+    EVP_PKEY_CTX_free(ctx);
+    if(ret != 1)
     {
         LOG_E("rsa private decrypt failed,ret=%d,err=0x%lX", ret, ERR_get_error());
         return CPPBytes();
     }
-    return CPPBytes(buf.data(), rsa_size);
+    return CPPBytes(buf.data(), out_size);
 }
 
-CPPBytes OpensslRSA::encryptWithPrivaeKey(uint8* data, int data_size)
+CPPBytes OpensslRSA::encryptWithPrivateKey(uint8* data, int data_size)
 {
-    CPPBytes bytes;
-    if(data == NULL || data_size <= 0 || rsa_priv == NULL)
-    {
-        return bytes;
-    }
-    int rsa_size = RSA_size((RSA*)rsa_priv);
-    if(rsa_size <= 0)
+#if 0
+    if(data == NULL || data_size <= 0 || key_pri == NULL)
     {
         return CPPBytes();
     }
+    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new((EVP_PKEY*)key_pri, NULL);
+    EVP_PKEY_encrypt_init(ctx);
+    EVP_PKEY_CTX_set_rsa_padding(ctx, padding_mode);
+
+    size_t out_size = 0;
+    if(EVP_PKEY_encrypt(ctx, NULL, &out_size, data, data_size) != 1)
+    {
+        EVP_PKEY_CTX_free(ctx);
+        LOG_E("failed to get encrypt data size");
+        return CPPBytes();
+    }
+    LOG_I("encrypt data size=%zu", out_size);
     std::vector<uint8> buf;
-    buf.reserve(rsa_size);
-    int ret = RSA_private_encrypt(data_size, data, buf.data(), (RSA*)rsa_priv, padding_mode);
-    if(ret <= 0)
+    buf.reserve(out_size);
+    int ret = EVP_PKEY_encrypt(ctx, buf.data(), &out_size, data, data_size);
+    EVP_PKEY_CTX_free(ctx);
+    if(ret != 1)
     {
-        LOG_E("rsa private encrypt failed,ret=%d,err=0x%lX", ret, ERR_get_error());
+        LOG_E("rsa public encrypt failed,ret=%d,err=0x%lX", ret, ERR_get_error());
         return CPPBytes();
     }
-    return CPPBytes(buf.data(), rsa_size);
+    return CPPBytes(buf.data(), out_size);
+#else
+    LOG_E("not support in openssl3");
+    return CPPBytes();
+#endif
 }
 
 CPPBytes OpensslRSA::decryptWithPublicKey(uint8* data, int data_size)
 {
-    CPPBytes bytes;
-    if(data == NULL || data_size <= 0 || rsa_pub == NULL)
-    {
-        return bytes;
-    }
-    int rsa_size = RSA_size((RSA*)rsa_pub);
-    if(rsa_size <= 0)
+#if 0
+    if(data == NULL || data_size <= 0 || key_pub == NULL)
     {
         return CPPBytes();
     }
+    EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new((EVP_PKEY*)key_pub, NULL);
+    EVP_PKEY_decrypt_init(ctx);
+    EVP_PKEY_CTX_set_rsa_padding(ctx, padding_mode);
+
+    size_t out_size = 0;
+    if(EVP_PKEY_decrypt(ctx, NULL, &out_size, data, data_size) != 1)
+    {
+        EVP_PKEY_CTX_free(ctx);
+        LOG_E("failed to get decrypt data size");
+        return CPPBytes();
+    }
+    LOG_I("decrypt data size=%zu", out_size);
     std::vector<uint8> buf;
-    buf.reserve(rsa_size);
-    int ret = RSA_public_decrypt(data_size, data, buf.data(), (RSA*)rsa_pub, padding_mode);
-    if(ret <= 0)
+    buf.reserve(out_size);
+    int ret = EVP_PKEY_decrypt(ctx, buf.data(), &out_size, data, data_size);
+    EVP_PKEY_CTX_free(ctx);
+    if(ret != 1)
     {
-        LOG_E("rsa public decrypt failed,ret=%d,err=0x%lX", ret, ERR_get_error());
+        LOG_E("rsa public decrypt failed,ret=%d,err=%s", ret, ERR_error_string(ERR_get_error(), NULL));
         return CPPBytes();
     }
-    return CPPBytes(buf.data(), rsa_size);
+    return CPPBytes(buf.data(), out_size);
+#else
+    LOG_E("not support in openssl3");
+    return CPPBytes();
+#endif
 }
 
 void OpensslRSA::cleanPublicKey()
 {
-    if(rsa_pub != NULL)
+    if(key_pub != NULL)
     {
-        RSA_free((RSA*)rsa_pub);
-        rsa_pub = NULL;
+        EVP_PKEY_free((EVP_PKEY*)key_pub);
+        key_pub = NULL;
     }
 }
 
 void OpensslRSA::cleanPrivateKey()
 {
-    if(rsa_priv != NULL)
+    if(key_pri != NULL)
     {
-        RSA_free((RSA*)rsa_priv);
-        rsa_priv = NULL;
+        EVP_PKEY_free((EVP_PKEY*)key_pri);
+        key_pri = NULL;
     }
 }
 
 bool OpensslRSA::GenerateKey(int key_bits, std::string& public_key, std::string& private_key, const char* pwd)
 {
-    RSA* rsa = RSA_new();
-    if(rsa == NULL)
+    BIO* b_pub = BIO_new(BIO_s_mem());
+    if(b_pub == NULL)
     {
         return false;
     }
-    BIGNUM* bn = BN_new();
-    if(bn == NULL)
+    BIO* b_pri = BIO_new(BIO_s_mem());
+    if(b_pri == NULL)
     {
-        RSA_free(rsa);
-        return false;
-    }
-    int ret = BN_set_word(bn, RSA_F4);
-    if(ret != 1)
-    {
-        BN_free(bn);
-        RSA_free(rsa);
-        return false;
-    }
-    ret = RSA_generate_key_ex(rsa, key_bits, bn, NULL);
-    if(ret != 1)
-    {
-        BN_free(bn);
-        RSA_free(rsa);
+        BIO_free_all(b_pub);
         return false;
     }
 
-    BIO* b1 = BIO_new(BIO_s_mem());
-    if(b1 == NULL)
+    EVP_PKEY* key = NULL;
+    EVP_PKEY_CTX* pctx = EVP_PKEY_CTX_new_from_name(NULL, "RSA", NULL);
+
+    EVP_PKEY_keygen_init(pctx);
+    EVP_PKEY_CTX_set_rsa_keygen_bits(pctx, key_bits);
+    EVP_PKEY_generate(pctx, &key);
+
+    PEM_write_bio_PUBKEY(b_pub, key);
+    PEM_write_bio_PrivateKey(b_pri, key, NULL, NULL, 0, pwd == NULL ? NULL : openssl_password_cb, (void*)pwd);
+
+    char* data_pri = NULL;
+    char* data_pub = NULL;
+    int size_pri = BIO_get_mem_data(b_pri, &data_pri);
+    int size_pub = BIO_get_mem_data(b_pub, &data_pub);
+    if(size_pub <= 0 || data_pub == NULL || size_pri <= 0 || data_pri == NULL)
     {
-        BN_free(bn);
-        RSA_free(rsa);
+        BIO_free_all(b_pub);
+        BIO_free_all(b_pri);
+        EVP_PKEY_CTX_free(pctx);
         return false;
     }
-    BIO* b2 = BIO_new(BIO_s_mem());
-    if(b1 == NULL)
-    {
-        BIO_free_all(b1);
-        BN_free(bn);
-        RSA_free(rsa);
-        return false;
-    }
-    PEM_write_bio_RSAPublicKey(b1, rsa);
-    PEM_write_bio_RSAPrivateKey(b2, rsa, NULL, NULL, 0, pwd == NULL ? NULL : openssl_password_cb, (void*)pwd);
+    private_key = std::string(data_pri, size_pri);
+    public_key = std::string(data_pub, size_pub);
 
-    char* pub_data = NULL;
-    char* pri_data = NULL;
-    int pub_size = BIO_get_mem_data(b1, &pub_data);
-    int pri_size = BIO_get_mem_data(b2, &pri_data);
-    if(pub_size <= 0 || pub_data == NULL || pri_size <= 0 || pri_data == NULL)
-    {
-        BIO_free_all(b1);
-        BIO_free_all(b2);
-        BN_free(bn);
-        RSA_free(rsa);
-        return false;
-    }
-
-    public_key = std::string(pub_data, pub_size);
-    private_key = std::string(pri_data, pri_size);
-
-    BIO_free_all(b1);
-    BIO_free_all(b2);
-    BN_free(bn);
-    RSA_free(rsa);
+    BIO_free_all(b_pub);
+    BIO_free_all(b_pri);
+    EVP_PKEY_CTX_free(pctx);
     return true;
 }
 
@@ -1505,8 +1541,6 @@ std::string OpensslCert::getSubject(const char* tag)
 bool OpensslCert::CreateCert(Message& params)
 {
     EVP_PKEY* key = NULL;
-    RSA* rsa = NULL;
-    BIGNUM* bn = NULL;
     X509* x509 = NULL;
     PKCS12* p12 = NULL;
     bool result = false;
@@ -1515,33 +1549,18 @@ bool OpensslCert::CreateCert(Message& params)
 
     do
     {
-        key = EVP_PKEY_new();
-        if(key == NULL)
-        {
-            LOG_E("failed");
-            break;
-        }
-        rsa = RSA_new();
-        if(rsa == NULL)
-        {
-            LOG_E("failed");
-            break;
-        }
-        bn = BN_new();
-        if(bn == NULL)
-        {
-            LOG_E("failed");
-            break;
-        }
-        BN_set_word(bn, RSA_F4);
-        RSA_generate_key_ex(rsa, params.getInt32("key_bits", 2048), bn, NULL);
-        EVP_PKEY_assign_RSA(key, rsa);
+        EVP_PKEY_CTX* pctx = EVP_PKEY_CTX_new_from_name(NULL, "RSA", NULL);
+
+        EVP_PKEY_keygen_init(pctx);
+        EVP_PKEY_CTX_set_rsa_keygen_bits(pctx, params.getInt32("key_bits", 2048));
+        EVP_PKEY_generate(pctx, &key);
+        EVP_PKEY_CTX_free(pctx);
 
         if(params.isKeyExist("file_private_key"))
         {
             std::string pwd = params.getString("password_private_key");
             std::string file =  params.getString("file_private_key");
-            FILE* f = com_file_open(file.c_str(), "w+");
+            FILE* f = com_file_open(file.c_str(), "wb+");
             if(pwd.empty())
             {
                 PEM_write_PrivateKey(f, key, NULL, NULL, 0, NULL, NULL);
@@ -1647,7 +1666,7 @@ bool OpensslCert::CreateCert(Message& params)
         if(params.isKeyExist("file_crt"))
         {
             std::string file = params.getString("file_crt");
-            FILE* f = com_file_open(file.c_str(), "w+");
+            FILE* f = com_file_open(file.c_str(), "wb+");
             if(f == NULL)
             {
                 LOG_E("failed:%s", file.c_str());
@@ -1674,7 +1693,7 @@ bool OpensslCert::CreateCert(Message& params)
         if(params.isKeyExist("file_p12"))
         {
             std::string file = params.getString("file_p12");
-            FILE* f = com_file_open(file.c_str(), "w+");
+            FILE* f = com_file_open(file.c_str(), "wb+");
             if(f == NULL)
             {
                 LOG_E("failed:%s", file.c_str());
@@ -1707,11 +1726,6 @@ bool OpensslCert::CreateCert(Message& params)
     {
         PKCS12_free(p12);
         p12 = NULL;
-    }
-    if(bn != NULL)
-    {
-        BN_free(bn);
-        bn = NULL;
     }
     return result;
 }

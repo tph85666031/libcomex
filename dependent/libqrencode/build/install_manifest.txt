@@ -1,5 +1,0 @@
-/data/libcomex/dependent/out/share/man/man1/qrencode.1
-/data/libcomex/dependent/out/lib/pkgconfig/libqrencode.pc
-/data/libcomex/dependent/out/include/qrencode.h
-/data/libcomex/dependent/out/lib/libqrencode.a
-/data/libcomex/dependent/out/bin/qrencode

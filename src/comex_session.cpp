@@ -516,7 +516,7 @@ std::string CPPSessionManager::getSessionIDByPID(int64 pid)
         return my_session_id;
     }
 
-    return com_file_readall("/proc/%lld/sessionid").toString();
+    return com_file_readall(com_string_format("/proc/%lld/sessionid", pid).c_str()).toString();
 }
 
 void CPPSessionManager::ThreadListener(CPPSessionManager* ctx)

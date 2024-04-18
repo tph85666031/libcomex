@@ -14,6 +14,7 @@ show_message()
 }
 
 BUILD_TYPE="Release"
+PROJECT_CLEAN="false"
 OS_TYPE=`uname`
 BUILD_ARCH=`uname -m`
 
@@ -38,8 +39,10 @@ else
     BUILD_ARCH="x64"
 fi
 
-while getopts 'dj:w' OPT; do
+while getopts 'cdj:w' OPT; do
 	case $OPT in
+	c)
+		PROJECT_CLEAN="true";;
 	d)
 		BUILD_TYPE="Debug";;
     j)
@@ -85,8 +88,16 @@ rm -rf ${DIR_ROOT}/fltk/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/curl/tmp 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libwebsockets/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/mosquitto/build 2>&1 > /dev/null
-
 rm -rf ${DIR_ROOT}/out 2>&1 > /dev/null
+
+#清理环境
+if [ x"${PROJECT_CLEAN}" == x"true" ];then
+    rm -rf ${DIR_ROOT}/out 2>&1 > /dev/null
+	show_message "clean done"
+	echo ""
+	exit 0
+fi
+
 mkdir -pv ${DIR_ROOT}/out 2>&1 > /dev/null
 
 #编译
@@ -103,7 +114,7 @@ echo "build for ${OS_TYPE}_${BUILD_ARCH}"
 #编译openssl
 mkdir ${DIR_ROOT}/openssl/build 2>&1 > /dev/null
 pushd ${DIR_ROOT}/openssl/build
-../config no-asm no-tests no-shared --prefix=${DIR_ROOT}/out
+../config no-asm no-tests no-shared no-module enable-weak-ssl-ciphers --libdir=lib --prefix=${DIR_ROOT}/out
 make -j${JOBS} && make install_sw
 if [ $? != 0 ]; then
     show_message "failed to make openssl"

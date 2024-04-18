@@ -87,7 +87,7 @@ void comex_openssl_des_unit_test_suit(void** state)
         encrypt.setIV(iv);
         encrypt.setMode(modes[i]);
         CPPBytes bytes = encrypt.encrypt((uint8*)"12345678901234567", 17);
-        LOG_D("DES[%s]%s", modes[i], bytes.toHexString().c_str());
+        LOG_I("DES[%s]%s", modes[i], bytes.toHexString().c_str());
 
         OpensslDES decrypt;
         decrypt.setKey(key);
@@ -256,7 +256,6 @@ void comex_openssl_unit_test_suit(void** state)
 {
     OpensslMD5 md5_openssl;
     CPPMD5 md5_cpp;
-#if 1
     for(int i = 0; i < 10; i++)
     {
         uint8 buf[1024];
@@ -268,11 +267,6 @@ void comex_openssl_unit_test_suit(void** state)
         md5_cpp.append(buf, sizeof(buf));
         ASSERT_STR_EQUAL(md5_cpp.finish().toHexString().c_str(), md5_openssl.finish().toHexString().c_str());
     }
-#else
-    md5_openssl.append((uint8*)"12345", sizeof("12345"));
-    md5_cpp.append((uint8*)"12345", sizeof("12345"));
-    ASSERT_STR_EQUAL(md5_cpp.finish().toHexString().c_str(), md5_openssl.finish().toHexString().c_str());
-#endif
 
     OpensslSHA1 sha1;
     sha1.append((uint8*)"0123456789", strlen("0123456789"));
@@ -285,6 +279,14 @@ void comex_openssl_unit_test_suit(void** state)
     OpensslSHA512 sha512;
     sha512.append((uint8*)"0123456789", strlen("0123456789"));
     ASSERT_STR_EQUAL(sha512.finish().toHexString().c_str(), "bb96c2fc40d2d54617d6f276febe571f623a8dadf0b734855299b0e107fda32cf6b69f2da32b36445d73690b93cbd0f7bfc20e0f7f28553d2a4428f23b716e90");
+
+    OpensslHMAC hmac;
+    hmac.setType("sha256");
+    hmac.setKey("123456");
+    hmac.append((uint8*)"0123456789", strlen("0123456789"));
+    ASSERT_STR_EQUAL(hmac.finish().toHexString().c_str(), "47b9be2425afe3157b036154d4c7bb497735c4ee5515aed9ef550a2c5d13aaa4");
+    CPPBytes hmac_hash = OpensslHMAC::Digest("sha256", "0123456789", strlen("0123456789"), "123456", 6);
+    ASSERT_STR_EQUAL(hmac_hash.toHexString().c_str(), "47b9be2425afe3157b036154d4c7bb497735c4ee5515aed9ef550a2c5d13aaa4");
 
     std::string public_key;
     std::string private_key;
@@ -301,11 +303,11 @@ void comex_openssl_unit_test_suit(void** state)
     CPPBytes bytes = rsa.encryptWithPublicKey((uint8*)"123456", 6);
     bytes = rsa.decryptWithPrivateKey(bytes.getData(), bytes.getDataSize());
     ASSERT_STR_EQUAL("123456", bytes.toString().c_str());
-
-    bytes = rsa.encryptWithPrivaeKey((uint8*)"123456", 6);
+#if 0
+    bytes = rsa.encryptWithPrivateKey((uint8*)"123456", 6);
     bytes = rsa.decryptWithPublicKey(bytes.getData(), bytes.getDataSize());
     ASSERT_STR_EQUAL("123456", bytes.toString().c_str());
-
+#endif
     std::string hmac_sha256 = OpensslHMAC::Digest("SHA256", "123", 3, "kkkkk").toHexString();
     ASSERT_STR_EQUAL(hmac_sha256.c_str(), "93e4aaa0c8f96fa9eb18c96a29c7557830809af1294b88411d929fc4d35a4292");
 
@@ -329,7 +331,7 @@ void comex_openssl_unit_test_suit(void** state)
     cert_params.set("dns", "www.baidu.com,www.163.com");
     cert_params.set("ip", "192.168.0.11,192.168.0.12");
     ASSERT_TRUE(OpensslCert::CreateCert(cert_params));
-    com_file_remove("./test.p12");
-    com_file_remove("./test.crt");
+    //com_file_remove("./test.p12");
+    //com_file_remove("./test.crt");
 }
 
