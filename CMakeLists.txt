@@ -110,6 +110,7 @@ SET(PROJECT_LIB
 	${PROJECT_SOURCE_DIR}/out/lib/libunistring.a
 	${PROJECT_SOURCE_DIR}/out/lib/libjpeg.a
 	${PROJECT_SOURCE_DIR}/out/lib/libpng.a
+	${PROJECT_SOURCE_DIR}/out/lib/libmagic.a
 	${PROJECT_SOURCE_DIR}/out/lib/liblzma.a
 	${PROJECT_SOURCE_DIR}/out/lib/libz.a
 	${PROJECT_SOURCE_DIR}/out/lib/libqrencode.a

@@ -64,6 +64,7 @@ rm -rf ${DIR_ROOT}/bzip2/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/zlib/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libtar/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libzip/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/file/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libjpeg/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libpng/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libqrencode/build 2>&1 > /dev/null

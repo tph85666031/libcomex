@@ -718,6 +718,7 @@ ArchiveReader::ArchiveReader(const char* file, const char* pwd)
     }
     content_size = 0;
     content = NULL;
+    ctx = NULL;
 }
 
 ArchiveReader::ArchiveReader(const uint8* content, int content_size, const char* pwd)
@@ -731,6 +732,7 @@ ArchiveReader::ArchiveReader(const uint8* content, int content_size, const char*
     {
         this->pwd = pwd;
     }
+    ctx = NULL;
 }
 
 ArchiveReader::~ArchiveReader()
@@ -740,6 +742,10 @@ ArchiveReader::~ArchiveReader()
 
 bool ArchiveReader::open()
 {
+    if(ctx != NULL)
+    {
+        close();
+    }
     ctx = archive_read_new();
     if(ctx == NULL)
     {
@@ -776,7 +782,10 @@ void ArchiveReader::close()
 {
     if(ctx != NULL)
     {
-        archive_read_free((struct archive*)ctx);
+        if(archive_read_free((struct archive*)ctx) != ARCHIVE_OK)
+        {
+            LOG_E("failed to close archive");
+        }
         ctx = NULL;
     }
 }
