@@ -220,6 +220,18 @@ if [ $? != 0 ]; then
 fi
 popd
 
+#编译libmagic
+mkdir ${DIR_ROOT}/file/build 2>&1 > /dev/null
+pushd ${DIR_ROOT}/file/build
+CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib" ../configure --enable-bzlib --with-pic --enable-static=yeo --enable-shared=no --prefix=${DIR_ROOT}/out
+make -j${JOBS} && make install
+if [ $? != 0 ]; then
+    show_message "failed to make libmagic"
+    popd
+    exit -1
+fi
+popd
+
 #编译libjpeg
 mkdir ${DIR_ROOT}/libjpeg/build 2>&1 > /dev/null
 pushd ${DIR_ROOT}/libjpeg/build
