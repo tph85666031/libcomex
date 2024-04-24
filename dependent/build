@@ -195,6 +195,7 @@ if [ $? != 0 ]; then
 fi
 popd
 rm -f ${DIR_ROOT}/out/lib/libz.so*
+rm -f ${DIR_ROOT}/out/lib/libz.*dylib
 
 #编译libtar
 mkdir ${DIR_ROOT}/libtar/build 2>&1 > /dev/null
@@ -224,7 +225,7 @@ popd
 #编译libmagic
 mkdir ${DIR_ROOT}/file/build 2>&1 > /dev/null
 pushd ${DIR_ROOT}/file/build
-CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib" ../configure --enable-bzlib --with-pic --enable-static=yeo --enable-shared=no --prefix=${DIR_ROOT}/out
+CXXFLAGS="-I${DIR_ROOT}/out/include" CFLAGS="-I${DIR_ROOT}/out/include" LDFLAGS="-L${DIR_ROOT}/out/lib" ../configure --enable-bzlib --with-pic --enable-static=yes --enable-shared=no --prefix=${DIR_ROOT}/out
 make -j${JOBS} && make install
 if [ $? != 0 ]; then
     show_message "failed to make libmagic"
@@ -507,7 +508,7 @@ rm -f ${DIR_ROOT}/out/lib/libmosquitto.so*
 
 #打包
 pushd ${DIR_ROOT}/out
-tar -Jcvf ../dependent_${OS_TYPE}_${BUILD_ARCH}.tar.xz ./*
+tar -Jcvf ../${OS_TYPE}_${BUILD_ARCH}.tar.xz ./*
 popd
 
 rm -rf ${DIR_ROOT}/out > /dev/null 2>&1
