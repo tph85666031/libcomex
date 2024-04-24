@@ -1,8 +1,4 @@
-#if defined(_WIN32) || defined(_WIN64)
-#include <cairo.h>
-#else
 #include <cairo/cairo.h>
-#endif
 #include <fontconfig/fontconfig.h>
 
 #define M_PI       3.14159265358979323846   // pi

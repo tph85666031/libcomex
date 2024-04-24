@@ -122,7 +122,6 @@ ELSE()
 ADD_COMPILE_OPTIONS( /W3 /wd4819 /wd4251 /wd4200 /wd4996)
 SET(PROJECT_LIB
 	${PROJECT_LIB}
-    msvcrt.lib
     com.lib
     archive.lib
     bz2.lib
@@ -159,6 +158,10 @@ SET(PROJECT_LIB
 	tiff.lib
 	qrencode.lib
 	cairo.lib
+	tre.lib
+	magic.lib
+	msvcrt.lib
+	shlwapi.lib
 	Crypt32.lib
 )
 ENDIF()
