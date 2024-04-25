@@ -3,6 +3,9 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 PROJECT("comex")
+SET(COMEX_MAJOR_VERSION 1)
+SET(COMEX_MINOR_VERSION 1)
+SET(COMEX_PATCH_VERSION 8)
 
 MESSAGE("CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
 MESSAGE("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -75,53 +78,53 @@ LINK_DIRECTORIES(
 #依赖库,无需修改,静态库的依赖顺序为依赖的库写在后面
 IF (UNIX OR APPLE)
 SET(PROJECT_LIB
-	${PROJECT_LIB}
-	com
-	pthread
+    ${PROJECT_LIB}
+    com
+    pthread
     dl
     m
-	-Wl,--start-group
-    ${PROJECT_SOURCE_DIR}/out/lib/libmosquitto.a
-	${PROJECT_SOURCE_DIR}/out/lib/libwebsockets.a
-	${PROJECT_SOURCE_DIR}/out/lib/libcurl.a
-	${PROJECT_SOURCE_DIR}/out/lib/libpodofo.a
-	${PROJECT_SOURCE_DIR}/out/lib/libpodofo_private.a
-	${PROJECT_SOURCE_DIR}/out/lib/libcairo.a
-	${PROJECT_SOURCE_DIR}/out/lib/libfontconfig.a
-	${PROJECT_SOURCE_DIR}/out/lib/libfreetype.a
-	${PROJECT_SOURCE_DIR}/out/lib/libarchive.a
-	${PROJECT_SOURCE_DIR}/out/lib/libtiff.a
-	${PROJECT_SOURCE_DIR}/out/lib/libxml2.a
-    ${PROJECT_SOURCE_DIR}/out/lib/libbz2.a
-    ${PROJECT_SOURCE_DIR}/out/lib/libtar.a
-    ${PROJECT_SOURCE_DIR}/out/lib/libzip.a
-    ${PROJECT_SOURCE_DIR}/out/lib/libsmb2.a
-    ${PROJECT_SOURCE_DIR}/out/lib/libnfs.a
-	${PROJECT_SOURCE_DIR}/out/lib/libssl.a
-    ${PROJECT_SOURCE_DIR}/out/lib/libcrypto.a
-	${PROJECT_SOURCE_DIR}/out/lib/libiconv.a
-	${PROJECT_SOURCE_DIR}/out/lib/libexpat.a
-    ${PROJECT_SOURCE_DIR}/out/lib/libjbig.a
-	${PROJECT_SOURCE_DIR}/out/lib/libidn.a
-	${PROJECT_SOURCE_DIR}/out/lib/libharfbuzz.a
-    ${PROJECT_SOURCE_DIR}/out/lib/libbrotlidec.a 
-    ${PROJECT_SOURCE_DIR}/out/lib/libbrotlienc.a
-	${PROJECT_SOURCE_DIR}/out/lib/libbrotlicommon.a
-	${PROJECT_SOURCE_DIR}/out/lib/libunistring.a
-	${PROJECT_SOURCE_DIR}/out/lib/libjpeg.a
-	${PROJECT_SOURCE_DIR}/out/lib/libpng.a
-	${PROJECT_SOURCE_DIR}/out/lib/libmagic.a
-	${PROJECT_SOURCE_DIR}/out/lib/liblzma.a
-	${PROJECT_SOURCE_DIR}/out/lib/libz.a
-	${PROJECT_SOURCE_DIR}/out/lib/libqrencode.a
-	${PROJECT_SOURCE_DIR}/out/lib/libpixman-1.a
-	libstdc++fs.a
-	-Wl,--end-group
+    -Wl,--start-group
+    libmosquitto.a
+    libwebsockets.a
+    libcurl.a
+    libpodofo.a
+    libpodofo_private.a
+    libcairo.a
+    libfontconfig.a
+    libfreetype.a
+    libarchive.a
+    libtiff.a
+    libxml2.a
+    libbz2.a
+    libtar.a
+    libzip.a
+    libsmb2.a
+    libnfs.a
+    libssl.a
+    libcrypto.a
+    libiconv.a
+    libexpat.a
+    libjbig.a
+    libidn.a
+    libharfbuzz.a
+    libbrotlidec.a
+    libbrotlienc.a
+    libbrotlicommon.a
+    libunistring.a
+    libjpeg.a
+    libpng.a
+    libmagic.a
+    liblzma.a
+    libz.a
+    libqrencode.a
+    libpixman-1.a
+    libstdc++fs.a
+    -Wl,--end-group
 )
 ELSE()
 ADD_COMPILE_OPTIONS( /W3 /wd4819 /wd4251 /wd4200 /wd4996)
 SET(PROJECT_LIB
-	${PROJECT_LIB}
+    ${PROJECT_LIB}
     com.lib
     archive.lib
     bz2.lib
@@ -143,26 +146,26 @@ SET(PROJECT_LIB
     zip.lib
     zlib.lib
     zstd.lib
-	libexpatMD.lib
-	pixman-1.lib
-	brotlicommon.lib
-	brotlidec.lib
-	brotlienc.lib
-	fontconfig.lib
-	freetype.lib
-	jpeg.lib
-	turbojpeg.lib
-	libpng16.lib
-	podofo.lib
-	podofo_private.lib
-	tiff.lib
-	qrencode.lib
-	cairo.lib
-	tre.lib
-	magic.lib
-	msvcrt.lib
-	shlwapi.lib
-	Crypt32.lib
+    libexpatMD.lib
+    pixman-1.lib
+    brotlicommon.lib
+    brotlidec.lib
+    brotlienc.lib
+    fontconfig.lib
+    freetype.lib
+    jpeg.lib
+    turbojpeg.lib
+    libpng16.lib
+    podofo.lib
+    podofo_private.lib
+    tiff.lib
+    qrencode.lib
+    cairo.lib
+    tre.lib
+    magic.lib
+    msvcrt.lib
+    shlwapi.lib
+    Crypt32.lib
 )
 ENDIF()
 
@@ -180,7 +183,26 @@ ENDIF()
 
 SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-SET(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/../../libcom/out:$ORIGIN/lib")
+IF ("${BUILD_TYPE}" STREQUAL "Debug")
+  SET(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../../libcom/out")
+  SET(CPACK_COMPONENTS_ALL "dbg")
+ELSE()
+  SET(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib")
+  SET(CPACK_COMPONENTS_ALL "rel")
+ENDIF()
+
+SET(CPACK_GENERATOR TGZ)
+SET(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/out/export)
+SET(CMAKE_INSTALL_CONFIG_NAME ${CMAKE_BUILD_TYPE})
+SET(CPACK_PACKAGE_VERSION ${COMEX_MAJOR_VERSION}.${COMEX_MINOR_VERSION}.${COMEX_PATCH_VERSION})
+SET(CPACK_PACKAGE_VERSION_MAJOR ${COMEX_MAJOR_VERSION})
+SET(CPACK_PACKAGE_VERSION_MINOR ${COMEX_MINOR_VERSION})
+SET(CPACK_PACKAGE_VERSION_PATCH ${COMEX_PATCH_VERSION})
+SET(CPACK_PACKAGE_FILE_NAME ${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_PROCESSOR})
+SET(CPACK_PACKAGE_DIRECTORY ${PROJECT_SOURCE_DIR}/out)
+SET(CPACK_ARCHIVE_COMPONENT_INSTALL ON)
+SET(CPACK_ARCHIVE_THREADS 0)
+INCLUDE(CPack)
 
 #无需改动
 IF (MSVC)
@@ -198,6 +220,7 @@ IF ("${UNIT_TEST}" STREQUAL "true")
   IF(MSVC)
     SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT /INCREMENTAL:NO /LTCG")
   ENDIF()
+  INSTALL(TARGETS ${PROJECT_NAME} DESTINATION bin COMPONENT dev)
 ELSE()
   IF (UNIX OR APPLE)
     SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/out)
@@ -214,8 +237,13 @@ ELSE()
   ADD_LIBRARY(${PROJECT_NAME} SHARED ${PROJECT_SRC})
   SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES OUTPUT_NAME ${PROJECT_NAME})
   SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
-  
-  FILE(COPY ${PROJECT_SOURCE_DIR}/src/export/ DESTINATION ${PROJECT_SOURCE_DIR}/out/include)
+  INSTALL(TARGETS ${PROJECT_NAME} DESTINATION lib COMPONENT dev)
+  INSTALL(TARGETS ${PROJECT_NAME}_static DESTINATION lib COMPONENT dev)
 ENDIF()
-STRING(STRIP "${PROJECT_LIB}" PROJECT_LIB)
+
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_LIB})
+
+FILE(GLOB LIBS_3RD ${PROJECT_SOURCE_DIR}/out/lib/*.a ${PROJECT_SOURCE_DIR}/out/lib/*.lib ${PROJECT_SOURCE_DIR}/out/lib/*.dll)
+INSTALL(FILES ${LIBS_3RD} DESTINATION lib COMPONENT dev)
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/out/include/ DESTINATION include COMPONENT dev)
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/export/ DESTINATION include COMPONENT dev)

@@ -100,7 +100,7 @@ if [ -d ${DIR_ROOT} ];then
   if [ x"$OS_TYPE" == x"Windows" ];then
       cmake -A ${BUILD_ARCH} -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} ${DIR_ROOT} && cmake --build . --config ${BUILD_TYPE}
   else
-      cmake -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} ${DIR_ROOT} && make -j${JOBS}
+      cmake -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} ${DIR_ROOT} && make -j${JOBS} && make package
   fi
   if [ $? != 0 ]; then
     show_message "failed to make comex"
