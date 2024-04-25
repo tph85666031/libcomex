@@ -24042,12 +24042,6 @@ unsigned char magic_content[] = {
   0x14, 0x17, 0x3b, 0x30, 0x03, 0x00, 0x00, 0x00, 0x00, 0x04, 0x59, 0x5a
 };
 
-FileMagic& GetFileMagicService()
-{
-    static FileMagic magic;
-    return magic;
-}
-
 FileMagic::FileMagic()
 {
     ctx = magic_open(MAGIC_MIME_TYPE | MAGIC_ERROR);

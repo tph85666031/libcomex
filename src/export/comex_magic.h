@@ -3,8 +3,7 @@
 
 #include "com_base.h"
 
-
-class FileMagic
+class COM_EXPORT FileMagic
 {
 public:
     FileMagic();
@@ -18,8 +17,6 @@ private:
     void* ctx;
     CPPBytes content;
 };
-
-FileMagic& GetFileMagicService();
 
 #endif  /* __COMEX_MAGIC_H__ */
 
