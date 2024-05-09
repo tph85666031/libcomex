@@ -14,7 +14,9 @@ public:
     std::string getContentType(const CPPBytes& data);
 
 private:
-    void* ctx;
+    void* open();
+    void close(void* ctx);
+private:
     CPPBytes content;
 };
 
