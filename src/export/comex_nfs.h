@@ -56,7 +56,7 @@ private:
     void* nfs_ctx  = NULL;
     bool nfs_connected = false;
 };
-//typedef ComexNfs DEPRECATED("Use ComexNfs instead") CPPNfs;
+typedef ComexNfs DEPRECATED("Use ComexNfs instead") CPPNfs;
 
 #endif /* __COMEX_NFS_H__ */
 

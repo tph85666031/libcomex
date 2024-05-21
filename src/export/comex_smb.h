@@ -52,7 +52,7 @@ private:
 
     void* smb_ctx  = NULL;
 };
-//typedef ComexSmb DEPRECATED("Use ComexSmb instead") CPPSmb;
+typedef ComexSmb DEPRECATED("Use ComexSmb instead") CPPSmb;
 
 #endif /* __COMEX_SMB_H__ */
 

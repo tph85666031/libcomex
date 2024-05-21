@@ -180,7 +180,7 @@ private:
 
     std::string server_cert_pem;
 };
-//typedef ComexCurl DEPRECATED("Use ComexCurl instead") CPPCurl;
+typedef ComexCurl DEPRECATED("Use ComexCurl instead") CPPCurl;
 
 #endif /* __COMEX_CURL_H__ */
 
