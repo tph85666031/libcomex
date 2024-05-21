@@ -388,7 +388,7 @@ void MqttClient::threadPoolRunner(Message& msg)
 MqttClient& MqttClient::setWillInfo(uint8* will_data, int will_data_size,
                                     const char* will_topic, int will_qos, bool will_retain)
 {
-    this->will_data = CPPBytes(will_data, will_data_size);
+    this->will_data = ComBytes(will_data, will_data_size);
     if(will_topic != NULL)
     {
         this->will_topic = will_topic;

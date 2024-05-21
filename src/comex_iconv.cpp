@@ -11,21 +11,21 @@ static const char* ICONV_ENCODE_ARRAY[] =
     "CP949", "CP932", "CP874", "CP1133", "CP1258", "CP864"
 };
 
-CPPBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const CPPBytes& data)
+ComBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const ComBytes& data)
 {
     return comex_iconv_convert(cs_to, cs_from, data.getData(), data.getDataSize());
 }
 
-CPPBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const void* data, int data_size)
+ComBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const void* data, int data_size)
 {
     if(cs_to == NULL || cs_from == NULL || data == NULL || data_size <= 0)
     {
-        return CPPBytes();
+        return ComBytes();
     }
     iconv_t handle = iconv_open(cs_to, cs_from);
     if(handle <= 0)
     {
-        return CPPBytes();
+        return ComBytes();
     }
 
     size_t size_src = (size_t)data_size;
@@ -42,19 +42,19 @@ CPPBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const void*
     if(ret == -1)
     {
         delete[] p_result;
-        return CPPBytes();
+        return ComBytes();
     }
 
     size_dst -= size_dst_remian;
 
-    CPPBytes result;
+    ComBytes result;
     result.append((uint8*)p_result, size_dst);
 
     delete[] p_result;
     return result;
 }
 
-std::string comex_iconv_dectect(const CPPBytes& data)
+std::string comex_iconv_dectect(const ComBytes& data)
 {
     return comex_iconv_dectect(data.getData(), data.getDataSize());
 }
@@ -77,66 +77,66 @@ std::string comex_iconv_dectect(const void* data, int data_size)
     return std::string();
 }
 
-CPPBytes comex_iconv_utf8_to_utf16(const CPPBytes& utf8)
+ComBytes comex_iconv_utf8_to_utf16(const ComBytes& utf8)
 {
     return comex_iconv_convert(htons(0x1234) == 0x1234 ? "UTF-16BE" : "UTF-16LE",
                                "UTF-8",
                                utf8);
 }
 
-CPPBytes comex_iconv_utf16_to_utf8(const CPPBytes& utf16)
+ComBytes comex_iconv_utf16_to_utf8(const ComBytes& utf16)
 {
     return comex_iconv_convert("UTF-8",
                                htons(0x1234) == 0x1234 ? "UTF-16BE" : "UTF-16LE",
                                utf16);
 }
 
-CPPBytes comex_iconv_utf8_to_utf32(const CPPBytes& utf8)
+ComBytes comex_iconv_utf8_to_utf32(const ComBytes& utf8)
 {
     return comex_iconv_convert(htons(0x1234) == 0x1234 ? "UTF-32BE" : "UTF-32LE",
                                "UTF-8",
                                utf8);
 }
 
-CPPBytes comex_iconv_utf32_to_utf8(const CPPBytes& utf32)
+ComBytes comex_iconv_utf32_to_utf8(const ComBytes& utf32)
 {
     return comex_iconv_convert("UTF-8",
                                htons(0x1234) == 0x1234 ? "UTF-32BE" : "UTF-32LE",
                                utf32);
 }
 
-CPPBytes comex_iconv_utf16_to_utf32(const CPPBytes& utf16)
+ComBytes comex_iconv_utf16_to_utf32(const ComBytes& utf16)
 {
     return comex_iconv_convert(htons(0x1234) == 0x1234 ? "UTF-32BE" : "UTF-32LE",
                                htons(0x1234) == 0x1234 ? "UTF-16BE" : "UTF-16LE",
                                utf16);
 }
 
-CPPBytes comex_iconv_utf32_to_utf16(const CPPBytes& utf32)
+ComBytes comex_iconv_utf32_to_utf16(const ComBytes& utf32)
 {
     return comex_iconv_convert(htons(0x1234) == 0x1234 ? "UTF-16BE" : "UTF-16LE",
                                htons(0x1234) == 0x1234 ? "UTF-32BE" : "UTF-32LE",
                                utf32);
 }
 
-std::wstring comex_iconv_utf8_to_wstring(const CPPBytes& utf8)
+std::wstring comex_iconv_utf8_to_wstring(const ComBytes& utf8)
 {
     std::wstring wstr;
     if(sizeof(wchar_t) == 2)
     {
-        CPPBytes utf16 = comex_iconv_utf8_to_utf16(utf8);
+        ComBytes utf16 = comex_iconv_utf8_to_utf16(utf8);
         wstr.append((wchar_t*)utf16.getData(), utf16.getDataSize() / 2);
     }
     else
     {
-        CPPBytes utf32 = comex_iconv_utf8_to_utf32(utf8);
+        ComBytes utf32 = comex_iconv_utf8_to_utf32(utf8);
         wstr.append((wchar_t*)utf32.getData(), utf32.getDataSize() / 4);
     }
 
     return wstr;
 }
 
-std::wstring comex_iconv_utf16_to_wstring(const CPPBytes& utf16)
+std::wstring comex_iconv_utf16_to_wstring(const ComBytes& utf16)
 {
     std::wstring wstr;
     if(sizeof(wchar_t) == 2)
@@ -145,19 +145,19 @@ std::wstring comex_iconv_utf16_to_wstring(const CPPBytes& utf16)
     }
     else
     {
-        CPPBytes utf32 = comex_iconv_utf16_to_utf32(utf16);
+        ComBytes utf32 = comex_iconv_utf16_to_utf32(utf16);
         wstr.append((wchar_t*)utf32.getData(), utf32.getDataSize() / 4);
     }
 
     return wstr;
 }
 
-std::wstring comex_iconv_utf32_to_wstring(const CPPBytes& utf32)
+std::wstring comex_iconv_utf32_to_wstring(const ComBytes& utf32)
 {
     std::wstring wstr;
     if(sizeof(wchar_t) == 2)
     {
-        CPPBytes utf16 = comex_iconv_utf32_to_utf16(utf32);
+        ComBytes utf16 = comex_iconv_utf32_to_utf16(utf32);
         wstr.append((wchar_t*)utf16.getData(), utf16.getDataSize() / 2);
     }
     else
@@ -168,9 +168,9 @@ std::wstring comex_iconv_utf32_to_wstring(const CPPBytes& utf32)
     return wstr;
 }
 
-CPPBytes comex_iconv_wstring_to_utf8(const std::wstring& wstr)
+ComBytes comex_iconv_wstring_to_utf8(const std::wstring& wstr)
 {
-    CPPBytes result;
+    ComBytes result;
     if(sizeof(wchar_t) == 2)
     {
         result.append((uint8*)wstr.data(), wstr.length() * 2);
@@ -185,9 +185,9 @@ CPPBytes comex_iconv_wstring_to_utf8(const std::wstring& wstr)
     return result;
 }
 
-CPPBytes comex_iconv_wstring_to_utf16(const std::wstring& wstr)
+ComBytes comex_iconv_wstring_to_utf16(const std::wstring& wstr)
 {
-    CPPBytes result;
+    ComBytes result;
     if(sizeof(wchar_t) == 2)
     {
         result.append((uint8*)wstr.data(), wstr.length() * 2);
@@ -201,9 +201,9 @@ CPPBytes comex_iconv_wstring_to_utf16(const std::wstring& wstr)
     return result;
 }
 
-CPPBytes comex_iconv_wstring_to_utf32(const std::wstring& wstr)
+ComBytes comex_iconv_wstring_to_utf32(const std::wstring& wstr)
 {
-    CPPBytes result;
+    ComBytes result;
     if(sizeof(wchar_t) == 2)
     {
         result.append((uint8*)wstr.data(), wstr.length() * 2);

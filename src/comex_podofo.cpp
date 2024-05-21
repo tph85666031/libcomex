@@ -50,7 +50,7 @@ void PdfReader::loadFromFile(const char* file)
     }
 }
 
-void PdfReader::loadFromMemory(const CPPBytes& content)
+void PdfReader::loadFromMemory(const ComBytes& content)
 {
     loadFromMemory(content.getData(), content.getDataSize());
 }
@@ -96,16 +96,16 @@ std::string PdfExtrator::getText()
     return text;
 }
 
-std::vector<CPPBytes>& PdfExtrator::getImage()
+std::vector<ComBytes>& PdfExtrator::getImage()
 {
     return image;
 }
 
-CPPBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm_size)
+ComBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm_size)
 {
     if(width <= 0 || height <= 0 || ppm == NULL || ppm_size <= 0)
     {
-        return CPPBytes();
+        return ComBytes();
     }
 
     uint8* dst = NULL;
@@ -146,7 +146,7 @@ CPPBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm
 
     jpeg_finish_compress(&cinfo);
 
-    CPPBytes result = CPPBytes(dst, dst_size);
+    ComBytes result = ComBytes(dst, dst_size);
     if(dst != NULL)
     {
         free(dst);
@@ -208,7 +208,7 @@ void PdfExtrator::extractImage()
             {
                 const PdfMemoryObjectStream& memprovider = dynamic_cast<const PdfMemoryObjectStream&>(((const PdfObject&)(*obj)).GetStream()->GetProvider());
                 auto& buffer = memprovider.GetBuffer();
-                CPPBytes jpeg;
+                ComBytes jpeg;
                 jpeg.append((const uint8*)buffer.data(), buffer.size());
                 image.push_back(jpeg);
             }
@@ -254,7 +254,7 @@ PdfWatermark::~PdfWatermark()
 
 bool PdfWatermark::addWaterMark(const char* file_image_block, int space_x, int space_y)
 {
-    CPPBytes file_raw =  com_file_readall(file_image_block);
+    ComBytes file_raw =  com_file_readall(file_image_block);
     auto& pages = ((PdfMemDocument*)ctx)->GetPages();
     std::unique_ptr<PdfImage> image = NULL;
     for(size_t i = 0; i < pages.GetCount(); i++)
@@ -263,7 +263,7 @@ bool PdfWatermark::addWaterMark(const char* file_image_block, int space_x, int s
         Rect rect =  page.GetRect();
         if(image == NULL || (int)(image->GetRect().Width) != (int)(rect.Width) || (int)(image->GetRect().Height) != (int)(rect.Height))
         {
-            CPPBytes result = WaterMark::ExpandWaterMark(file_raw, rect.Width, rect.Height, space_x, space_y);
+            ComBytes result = WaterMark::ExpandWaterMark(file_raw, rect.Width, rect.Height, space_x, space_y);
             image = ((PdfMemDocument*)ctx)->CreateImage();
             image->LoadFromBuffer(bufferview((const char*)result.getData(), result.getDataSize()));
         }
@@ -295,7 +295,7 @@ std::vector<DarkMarkPos> PdfWatermark::addDarkMark(int pix_size)
         std::vector<PdfTextEntry> entries_refine;
         for(size_t n = 0; n < entries.size(); n++)
         {
-            std::wstring text = com_wstring_from_utf8(CPPBytes(entries[n].Text.data(), entries[n].Text.length()));
+            std::wstring text = com_wstring_from_utf8(ComBytes(entries[n].Text.data(), entries[n].Text.length()));
             bool found = false;
             for(size_t j = 0; j < text.length(); j++)
             {
@@ -318,7 +318,7 @@ std::vector<DarkMarkPos> PdfWatermark::addDarkMark(int pix_size)
         PdfTextEntry& entry = entries_refine[com_rand(0, entries_refine.size() - 1)];
         //一行文字中随机选择一个可见字符
         std::vector<int> cache_index;
-        std::wstring text = com_wstring_from_utf8(CPPBytes(entry.Text.data(), entry.Text.length()));
+        std::wstring text = com_wstring_from_utf8(ComBytes(entry.Text.data(), entry.Text.length()));
         for(size_t j = 0; j < text.length(); j++)
         {
             if(std::iswalnum(text[j]) || text[j] > 127)

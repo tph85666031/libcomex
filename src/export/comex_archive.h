@@ -12,7 +12,7 @@ public:
     void setPassword(const char* pwd);
 
     bool open(const char* file, bool append = true, bool create = true);
-    bool open(const CPPBytes& content);
+    bool open(const ComBytes& content);
     void close(bool save = true);
 
     void clear();
@@ -25,7 +25,7 @@ public:
     std::vector<std::string> getFileList();
     bool removeFile(const char* path);
     bool removeDirectoy(const char* path);
-    CPPBytes read(const char* path);
+    ComBytes read(const char* path);
     bool readTo(const char* path, const char* to, bool append = false);
     bool extractTo(const char* dir);
 private:
@@ -70,8 +70,8 @@ public:
     int64 getFileSize(const char* path);
     std::vector<std::string> list(const char* path);
     void list(const char* path, std::function<void(const std::string&, int64)> func);
-    CPPBytes read();
-    CPPBytes read(const char* path);
+    ComBytes read();
+    ComBytes read(const char* path);
     bool readTo(const char* path, const char* to);
     bool extractTo(const char* dir);
 
@@ -87,7 +87,7 @@ class COM_EXPORT ArchiveWriter
 {
 public:
     ArchiveWriter(const char* file, const char* pwd = NULL);
-    ArchiveWriter(CPPBytes& buffer, const char* suffix, const char* pwd = NULL);
+    ArchiveWriter(ComBytes& buffer, const char* suffix, const char* pwd = NULL);
     virtual ~ArchiveWriter();
 
     void close();

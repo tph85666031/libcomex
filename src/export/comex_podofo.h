@@ -9,7 +9,7 @@ public:
     PdfReader();
     virtual ~PdfReader();
     void loadFromFile(const char* file);
-    void loadFromMemory(const CPPBytes& content);
+    void loadFromMemory(const ComBytes& content);
     void loadFromMemory(const void* data, int data_size);
 
     bool saveAs(const char* file);
@@ -24,15 +24,15 @@ public:
     virtual ~PdfExtrator();
 
     std::string getText();
-    std::vector<CPPBytes>& getImage();
+    std::vector<ComBytes>& getImage();
 
     void extractText();
     void extractImage();
 private:
-    CPPBytes ppmToJpeg(int width, int height, const uint8* ppm, int ppm_size);
+    ComBytes ppmToJpeg(int width, int height, const uint8* ppm, int ppm_size);
 private:
     std::string text;
-    std::vector<CPPBytes> image;
+    std::vector<ComBytes> image;
 };
 
 class DarkMarkPos
@@ -54,7 +54,7 @@ public:
     std::vector<DarkMarkPos> addDarkMark(int pix_size);
 private:
     std::string file;
-    CPPBytes content;
+    ComBytes content;
 };
 
 #endif /* __COMEX_PODOFO_H__ */

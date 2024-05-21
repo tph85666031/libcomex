@@ -4,7 +4,7 @@
 
 void comex_nfs_unit_test_suit(void** state)
 {
-    CPPNfs nfs;
+    ComexNfs nfs;
     nfs.setHost("172.22.72.2").setShareName("nfs");
     nfs.setUID(0).setGID(0);
     std::map<std::string, int> list = nfs.ls(PATH_TO_LOCAL(".\\").c_str());
@@ -31,7 +31,7 @@ void comex_nfs_unit_test_suit(void** state)
     ASSERT_INT_EQUAL(com_file_size(PATH_TO_LOCAL("./xxx/s1/s2/nfs.txt").c_str()), file_size);
     com_dir_remove(PATH_TO_LOCAL("./xxx/s1").c_str());
 
-    CPPBytes bytes = nfs.getBytes("__nfs_test__.txt");
+    ComBytes bytes = nfs.getBytes("__nfs_test__.txt");
     ASSERT_INT_EQUAL(bytes.getDataSize(), file_size);
 
     ASSERT_INT_EQUAL(nfs.getFileType("__sss__/__not_exist__"), FILE_TYPE_NOT_EXIST);

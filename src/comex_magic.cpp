@@ -24107,7 +24107,7 @@ std::string FileMagic::getContentType(const void* data, int data_size)
     return result;
 }
 
-std::string FileMagic::getContentType(const CPPBytes& data)
+std::string FileMagic::getContentType(const ComBytes& data)
 {
     return getContentType(data.getData(), data.getDataSize());
 }

@@ -13,9 +13,9 @@ public:
     virtual ~OpensslHash();
 
     bool append(const void* data, int data_size);
-    CPPBytes finish();
+    ComBytes finish();
 
-    static CPPBytes Digest(const char* type, const void* data, int data_size);
+    static ComBytes Digest(const char* type, const void* data, int data_size);
 private:
     void* ctx = NULL;
     const void* digest = NULL;
@@ -67,11 +67,11 @@ public:
     bool setKey(const char* key);
     bool setKey(const uint8* key, int key_size);
     bool append(const void* data, int data_size);
-    CPPBytes finish();
+    ComBytes finish();
 public:
-    static CPPBytes Digest(const char* type, const void* data, int data_size, const void* key = NULL, int key_size = 0);
+    static ComBytes Digest(const char* type, const void* data, int data_size, const void* key = NULL, int key_size = 0);
 private:
-    CPPBytes key;
+    ComBytes key;
     std::string type;
     void* mac = NULL;
     void* ctx = NULL;
@@ -96,23 +96,23 @@ public:
     bool setTag(const char* tag);
     bool setTag(const std::string& tag);
     bool setTag(uint8* tag, int tag_size);
-    bool setTag(const CPPBytes& tag);
+    bool setTag(const ComBytes& tag);
 
-    CPPBytes getTag();
+    ComBytes getTag();
 
-    CPPBytes encrypt(const uint8* data, int data_size);
-    CPPBytes decrypt(const uint8* data, int data_size);
+    ComBytes encrypt(const uint8* data, int data_size);
+    ComBytes decrypt(const uint8* data, int data_size);
 
     bool encryptFile(const char* file_src, const char* file_dst, bool attach_tag = false);
     bool decryptFile(const char* file_src, const char* file_dst);
 
     bool encryptBegin();
-    bool encryptAppend(CPPBytes& result, const uint8* data, int data_size);
-    bool encryptEnd(CPPBytes& result);
+    bool encryptAppend(ComBytes& result, const uint8* data, int data_size);
+    bool encryptEnd(ComBytes& result);
 
     bool decryptBegin();
-    bool decryptAppend(CPPBytes& result, const uint8* data, int data_size);
-    bool decryptEnd(CPPBytes& result);
+    bool decryptAppend(ComBytes& result, const uint8* data, int data_size);
+    bool decryptEnd(ComBytes& result);
 protected:
     virtual const void* getCipher() = 0;
 protected:
@@ -120,9 +120,9 @@ protected:
     std::string padd_mode;
 
     void* ctx = NULL;
-    CPPBytes key;
-    CPPBytes iv;
-    CPPBytes tag;
+    ComBytes key;
+    ComBytes iv;
+    ComBytes tag;
     uint8 buf[4096];
     int block_size = 0;
 };
@@ -241,10 +241,10 @@ public:
     void setPaddingNO();
     void setPaddingPKCS1OAEP();
     void setPaddingX931();
-    CPPBytes encryptWithPublicKey(uint8* data, int data_size);
-    CPPBytes decryptWithPrivateKey(uint8* data, int data_size);
-    CPPBytes encryptWithPrivateKey(uint8* data, int data_size);
-    CPPBytes decryptWithPublicKey(uint8* data, int data_size);
+    ComBytes encryptWithPublicKey(uint8* data, int data_size);
+    ComBytes decryptWithPrivateKey(uint8* data, int data_size);
+    ComBytes encryptWithPrivateKey(uint8* data, int data_size);
+    ComBytes decryptWithPublicKey(uint8* data, int data_size);
     void cleanPublicKey();
     void cleanPrivateKey();
 public:

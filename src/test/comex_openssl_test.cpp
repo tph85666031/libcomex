@@ -26,7 +26,7 @@ void comex_openssl_aes_unit_test_suit(void** state)
             encrypt.setIV(iv);
         }
         encrypt.setMode(modes[i]);
-        CPPBytes bytes = encrypt.encrypt((uint8*)"12345678901234567", 17);
+        ComBytes bytes = encrypt.encrypt((uint8*)"12345678901234567", 17);
         LOG_D("AES[%s%zu]%s", modes[i], key.length() * 8, bytes.toHexString().c_str());
 
         OpensslAES decrypt;
@@ -60,8 +60,8 @@ void comex_openssl_aes_unit_test_suit(void** state)
         aes2.setMode(modes[i]);
         aes2.decryptFile(file2, file3);
 
-        CPPBytes b1 = com_file_readall(file1);
-        CPPBytes b2 = com_file_readall(file1);
+        ComBytes b1 = com_file_readall(file1);
+        ComBytes b2 = com_file_readall(file1);
 
         ASSERT_TRUE(b1 == b2);
     }
@@ -86,7 +86,7 @@ void comex_openssl_des_unit_test_suit(void** state)
         encrypt.setKey(key);
         encrypt.setIV(iv);
         encrypt.setMode(modes[i]);
-        CPPBytes bytes = encrypt.encrypt((uint8*)"12345678901234567", 17);
+        ComBytes bytes = encrypt.encrypt((uint8*)"12345678901234567", 17);
         LOG_I("DES[%s]%s", modes[i], bytes.toHexString().c_str());
 
         OpensslDES decrypt;
@@ -110,8 +110,8 @@ void comex_openssl_des_unit_test_suit(void** state)
         des2.setMode(modes[i]);
         des2.decryptFile(file2, file3);
 
-        CPPBytes b1 = com_file_readall(file1);
-        CPPBytes b2 = com_file_readall(file1);
+        ComBytes b1 = com_file_readall(file1);
+        ComBytes b2 = com_file_readall(file1);
 
         ASSERT_TRUE(b1 == b2);
     }
@@ -136,7 +136,7 @@ void comex_openssl_des2_unit_test_suit(void** state)
         encrypt.setKey(key);
         encrypt.setIV(iv);
         encrypt.setMode(modes[i]);
-        CPPBytes bytes = encrypt.encrypt((uint8*)"12345678901234567", 17);
+        ComBytes bytes = encrypt.encrypt((uint8*)"12345678901234567", 17);
         LOG_D("2DES[%s]%s", modes[i], bytes.toHexString().c_str());
 
         Openssl2DES decrypt;
@@ -160,8 +160,8 @@ void comex_openssl_des2_unit_test_suit(void** state)
         des2.setMode(modes[i]);
         des2.decryptFile(file2, file3);
 
-        CPPBytes b1 = com_file_readall(file1);
-        CPPBytes b2 = com_file_readall(file1);
+        ComBytes b1 = com_file_readall(file1);
+        ComBytes b2 = com_file_readall(file1);
 
         ASSERT_TRUE(b1 == b2);
     }
@@ -186,7 +186,7 @@ void comex_openssl_des3_unit_test_suit(void** state)
         encrypt.setKey(key);
         encrypt.setIV(iv);
         encrypt.setMode(modes[i]);
-        CPPBytes bytes = encrypt.encrypt((uint8*)"12345678901234567", 17);
+        ComBytes bytes = encrypt.encrypt((uint8*)"12345678901234567", 17);
         LOG_D("3DES[%s]%s", modes[i], bytes.toHexString().c_str());
 
         Openssl3DES decrypt;
@@ -210,8 +210,8 @@ void comex_openssl_des3_unit_test_suit(void** state)
         des2.setMode(modes[i]);
         des2.decryptFile(file2, file3);
 
-        CPPBytes b1 = com_file_readall(file1);
-        CPPBytes b2 = com_file_readall(file1);
+        ComBytes b1 = com_file_readall(file1);
+        ComBytes b2 = com_file_readall(file1);
 
         ASSERT_TRUE(b1 == b2);
     }
@@ -255,7 +255,7 @@ Y5BeUeqqGJJKAfLrXCgQ\n\
 void comex_openssl_unit_test_suit(void** state)
 {
     OpensslMD5 md5_openssl;
-    CPPMD5 md5_cpp;
+    ComMD5 md5_com;
     for(int i = 0; i < 10; i++)
     {
         uint8 buf[1024];
@@ -264,8 +264,8 @@ void comex_openssl_unit_test_suit(void** state)
             buf[j] = (uint8)com_rand(0, 9);
         }
         md5_openssl.append(buf, sizeof(buf));
-        md5_cpp.append(buf, sizeof(buf));
-        ASSERT_STR_EQUAL(md5_cpp.finish().toHexString().c_str(), md5_openssl.finish().toHexString().c_str());
+        md5_com.append(buf, sizeof(buf));
+        ASSERT_STR_EQUAL(md5_com.finish().toHexString().c_str(), md5_openssl.finish().toHexString().c_str());
     }
 
     OpensslSHA1 sha1;
@@ -285,7 +285,7 @@ void comex_openssl_unit_test_suit(void** state)
     hmac.setKey("123456");
     hmac.append((uint8*)"0123456789", strlen("0123456789"));
     ASSERT_STR_EQUAL(hmac.finish().toHexString().c_str(), "47b9be2425afe3157b036154d4c7bb497735c4ee5515aed9ef550a2c5d13aaa4");
-    CPPBytes hmac_hash = OpensslHMAC::Digest("sha256", "0123456789", strlen("0123456789"), "123456", 6);
+    ComBytes hmac_hash = OpensslHMAC::Digest("sha256", "0123456789", strlen("0123456789"), "123456", 6);
     ASSERT_STR_EQUAL(hmac_hash.toHexString().c_str(), "47b9be2425afe3157b036154d4c7bb497735c4ee5515aed9ef550a2c5d13aaa4");
 
     std::string public_key;
@@ -300,7 +300,7 @@ void comex_openssl_unit_test_suit(void** state)
     rsa.setPrivateKey(private_key.c_str(), "123456");
     private_key.clear();
 
-    CPPBytes bytes = rsa.encryptWithPublicKey((uint8*)"123456", 6);
+    ComBytes bytes = rsa.encryptWithPublicKey((uint8*)"123456", 6);
     bytes = rsa.decryptWithPrivateKey(bytes.getData(), bytes.getDataSize());
     ASSERT_STR_EQUAL("123456", bytes.toString().c_str());
 #if 0

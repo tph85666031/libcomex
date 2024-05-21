@@ -3,13 +3,13 @@
 
 void comex_smb_unit_test_suit(void** state)
 {
-    CPPSmb smb_test;
+    ComexSmb smb_test;
     smb_test.setShareUrlPath("smb://root@192.168.0.11/data");
     smb_test.setPassword("root");
     std::map<std::string, int> r = smb_test.ls("");
     ASSERT_TRUE(r.size() > 0);
 
-    CPPSmb smb;
+    ComexSmb smb;
     smb.setHost("192.168.0.11").setUsername("root").setPassword("root").setShareName("data");
 
     //prepare environment
@@ -35,7 +35,7 @@ void comex_smb_unit_test_suit(void** state)
     ASSERT_INT_EQUAL(com_file_size(PATH_TO_LOCAL("./xxx/s1/s2/smb.txt").c_str()), file_size);
     com_dir_remove(PATH_TO_LOCAL("./xxx/s1").c_str());
 
-    CPPBytes bytes = smb.getBytes("__smb_test__.txt");
+    ComBytes bytes = smb.getBytes("__smb_test__.txt");
     ASSERT_INT_EQUAL(bytes.getDataSize(), file_size);
 
     ASSERT_INT_EQUAL(smb.getFileType(PATH_TO_LOCAL("__sss__/__not_exist__").c_str()), FILE_TYPE_NOT_EXIST);

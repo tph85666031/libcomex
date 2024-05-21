@@ -154,7 +154,7 @@ static cairo_status_t cairo_png_write_func(void* ctx, const unsigned char* data,
         return CAIRO_STATUS_WRITE_ERROR;
     }
 
-    CPPBytes* bytes = (CPPBytes*)ctx;
+    ComBytes* bytes = (ComBytes*)ctx;
     bytes->append(data, length);
     return CAIRO_STATUS_SUCCESS;
 }
@@ -166,7 +166,7 @@ static cairo_status_t cairo_png_read_func(void* ctx, unsigned char* data, unsign
         return CAIRO_STATUS_READ_ERROR;
     }
 
-    CPPBytes* bytes = (CPPBytes*)ctx;
+    ComBytes* bytes = (ComBytes*)ctx;
     if(bytes->getDataSize() < (int)length)
     {
         return CAIRO_STATUS_READ_ERROR;
@@ -479,7 +479,7 @@ bool WaterMark::createWatermark(const char* file)
     return createWatermark().toFile(file);
 }
 
-CPPBytes WaterMark::createWatermark()
+ComBytes WaterMark::createWatermark()
 {
     if(type == WATER_MARK_TYPE_TEXT)
     {
@@ -496,7 +496,7 @@ CPPBytes WaterMark::createWatermark()
     else
     {
         LOG_E("watermark type not support, type=%d", type);
-        return CPPBytes();
+        return ComBytes();
     }
 }
 
@@ -515,12 +515,12 @@ bool WaterMark::createWatermarkAsDot(const char* file)
     return createWatermarkAsDot().toFile(file);
 }
 
-CPPBytes WaterMark::createWatermarkAsQRCode()
+ComBytes WaterMark::createWatermarkAsQRCode()
 {
     QRcode* qr = QRcode_encodeString(getText().c_str(), 1, QR_ECLEVEL_M, QR_MODE_8, 1);
     if(qr == NULL)
     {
-        return CPPBytes();
+        return ComBytes();
     }
 
     int block_width = width + space_x;
@@ -602,7 +602,7 @@ CPPBytes WaterMark::createWatermarkAsQRCode()
     }
 
     cairo_destroy(cr_block);
-    CPPBytes data;
+    ComBytes data;
     cairo_surface_write_to_png_stream(surface_block, cairo_png_write_func, &data);
     cairo_surface_destroy(surface_block);
     QRcode_free(qr);
@@ -610,7 +610,7 @@ CPPBytes WaterMark::createWatermarkAsQRCode()
     return data;
 }
 
-CPPBytes WaterMark::createWatermarkAsText()
+ComBytes WaterMark::createWatermarkAsText()
 {
     std::vector<std::string> vals = com_string_split(getText().c_str(), "\n");
     double font_size_px = (font_size * dpi / 72) + 1;
@@ -686,7 +686,7 @@ CPPBytes WaterMark::createWatermarkAsText()
     cairo_paint(cr_block_final);
 
     //将新图层保存为png
-    CPPBytes data;
+    ComBytes data;
     cairo_surface_write_to_png_stream(surface_block_final, cairo_png_write_func, &data);
 
     //资源回收
@@ -698,13 +698,13 @@ CPPBytes WaterMark::createWatermarkAsText()
     return data;
 }
 
-CPPBytes WaterMark::createWatermarkAsDot()
+ComBytes WaterMark::createWatermarkAsDot()
 {
     std::string text_tmp = getText();
     if(text_tmp.length() < 9 || text_tmp.at(0) != 's')
     {
         LOG_E("text incorrect:%s", text_tmp.c_str());
-        return CPPBytes();
+        return ComBytes();
     }
     com_string_to_lower(text_tmp);
 
@@ -868,20 +868,20 @@ CPPBytes WaterMark::createWatermarkAsDot()
     }
 
     cairo_destroy(cr_block);
-    CPPBytes data;
+    ComBytes data;
     cairo_surface_write_to_png_stream(surface_block, cairo_png_write_func, &data);
     cairo_surface_destroy(surface_block);
 
     return data;
 }
 
-CPPBytes WaterMark::ExpandWaterMark(const CPPBytes& block, int width, int height, int space_x, int space_y)
+ComBytes WaterMark::ExpandWaterMark(const ComBytes& block, int width, int height, int space_x, int space_y)
 {
     if(width <= 0 || height <= 0)
     {
-        return CPPBytes();
+        return ComBytes();
     }
-    CPPBytes block_copy = block;
+    ComBytes block_copy = block;
     cairo_surface_t* surface_block = cairo_image_surface_create_from_png_stream(cairo_png_read_func, &block_copy);
     if(space_x > 0 || space_y > 0)//添加边距
     {
@@ -890,7 +890,7 @@ CPPBytes WaterMark::ExpandWaterMark(const CPPBytes& block, int width, int height
         if(block_width <= 0 || block_height <= 0)
         {
             cairo_surface_destroy(surface_block);
-            return CPPBytes();
+            return ComBytes();
         }
         cairo_surface_t* surface_block_margin = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, block_width + space_x, block_height + space_y);
         cairo_t* cr_block_margin = cairo_create(surface_block_margin);
@@ -911,7 +911,7 @@ CPPBytes WaterMark::ExpandWaterMark(const CPPBytes& block, int width, int height
     cairo_destroy(cr);
     cairo_pattern_destroy(pattern);
     cairo_surface_destroy(surface_block);
-    CPPBytes data;
+    ComBytes data;
     cairo_surface_write_to_png_stream(surface, cairo_png_write_func, &data);
     cairo_surface_destroy(surface);
     return data;
@@ -923,7 +923,7 @@ bool WaterMark::ExpandWaterMark(const char* file, const char* file_block,
     return ExpandWaterMark(com_file_readall(file_block), width, height, space_x, space_y).toFile(file);
 }
 
-bool WaterMark::ExpandWaterMark(const char* file, const CPPBytes& block,
+bool WaterMark::ExpandWaterMark(const char* file, const ComBytes& block,
                                 int width, int height, int space_x, int space_y)
 {
     return ExpandWaterMark(block, width, height, space_x, space_y).toFile(file);

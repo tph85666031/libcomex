@@ -76,11 +76,11 @@ bool OpensslHash::append(const void* data, int data_size)
     return true;
 }
 
-CPPBytes OpensslHash::finish()
+ComBytes OpensslHash::finish()
 {
     if(ctx == NULL || digest == NULL)
     {
-        return CPPBytes();
+        return ComBytes();
     }
     uint32 size_out = 0;
     uint8 buf[EVP_MAX_MD_SIZE];
@@ -90,12 +90,12 @@ CPPBytes OpensslHash::finish()
         LOG_E("failed to finalize");
         return false;
     }
-    CPPBytes hash = CPPBytes(buf, size_out);
+    ComBytes hash = ComBytes(buf, size_out);
     EVP_DigestInit_ex((EVP_MD_CTX*)ctx, (const EVP_MD*)digest, NULL);
     return hash;
 }
 
-CPPBytes OpensslHash::Digest(const char* type, const void* data, int data_size)
+ComBytes OpensslHash::Digest(const char* type, const void* data, int data_size)
 {
     uint32 size_out = 0;
     uint8 buf[EVP_MAX_MD_SIZE];
@@ -103,9 +103,9 @@ CPPBytes OpensslHash::Digest(const char* type, const void* data, int data_size)
     OpenSSL_add_all_digests();
     if(EVP_Digest((const uint8*)data, data_size, buf, &size_out, EVP_get_digestbyname(type), NULL) != 1)
     {
-        return CPPBytes();
+        return ComBytes();
     }
-    return CPPBytes(buf, size_out);
+    return ComBytes(buf, size_out);
 }
 
 OpensslHMAC::OpensslHMAC()
@@ -190,11 +190,11 @@ bool OpensslHMAC::append(const void* data, int data_size)
     return true;
 }
 
-CPPBytes OpensslHMAC::finish()
+ComBytes OpensslHMAC::finish()
 {
     if(ctx == NULL)
     {
-        return CPPBytes();
+        return ComBytes();
     }
     size_t size_out = 0;
     uint8 buf[EVP_MAX_MD_SIZE];
@@ -204,7 +204,7 @@ CPPBytes OpensslHMAC::finish()
         LOG_E("failed to finalize");
         return false;
     }
-    CPPBytes hash = CPPBytes(buf, size_out);
+    ComBytes hash = ComBytes(buf, size_out);
     if(ctx != NULL)
     {
         EVP_MAC_CTX_free((EVP_MAC_CTX*)ctx);
@@ -218,7 +218,7 @@ CPPBytes OpensslHMAC::finish()
     return hash;
 }
 
-CPPBytes OpensslHMAC::Digest(const char* type, const void* data, int data_size, const void* key, int key_size)
+ComBytes OpensslHMAC::Digest(const char* type, const void* data, int data_size, const void* key, int key_size)
 {
     if(key_size == 0)
     {
@@ -236,7 +236,7 @@ CPPBytes OpensslHMAC::Digest(const char* type, const void* data, int data_size, 
     memset(buf, 0, sizeof(buf));
     OpenSSL_add_all_digests();
     HMAC(EVP_get_digestbyname(type), key, key_size, (const uint8*)data, data_size, buf, &size_out);
-    return CPPBytes(buf, size_out);
+    return ComBytes(buf, size_out);
 #endif
 }
 
@@ -331,53 +331,53 @@ bool OpensslCrypto::setTag(uint8* tag, int tag_size)
     return true;
 }
 
-bool OpensslCrypto::setTag(const CPPBytes& tag)
+bool OpensslCrypto::setTag(const ComBytes& tag)
 {
     this->tag = tag;
     return true;
 }
 
-CPPBytes OpensslCrypto::getTag()
+ComBytes OpensslCrypto::getTag()
 {
     return tag;
 }
 
-CPPBytes OpensslCrypto::encrypt(const uint8* data, int data_size)
+ComBytes OpensslCrypto::encrypt(const uint8* data, int data_size)
 {
     if(encryptBegin() == false)
     {
-        return CPPBytes();
+        return ComBytes();
     }
 
-    CPPBytes bytes;
+    ComBytes bytes;
     if(encryptAppend(bytes, data, data_size) == false)
     {
-        return CPPBytes();
+        return ComBytes();
     }
 
     if(encryptEnd(bytes) == false)
     {
-        return CPPBytes();
+        return ComBytes();
     }
     return bytes;
 }
 
-CPPBytes OpensslCrypto::decrypt(const uint8* data, int data_size)
+ComBytes OpensslCrypto::decrypt(const uint8* data, int data_size)
 {
     if(decryptBegin() == false)
     {
-        return CPPBytes();
+        return ComBytes();
     }
 
-    CPPBytes bytes;
+    ComBytes bytes;
     if(decryptAppend(bytes, data, data_size) == false)
     {
-        return CPPBytes();
+        return ComBytes();
     }
 
     if(decryptEnd(bytes) == false)
     {
-        return CPPBytes();
+        return ComBytes();
     }
     return bytes;
 }
@@ -413,7 +413,7 @@ bool OpensslCrypto::encryptFile(const char* file_src, const char* file_dst, bool
 
     bool ret = true;
     int len = 0;
-    CPPBytes bytes;
+    ComBytes bytes;
     while((len = (int)com_file_read(fin, buf, sizeof(buf))) > 0)
     {
         bytes.clear();
@@ -483,7 +483,7 @@ bool OpensslCrypto::decryptFile(const char* file_src, const char* file_dst)
 
     bool ret = true;
     int len = 0;
-    CPPBytes bytes;
+    ComBytes bytes;
     while((len = com_file_read(fin, buf, sizeof(buf))) > 0)
     {
         bytes.clear();
@@ -563,7 +563,7 @@ bool OpensslCrypto::encryptBegin()
     return true;
 }
 
-bool OpensslCrypto::encryptAppend(CPPBytes& result, const uint8* data, int data_size)
+bool OpensslCrypto::encryptAppend(ComBytes& result, const uint8* data, int data_size)
 {
     if(ctx == NULL || data == NULL || data_size <= 0)
     {
@@ -582,7 +582,7 @@ bool OpensslCrypto::encryptAppend(CPPBytes& result, const uint8* data, int data_
     return true;
 }
 
-bool OpensslCrypto::encryptEnd(CPPBytes& result)
+bool OpensslCrypto::encryptEnd(ComBytes& result)
 {
     if(ctx == NULL)
     {
@@ -612,7 +612,7 @@ bool OpensslCrypto::encryptEnd(CPPBytes& result)
             LOG_E("failed to get tag");
             return false;
         }
-        tag = CPPBytes(buf_tag, sizeof(buf_tag));
+        tag = ComBytes(buf_tag, sizeof(buf_tag));
     }
 
     return true;
@@ -657,7 +657,7 @@ bool OpensslCrypto::decryptBegin()
     return true;
 }
 
-bool OpensslCrypto::decryptAppend(CPPBytes& result, const uint8* data, int data_size)
+bool OpensslCrypto::decryptAppend(ComBytes& result, const uint8* data, int data_size)
 {
     if(ctx == NULL || data == NULL || data_size <= 0)
     {
@@ -676,7 +676,7 @@ bool OpensslCrypto::decryptAppend(CPPBytes& result, const uint8* data, int data_
     return true;
 }
 
-bool OpensslCrypto::decryptEnd(CPPBytes& result)
+bool OpensslCrypto::decryptEnd(ComBytes& result)
 {
     if(ctx == NULL)
     {
@@ -1148,7 +1148,7 @@ bool OpensslRSA::setPublicKeyFromFile(const char* file_public_key, const char* p
     {
         return false;
     }
-    CPPBytes content = com_file_readall(file_public_key);
+    ComBytes content = com_file_readall(file_public_key);
     return setPublicKey(content.toString().c_str(), pwd);
 }
 
@@ -1158,7 +1158,7 @@ bool OpensslRSA::setPrivateKeyFromFile(const char* file_private_key, const char*
     {
         return false;
     }
-    CPPBytes content = com_file_readall(file_public_key);
+    ComBytes content = com_file_readall(file_public_key);
     return setPrivateKey(content.toString().c_str(), pwd);
 }
 
@@ -1187,12 +1187,12 @@ void OpensslRSA::setPaddingX931()
     padding_mode = 5;
 }
 
-CPPBytes OpensslRSA::encryptWithPublicKey(uint8* data, int data_size)
+ComBytes OpensslRSA::encryptWithPublicKey(uint8* data, int data_size)
 {
     if(data == NULL || data_size <= 0 || key_pub == NULL)
     {
         LOG_E("arg incorrect,data=%p,data_size=%d,key_pub=%p", data, data_size, key_pub);
-        return CPPBytes();
+        return ComBytes();
     }
     EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new((EVP_PKEY*)key_pub, NULL);
     EVP_PKEY_encrypt_init(ctx);
@@ -1203,7 +1203,7 @@ CPPBytes OpensslRSA::encryptWithPublicKey(uint8* data, int data_size)
     {
         EVP_PKEY_CTX_free(ctx);
         LOG_E("failed to get encrypt data size");
-        return CPPBytes();
+        return ComBytes();
     }
     std::vector<uint8> buf;
     buf.reserve(out_size);
@@ -1212,16 +1212,16 @@ CPPBytes OpensslRSA::encryptWithPublicKey(uint8* data, int data_size)
     if(ret != 1)
     {
         LOG_E("rsa public encrypt failed,ret=%d,err=0x%lX", ret, ERR_get_error());
-        return CPPBytes();
+        return ComBytes();
     }
-    return CPPBytes(buf.data(), out_size);
+    return ComBytes(buf.data(), out_size);
 }
 
-CPPBytes OpensslRSA::decryptWithPrivateKey(uint8* data, int data_size)
+ComBytes OpensslRSA::decryptWithPrivateKey(uint8* data, int data_size)
 {
     if(data == NULL || data_size <= 0 || key_pri == NULL)
     {
-        return CPPBytes();
+        return ComBytes();
     }
     EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new((EVP_PKEY*)key_pri, NULL);
     EVP_PKEY_decrypt_init(ctx);
@@ -1232,7 +1232,7 @@ CPPBytes OpensslRSA::decryptWithPrivateKey(uint8* data, int data_size)
     {
         EVP_PKEY_CTX_free(ctx);
         LOG_E("failed to get decrypt data size");
-        return CPPBytes();
+        return ComBytes();
     }
     std::vector<uint8> buf;
     buf.reserve(out_size);
@@ -1241,17 +1241,17 @@ CPPBytes OpensslRSA::decryptWithPrivateKey(uint8* data, int data_size)
     if(ret != 1)
     {
         LOG_E("rsa private decrypt failed,ret=%d,err=0x%lX", ret, ERR_get_error());
-        return CPPBytes();
+        return ComBytes();
     }
-    return CPPBytes(buf.data(), out_size);
+    return ComBytes(buf.data(), out_size);
 }
 
-CPPBytes OpensslRSA::encryptWithPrivateKey(uint8* data, int data_size)
+ComBytes OpensslRSA::encryptWithPrivateKey(uint8* data, int data_size)
 {
 #if 0
     if(data == NULL || data_size <= 0 || key_pri == NULL)
     {
-        return CPPBytes();
+        return ComBytes();
     }
     EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new((EVP_PKEY*)key_pri, NULL);
     EVP_PKEY_encrypt_init(ctx);
@@ -1262,7 +1262,7 @@ CPPBytes OpensslRSA::encryptWithPrivateKey(uint8* data, int data_size)
     {
         EVP_PKEY_CTX_free(ctx);
         LOG_E("failed to get encrypt data size");
-        return CPPBytes();
+        return ComBytes();
     }
     LOG_I("encrypt data size=%zu", out_size);
     std::vector<uint8> buf;
@@ -1272,21 +1272,21 @@ CPPBytes OpensslRSA::encryptWithPrivateKey(uint8* data, int data_size)
     if(ret != 1)
     {
         LOG_E("rsa public encrypt failed,ret=%d,err=0x%lX", ret, ERR_get_error());
-        return CPPBytes();
+        return ComBytes();
     }
-    return CPPBytes(buf.data(), out_size);
+    return ComBytes(buf.data(), out_size);
 #else
     LOG_E("not support in openssl3");
-    return CPPBytes();
+    return ComBytes();
 #endif
 }
 
-CPPBytes OpensslRSA::decryptWithPublicKey(uint8* data, int data_size)
+ComBytes OpensslRSA::decryptWithPublicKey(uint8* data, int data_size)
 {
 #if 0
     if(data == NULL || data_size <= 0 || key_pub == NULL)
     {
-        return CPPBytes();
+        return ComBytes();
     }
     EVP_PKEY_CTX* ctx = EVP_PKEY_CTX_new((EVP_PKEY*)key_pub, NULL);
     EVP_PKEY_decrypt_init(ctx);
@@ -1297,7 +1297,7 @@ CPPBytes OpensslRSA::decryptWithPublicKey(uint8* data, int data_size)
     {
         EVP_PKEY_CTX_free(ctx);
         LOG_E("failed to get decrypt data size");
-        return CPPBytes();
+        return ComBytes();
     }
     LOG_I("decrypt data size=%zu", out_size);
     std::vector<uint8> buf;
@@ -1307,12 +1307,12 @@ CPPBytes OpensslRSA::decryptWithPublicKey(uint8* data, int data_size)
     if(ret != 1)
     {
         LOG_E("rsa public decrypt failed,ret=%d,err=%s", ret, ERR_error_string(ERR_get_error(), NULL));
-        return CPPBytes();
+        return ComBytes();
     }
-    return CPPBytes(buf.data(), out_size);
+    return ComBytes(buf.data(), out_size);
 #else
     LOG_E("not support in openssl3");
-    return CPPBytes();
+    return ComBytes();
 #endif
 }
 
@@ -1411,7 +1411,7 @@ OpensslCert::~OpensslCert()
 
 bool OpensslCert::loadFromFile(const char* file)
 {
-    CPPBytes bytes = com_file_readall(file);
+    ComBytes bytes = com_file_readall(file);
     return loadFromMem(bytes.getData(), bytes.getDataSize());
 }
 

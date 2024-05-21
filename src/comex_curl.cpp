@@ -93,7 +93,7 @@ static size_t http_file_download_callback(void* ptr, size_t size, size_t nmemb, 
 
 static size_t http_memory_download_callback(void* ptr, size_t size, size_t nmemb, void* userp)
 {
-    CPPBytes* bytes = (CPPBytes*)userp;
+    ComBytes* bytes = (ComBytes*)userp;
     if(bytes == NULL || size * nmemb <= 0 || ptr == NULL)
     {
         return 0;
@@ -191,7 +191,7 @@ int64 CurlProgress::getCurrentSize()
     return (cur_size_base + cur_size_remain);
 }
 
-CPPCurl::CPPCurl()
+ComexCurl::ComexCurl()
 {
     retry_count = 0;
     connection_timeout_ms = 5000L;
@@ -199,11 +199,11 @@ CPPCurl::CPPCurl()
     debug_enable = false;
 }
 
-CPPCurl::~CPPCurl()
+ComexCurl::~ComexCurl()
 {
 }
 
-void CPPCurl::prepareCert(void* curl)
+void ComexCurl::prepareCert(void* curl)
 {
     if(curl == NULL)
     {
@@ -248,7 +248,7 @@ void CPPCurl::prepareCert(void* curl)
     }
 }
 
-CPPCurl& CPPCurl::addHeader(const char* header)
+ComexCurl& ComexCurl::addHeader(const char* header)
 {
     if(header != NULL && header[0] != '\0')
     {
@@ -257,7 +257,7 @@ CPPCurl& CPPCurl::addHeader(const char* header)
     return *this;
 }
 
-CPPCurl& CPPCurl::addHeader(const char* key, const char* value)
+ComexCurl& ComexCurl::addHeader(const char* key, const char* value)
 {
     if(key != NULL && value != NULL && key[0] != '\0' && value[0] != '\0')
     {
@@ -266,7 +266,7 @@ CPPCurl& CPPCurl::addHeader(const char* key, const char* value)
     return *this;
 }
 
-CPPCurl& CPPCurl::addFormData(const char* key, const char* value)
+ComexCurl& ComexCurl::addFormData(const char* key, const char* value)
 {
     if(key != NULL && value != NULL && key[0] != '\0' && value[0] != '\0')
     {
@@ -275,7 +275,7 @@ CPPCurl& CPPCurl::addFormData(const char* key, const char* value)
     return *this;
 }
 
-CPPCurl& CPPCurl::addFormFile(const char* name, const char* path, int64 offset, int64 size)
+ComexCurl& ComexCurl::addFormFile(const char* name, const char* path, int64 offset, int64 size)
 {
     if(name != NULL && path != NULL && name[0] != '\0' && path[0] != '\0')
     {
@@ -288,43 +288,43 @@ CPPCurl& CPPCurl::addFormFile(const char* name, const char* path, int64 offset, 
     return *this;
 }
 
-CPPCurl& CPPCurl::enableDebug()
+ComexCurl& ComexCurl::enableDebug()
 {
     debug_enable = true;
     return *this;
 }
 
-CPPCurl& CPPCurl::disableDebug()
+ComexCurl& ComexCurl::disableDebug()
 {
     debug_enable = false;
     return *this;
 }
 
-CPPCurl& CPPCurl::setVerifyCertDNS(bool enable)
+ComexCurl& ComexCurl::setVerifyCertDNS(bool enable)
 {
     verify_cert_dns = enable;
     return *this;
 }
 
-CPPCurl& CPPCurl::setVerifyCertCA(bool enable)
+ComexCurl& ComexCurl::setVerifyCertCA(bool enable)
 {
     verify_cert_ca = enable;
     return *this;
 }
 
-CPPCurl& CPPCurl::setConnectionTimeout(int timeout_ms)
+ComexCurl& ComexCurl::setConnectionTimeout(int timeout_ms)
 {
     connection_timeout_ms = timeout_ms;
     return *this;
 }
 
-CPPCurl& CPPCurl::setReceiveTimeout(int timeout_ms)
+ComexCurl& ComexCurl::setReceiveTimeout(int timeout_ms)
 {
     this->timeout_ms = timeout_ms;
     return *this;
 }
 
-CPPCurl& CPPCurl::setRetryCount(int retryCount)
+ComexCurl& ComexCurl::setRetryCount(int retryCount)
 {
     if(retryCount >= 0)
     {
@@ -333,7 +333,7 @@ CPPCurl& CPPCurl::setRetryCount(int retryCount)
     return *this;
 }
 
-CPPCurl& CPPCurl::setCAFile(const char* file)
+ComexCurl& ComexCurl::setCAFile(const char* file)
 {
     if(file != NULL)
     {
@@ -344,7 +344,7 @@ CPPCurl& CPPCurl::setCAFile(const char* file)
     return *this;
 }
 
-CPPCurl& CPPCurl::setCertFile(const char* file, const char* type)
+ComexCurl& ComexCurl::setCertFile(const char* file, const char* type)
 {
     if(file != NULL)
     {
@@ -357,7 +357,7 @@ CPPCurl& CPPCurl::setCertFile(const char* file, const char* type)
     return *this;
 }
 
-CPPCurl& CPPCurl::setCertPassword(const char* password)
+ComexCurl& ComexCurl::setCertPassword(const char* password)
 {
     if(password != NULL)
     {
@@ -366,7 +366,7 @@ CPPCurl& CPPCurl::setCertPassword(const char* password)
     return *this;
 }
 
-CPPCurl& CPPCurl::setKeyFile(const char* file, const char* type)
+ComexCurl& ComexCurl::setKeyFile(const char* file, const char* type)
 {
     if(file != NULL)
     {
@@ -379,7 +379,7 @@ CPPCurl& CPPCurl::setKeyFile(const char* file, const char* type)
     return *this;
 }
 
-CPPCurl& CPPCurl::setKeyPassword(const char* password)
+ComexCurl& ComexCurl::setKeyPassword(const char* password)
 {
     if(password != NULL)
     {
@@ -388,7 +388,7 @@ CPPCurl& CPPCurl::setKeyPassword(const char* password)
     return *this;
 }
 
-CPPCurl& CPPCurl::setUsername(const char* username)
+ComexCurl& ComexCurl::setUsername(const char* username)
 {
     if(username != NULL)
     {
@@ -397,7 +397,7 @@ CPPCurl& CPPCurl::setUsername(const char* username)
     return *this;
 }
 
-CPPCurl& CPPCurl::setPassword(const char* password)
+ComexCurl& ComexCurl::setPassword(const char* password)
 {
     if(password != NULL)
     {
@@ -406,12 +406,12 @@ CPPCurl& CPPCurl::setPassword(const char* password)
     return *this;
 }
 
-HttpResponse CPPCurl::post(const char* url, const char* body)
+HttpResponse ComexCurl::post(const char* url, const char* body)
 {
     return send(url, "POST", body, com_string_len(body));
 }
 
-HttpResponse CPPCurl::get(const char* fmt, ...)
+HttpResponse ComexCurl::get(const char* fmt, ...)
 {
     char url[4096];
     va_list list;
@@ -422,12 +422,12 @@ HttpResponse CPPCurl::get(const char* fmt, ...)
     return send(url, "GET");
 }
 
-HttpResponse CPPCurl::put(const char* url, const char* body)
+HttpResponse ComexCurl::put(const char* url, const char* body)
 {
     return send(url, "PUT", body, com_string_len(body));
 }
 
-HttpResponse CPPCurl::send(const char* url, const char* method, const void* body, int body_size)
+HttpResponse ComexCurl::send(const char* url, const char* method, const void* body, int body_size)
 {
     HttpResponse response;
     if(url == NULL || method == NULL)
@@ -548,7 +548,7 @@ HttpResponse CPPCurl::send(const char* url, const char* method, const void* body
     return response;
 }
 
-int64 CPPCurl::getRemoteFileSize(const char* url)
+int64 ComexCurl::getRemoteFileSize(const char* url)
 {
     if(url == NULL || url[0] == '\0')
     {
@@ -625,7 +625,7 @@ int64 CPPCurl::getRemoteFileSize(const char* url)
     @return -1至-99:对应CURL错误码
     @return >0:已下载字节数
 */
-int64 CPPCurl::download(const char* url, int64 remote_file_size, CPPBytes& bytes,
+int64 ComexCurl::download(const char* url, int64 remote_file_size, ComBytes& bytes,
                         int64 begin_byte, int64 end_byte, CurlProgress& progress)
 {
     long code = 0;
@@ -738,13 +738,13 @@ int64 CPPCurl::download(const char* url, int64 remote_file_size, CPPBytes& bytes
     @return -1至-99:对应CURL错误码
     @return >0:已下载字节数
 */
-int64 CPPCurl::download(const char* url, CPPBytes& bytes)
+int64 ComexCurl::download(const char* url, ComBytes& bytes)
 {
     CurlProgress progress;
     return download(url, bytes, progress);
 }
 
-int64 CPPCurl::download(const char* url, CPPBytes& bytes, CurlProgress& progress)
+int64 ComexCurl::download(const char* url, ComBytes& bytes, CurlProgress& progress)
 {
     long code = 0;
     if(url == NULL || url[0] == '\0')
@@ -856,13 +856,13 @@ int64 CPPCurl::download(const char* url, CPPBytes& bytes, CurlProgress& progress
     @return -1至-99:对应CURL错误码
     @return >0:已下载字节数
 */
-int64 CPPCurl::download(const char* url, const char* file_path)
+int64 ComexCurl::download(const char* url, const char* file_path)
 {
     CurlProgress progress;
     return download(url, file_path, progress);
 }
 
-int64 CPPCurl::download(const char* url, const char* file_path, CurlProgress& progress)
+int64 ComexCurl::download(const char* url, const char* file_path, CurlProgress& progress)
 {
     long code = 0;
     if(url == NULL || url[0] == '\0' || file_path == NULL || file_path[0] == '\0')
@@ -982,7 +982,7 @@ int64 CPPCurl::download(const char* url, const char* file_path, CurlProgress& pr
     return (int)com_file_size(file_path);
 }
 
-std::string CPPCurl::ConvertErrMessage(int err_code)
+std::string ComexCurl::ConvertErrMessage(int err_code)
 {
     const char* msg = curl_easy_strerror((CURLcode)err_code);
     if(msg == NULL)

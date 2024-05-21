@@ -6,7 +6,7 @@
 #include <dbus/dbus.h>
 #include "com_base.h"
 
-class CPPSession
+class ComexSession
 {
 public:
     std::string toJson();
@@ -39,27 +39,27 @@ public:
     uint32 serial;
 };
 
-class CPPSessionManager
+class ComexSessionManager
 {
 public:
-    CPPSessionManager();
-    virtual ~CPPSessionManager();
+    ComexSessionManager();
+    virtual ~ComexSessionManager();
 
     bool openDBus();
     void closeDBus();
 
-    std::vector<CPPSession> getAllSessions();
+    std::vector<ComexSession> getAllSessions();
     std::string getSessionIDByPID(int64 pid = -1);
 
     bool isSessionExist(const char* id);
-    CPPSession getSession(const char* id);
+    ComexSession getSession(const char* id);
     void showAllSesions();
 
-    virtual void onSessionNew(CPPSession& session);
-    virtual void onSessionRemoved(CPPSession& session);
+    virtual void onSessionNew(ComexSession& session);
+    virtual void onSessionRemoved(ComexSession& session);
 private:
-    static void ThreadListener(CPPSessionManager* ctx);
-    static void ThreadEventDispatcher(CPPSessionManager* ctx);
+    static void ThreadListener(ComexSessionManager* ctx);
+    static void ThreadEventDispatcher(ComexSessionManager* ctx);
     static DBusHandlerResult ListenerMessageCallback(DBusConnection* conn, DBusMessage* msg, void* user_data);
 private:
     std::string getMessageValueAsString(DBusMessageIter& it);
@@ -76,11 +76,11 @@ private:
     std::thread thread_dispatcher;
 
     std::mutex mutex_sessions;
-    std::map<std::string, CPPSession> sessions;
+    std::map<std::string, ComexSession> sessions;
 
     std::queue<std::string> event_new;
     std::queue<std::string> event_remove;
-    CPPSem sem_event;
+    ComSem sem_event;
     std::mutex mutex_event;
 
     std::mutex mutex_serial_id_propeties;

@@ -64,12 +64,12 @@ public:
     WaterMark& setQRCodeCombineBackground(bool combine);//二维码0点位置使用背景配色
 
     bool createWatermark(const char* file);
-    CPPBytes createWatermark();
+    ComBytes createWatermark();
     //平铺水印图片到指定分辨率
-    static CPPBytes ExpandWaterMark(const CPPBytes& block, int width, int height, int space_x = 0, int space_y = 0);
+    static ComBytes ExpandWaterMark(const ComBytes& block, int width, int height, int space_x = 0, int space_y = 0);
     static bool ExpandWaterMark(const char* file, const char* file_block,
                                 int width, int height, int space_x = 0, int space_y = 0);
-    static bool ExpandWaterMark(const char* file, const CPPBytes& block,
+    static bool ExpandWaterMark(const char* file, const ComBytes& block,
                                 int width, int height, int space_x = 0, int space_y = 0);
 
     //设置PNG透明度
@@ -83,9 +83,9 @@ private:
     bool createWatermarkAsText(const char* file);
     bool createWatermarkAsDot(const char* file);
 
-    CPPBytes createWatermarkAsQRCode();
-    CPPBytes createWatermarkAsText();
-    CPPBytes createWatermarkAsDot();
+    ComBytes createWatermarkAsQRCode();
+    ComBytes createWatermarkAsText();
+    ComBytes createWatermarkAsDot();
 
     std::string detectFontNameFromLang(const char* lang = NULL);
     

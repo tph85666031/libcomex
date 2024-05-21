@@ -5,17 +5,17 @@
 #include "nfsc/libnfs.h"
 #include "nfsc/libnfs-raw-nfs.h"
 
-CPPNfs::CPPNfs()
+ComexNfs::ComexNfs()
 {
     dir_local = "." PATH_DELIM_STR;
     dir_remote = "/";
 }
 
-CPPNfs::~CPPNfs()
+ComexNfs::~ComexNfs()
 {
     disconnect();
 }
-CPPNfs& CPPNfs::setShareUrlPath(const char* url)
+ComexNfs& ComexNfs::setShareUrlPath(const char* url)
 {
     if(url != NULL)
     {
@@ -23,7 +23,7 @@ CPPNfs& CPPNfs::setShareUrlPath(const char* url)
     }
     return *this;
 }
-CPPNfs& CPPNfs::setHost(const char* host)
+ComexNfs& ComexNfs::setHost(const char* host)
 {
     if(host != NULL)
     {
@@ -32,7 +32,7 @@ CPPNfs& CPPNfs::setHost(const char* host)
     return *this;
 }
 
-CPPNfs& CPPNfs::setShareName(const char* share_name)
+ComexNfs& ComexNfs::setShareName(const char* share_name)
 {
     if(share_name != NULL)
     {
@@ -41,7 +41,7 @@ CPPNfs& CPPNfs::setShareName(const char* share_name)
     return *this;
 }
 
-CPPNfs& CPPNfs::setUID(int uid)
+ComexNfs& ComexNfs::setUID(int uid)
 {
     if(uid >= 0)
     {
@@ -50,7 +50,7 @@ CPPNfs& CPPNfs::setUID(int uid)
     return *this;
 }
 
-CPPNfs& CPPNfs::setGID(int gid)
+ComexNfs& ComexNfs::setGID(int gid)
 {
     if(gid >= 0)
     {
@@ -59,19 +59,19 @@ CPPNfs& CPPNfs::setGID(int gid)
     return *this;
 }
 
-CPPNfs& CPPNfs::setVersion(int version)
+ComexNfs& ComexNfs::setVersion(int version)
 {
     this->version = version;
     return *this;
 }
 
-CPPNfs& CPPNfs::seReconnect(bool reconnect)
+ComexNfs& ComexNfs::seReconnect(bool reconnect)
 {
     this->reconnect = reconnect;
     return *this;
 }
 
-CPPNfs& CPPNfs::setLocalDir(const char* dir)
+ComexNfs& ComexNfs::setLocalDir(const char* dir)
 {
     if(dir != NULL)
     {
@@ -84,7 +84,7 @@ CPPNfs& CPPNfs::setLocalDir(const char* dir)
     return *this;
 }
 
-CPPNfs& CPPNfs::setRemoteDir(const char* dir)
+ComexNfs& ComexNfs::setRemoteDir(const char* dir)
 {
     if(dir != NULL)
     {
@@ -97,7 +97,7 @@ CPPNfs& CPPNfs::setRemoteDir(const char* dir)
     return *this;
 }
 
-bool CPPNfs::autoReconnect()
+bool ComexNfs::autoReconnect()
 {
     if(nfs_ctx != NULL && nfs_is_connected((struct nfs_context*)nfs_ctx))
     {
@@ -151,7 +151,7 @@ bool CPPNfs::autoReconnect()
     return nfs_connected;
 }
 
-void CPPNfs::disconnect()
+void ComexNfs::disconnect()
 {
     if(nfs_ctx != NULL)
     {
@@ -161,13 +161,13 @@ void CPPNfs::disconnect()
     }
 }
 
-bool CPPNfs::put(const char* file_path_local)
+bool ComexNfs::put(const char* file_path_local)
 {
     std::string file_path_remote = dir_remote + com_path_name(file_path_local);
     return putAs(file_path_local, file_path_remote.c_str());
 }
 
-bool CPPNfs::putAs(const char* file_path_local, const char* file_path_remote)
+bool ComexNfs::putAs(const char* file_path_local, const char* file_path_remote)
 {
     if(file_path_local == NULL || file_path_remote == NULL)
     {
@@ -216,7 +216,7 @@ bool CPPNfs::putAs(const char* file_path_local, const char* file_path_remote)
     return (write_size >= 0);
 }
 
-bool CPPNfs::get(const char* file_path_remote)
+bool ComexNfs::get(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -235,7 +235,7 @@ bool CPPNfs::get(const char* file_path_remote)
     return getAs(file_path_remote, file_path_local.c_str());
 }
 
-bool CPPNfs::getAs(const char* file_path_remote, const char* file_path_local)
+bool ComexNfs::getAs(const char* file_path_remote, const char* file_path_local)
 {
     if(file_path_local == NULL || file_path_remote == NULL)
     {
@@ -283,17 +283,17 @@ bool CPPNfs::getAs(const char* file_path_remote, const char* file_path_local)
     return (write_size > 0);
 }
 
-CPPBytes CPPNfs::getBytes(const char* file_path_remote)
+ComBytes ComexNfs::getBytes(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
         LOG_E("arg incorrect");
-        return CPPBytes();
+        return ComBytes();
     }
 
     if(autoReconnect() == false)
     {
-        return CPPBytes();
+        return ComBytes();
     }
 
     struct nfsfh* f_remote = NULL;
@@ -301,10 +301,10 @@ CPPBytes CPPNfs::getBytes(const char* file_path_remote)
     if(ret != 0)
     {
         LOG_E("failed to open remote file:%s", PATH_FROM_DOS(file_path_remote).c_str());
-        return CPPBytes();
+        return ComBytes();
     }
 
-    CPPBytes bytes;
+    ComBytes bytes;
     uint8 buf[1024];
     int read_size = 0 ;
     while((read_size = nfs_read((struct nfs_context*)nfs_ctx, f_remote, sizeof(buf), buf)) > 0)
@@ -315,7 +315,7 @@ CPPBytes CPPNfs::getBytes(const char* file_path_remote)
     return bytes;
 }
 
-std::map<std::string, int> CPPNfs::ls(const char* dir_path, bool full_path)
+std::map<std::string, int> ComexNfs::ls(const char* dir_path, bool full_path)
 {
     std::map<std::string, int> list;
     if(dir_path == NULL)
@@ -372,7 +372,7 @@ std::map<std::string, int> CPPNfs::ls(const char* dir_path, bool full_path)
     return list;
 }
 
-bool CPPNfs::rename(const char* file_path, const char* file_path_new)
+bool ComexNfs::rename(const char* file_path, const char* file_path_new)
 {
     if(file_path == NULL || file_path_new == NULL)
     {
@@ -388,7 +388,7 @@ bool CPPNfs::rename(const char* file_path, const char* file_path_new)
     return nfs_rename((struct nfs_context*)nfs_ctx, PATH_FROM_DOS(file_path).c_str(), PATH_FROM_DOS(file_path_new).c_str()) == 0;
 }
 
-bool CPPNfs::clean(const char* file_path)
+bool ComexNfs::clean(const char* file_path)
 {
     if(file_path == NULL)
     {
@@ -404,7 +404,7 @@ bool CPPNfs::clean(const char* file_path)
     return nfs_truncate((struct nfs_context*)nfs_ctx, PATH_FROM_DOS(file_path).c_str(), 0) == 0;
 }
 
-bool CPPNfs::remove(const char* file_path)
+bool ComexNfs::remove(const char* file_path)
 {
     if(file_path == NULL)
     {
@@ -420,7 +420,7 @@ bool CPPNfs::remove(const char* file_path)
     return nfs_unlink((struct nfs_context*)nfs_ctx, PATH_FROM_DOS(file_path).c_str()) == 0;
 }
 
-bool CPPNfs::mkdir(const char* dir_path)
+bool ComexNfs::mkdir(const char* dir_path)
 {
     if(dir_path == NULL)
     {
@@ -473,7 +473,7 @@ bool CPPNfs::mkdir(const char* dir_path)
     return true;
 }
 
-bool CPPNfs::rmdir(const char* dir_path)
+bool ComexNfs::rmdir(const char* dir_path)
 {
     if(dir_path == NULL)
     {
@@ -521,7 +521,7 @@ bool CPPNfs::rmdir(const char* dir_path)
     return true;
 }
 
-int CPPNfs::getFileType(const char* file_path_remote)
+int ComexNfs::getFileType(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -560,7 +560,7 @@ int CPPNfs::getFileType(const char* file_path_remote)
     return FILE_TYPE_UNKNOWN;
 }
 
-int64 CPPNfs::getFileSize(const char* file_path_remote)
+int64 ComexNfs::getFileSize(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -582,7 +582,7 @@ int64 CPPNfs::getFileSize(const char* file_path_remote)
     return (int64)st.nfs_size;
 }
 
-uint32 CPPNfs::getFileAccessTime(const char* file_path_remote)
+uint32 ComexNfs::getFileAccessTime(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -604,7 +604,7 @@ uint32 CPPNfs::getFileAccessTime(const char* file_path_remote)
     return (uint32)st.nfs_atime;
 }
 
-uint32 CPPNfs::getFileModifyTime(const char* file_path_remote)
+uint32 ComexNfs::getFileModifyTime(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -626,7 +626,7 @@ uint32 CPPNfs::getFileModifyTime(const char* file_path_remote)
     return (uint32)st.nfs_mtime;
 }
 
-uint32 CPPNfs::getFileChangeTime(const char* file_path_remote)
+uint32 ComexNfs::getFileChangeTime(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {

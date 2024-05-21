@@ -8,7 +8,7 @@ public:
     MyLiteIPC() {};
     ~MyLiteIPC() {};
 
-    virtual CPPBytes onRecvControl(uint32 addr, uint32 id, uint8* data, int data_size)
+    virtual ComBytes onRecvControl(uint32 addr, uint32 id, uint8* data, int data_size)
     {
         count_control++;
         LOG_I("got control from %u,msg=%s,data_size=%d,count=%d", addr, (char*)data, data_size, count_control.load());
@@ -31,13 +31,13 @@ public:
         LOG_I("got event from %u,msg=%s", addr, (char*)data);
     }
 
-    CPPBytes bytes;
+    ComBytes bytes;
     std::atomic<int> count_control = {0};
     std::atomic<int> count_control_max = {0};
     std::atomic<int> count_event = {0};
     std::atomic<int> count_status = {0};
 
-    CPPSem sem;
+    ComSem sem;
 };
 
 void th_test(MyLiteIPC* ipc)
@@ -53,8 +53,8 @@ void comex_liteipc_unit_test_suit(void** state)
     TIME_COST();
 
     uint8 buf[50 * 1024];
-    CPPBytes send_data(sizeof(buf) * 5);
-    CPPBytes reply_data(sizeof(buf) * 5);
+    ComBytes send_data(sizeof(buf) * 5);
+    ComBytes reply_data(sizeof(buf) * 5);
 
     TIME_COST_SHOW();
     for(int i = 0; i < 1; i++)

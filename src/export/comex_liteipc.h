@@ -25,13 +25,13 @@ public:
     void removeStatusListener(uint32 addr, uint32 id = LITEIPC_ID_ALL);
     void removeEventListener(uint32 addr, uint32 id = LITEIPC_ID_ALL);
 
-    CPPBytes sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms = 5000);
+    ComBytes sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms = 5000);
     bool sendStatus(uint32 id, const void* data, int data_size);
     bool sendEvent(uint32 id, const void* data, int data_size);
 private:
-    virtual CPPBytes onRecvControl(uint32 addr, uint32 id, uint8* data, int data_size)
+    virtual ComBytes onRecvControl(uint32 addr, uint32 id, uint8* data, int data_size)
     {
-        return CPPBytes();
+        return ComBytes();
     };
     virtual void onRecvStatus(uint32 addr, uint32 id, uint8* data, int data_size) {};
     virtual void onRecvEvent(uint32 addr, uint32 id, uint8* data, int data_size) {};
@@ -51,8 +51,8 @@ private:
     std::atomic<bool> thread_rx_running;
 
     std::mutex mutex_rx_queue;
-    CPPCondition condition_rx_queue;
-    std::queue<CPPBytes> rx_queue;
+    ComCondition condition_rx_queue;
+    std::queue<ComBytes> rx_queue;
 };
 
 #endif /* __COMEX_LLTEIPC_H__ */

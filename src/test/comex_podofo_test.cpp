@@ -7,7 +7,7 @@ void comex_podofo_unit_test_suit(void** state)
     extractor.loadFromFile("/data/4.pdf");
     extractor.extractText();
     extractor.extractImage();
-    std::vector<CPPBytes>& images = extractor.getImage();
+    std::vector<ComBytes>& images = extractor.getImage();
     for(size_t i = 0; i < images.size(); i++)
     {
         //images[i].toFile(com_string_format("/data/img/%hu.jpg", i).c_str());

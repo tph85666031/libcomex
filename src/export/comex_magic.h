@@ -11,11 +11,11 @@ public:
 
     std::string getFileType(const char* file);
     std::string getContentType(const void* data, int data_size);
-    std::string getContentType(const CPPBytes& data);
+    std::string getContentType(const ComBytes& data);
 
 private:
     void* ctx;
-    CPPBytes content;
+    ComBytes content;
 };
 
 #endif  /* __COMEX_MAGIC_H__ */

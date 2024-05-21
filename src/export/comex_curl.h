@@ -82,35 +82,35 @@ private:
     CURLE_LDAP_SEARCH_FAILED, 39: LDAP: search failed
     CURLE_LIBRARY_NOT_FOUND, 40: a required shared library was not found
 */
-class COM_EXPORT CPPCurl
+class COM_EXPORT ComexCurl
 {
 public:
-    CPPCurl();
-    virtual ~CPPCurl();
+    ComexCurl();
+    virtual ~ComexCurl();
     HttpResponse post(const char* url, const char* body = NULL);
     HttpResponse get(const char* fmt, ...) __attribute__((format(printf, 2, 3)));
     HttpResponse put(const char* url, const char* body = NULL);
     HttpResponse send(const char* url, const char* method, const void* body = NULL, int body_size = 0);
-    CPPCurl& addHeader(const char* header);
-    CPPCurl& addHeader(const char* key, const char* value);
-    CPPCurl& addFormData(const char* key, const char* value);
-    CPPCurl& addFormFile(const char* name, const char* path, int64 offset = 0, int64 size = -1);
-    CPPCurl& enableDebug();
-    CPPCurl& disableDebug();
+    ComexCurl& addHeader(const char* header);
+    ComexCurl& addHeader(const char* key, const char* value);
+    ComexCurl& addFormData(const char* key, const char* value);
+    ComexCurl& addFormFile(const char* name, const char* path, int64 offset = 0, int64 size = -1);
+    ComexCurl& enableDebug();
+    ComexCurl& disableDebug();
 
-    CPPCurl& setVerifyCertDNS(bool enable);
-    CPPCurl& setVerifyCertCA(bool enable);
-    CPPCurl& setConnectionTimeout(int timeout_ms);
-    CPPCurl& setReceiveTimeout(int timeout_ms);
-    CPPCurl& setRetryCount(int retryCount);
+    ComexCurl& setVerifyCertDNS(bool enable);
+    ComexCurl& setVerifyCertCA(bool enable);
+    ComexCurl& setConnectionTimeout(int timeout_ms);
+    ComexCurl& setReceiveTimeout(int timeout_ms);
+    ComexCurl& setRetryCount(int retryCount);
 
-    CPPCurl& setCAFile(const char* file);
-    CPPCurl& setCertFile(const char* file, const char* type = NULL);
-    CPPCurl& setCertPassword(const char* password);
-    CPPCurl& setKeyFile(const char* file, const char* type = NULL);
-    CPPCurl& setKeyPassword(const char* password);
-    CPPCurl& setUsername(const char* username);
-    CPPCurl& setPassword(const char* password);
+    ComexCurl& setCAFile(const char* file);
+    ComexCurl& setCertFile(const char* file, const char* type = NULL);
+    ComexCurl& setCertPassword(const char* password);
+    ComexCurl& setKeyFile(const char* file, const char* type = NULL);
+    ComexCurl& setKeyPassword(const char* password);
+    ComexCurl& setUsername(const char* username);
+    ComexCurl& setPassword(const char* password);
 
     int64 getRemoteFileSize(const char* url);
 
@@ -128,7 +128,7 @@ public:
         @return >0:已下载字节数
     */
 
-    int64 download(const char* url, int64 remoteFileSize, CPPBytes& bytes,
+    int64 download(const char* url, int64 remoteFileSize, ComBytes& bytes,
                    int64 beginByte, int64 endByte, CurlProgress& progress);
     /**
         下载数据到内存
@@ -138,8 +138,8 @@ public:
         @return -1至-99:对应CURL错误码
         @return >0:已下载字节数
     */
-    int64 download(const char* url, CPPBytes& bytes);
-    int64 download(const char* url, CPPBytes& bytes, CurlProgress& progress);
+    int64 download(const char* url, ComBytes& bytes);
+    int64 download(const char* url, ComBytes& bytes, CurlProgress& progress);
 
     /**
         下载数据到文件
@@ -180,6 +180,7 @@ private:
 
     std::string server_cert_pem;
 };
+//typedef ComexCurl DEPRECATED("Use ComexCurl instead") CPPCurl;
 
 #endif /* __COMEX_CURL_H__ */
 

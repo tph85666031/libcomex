@@ -7,17 +7,17 @@
 #include "smb2/smb2.h"
 
 
-CPPSmb::CPPSmb()
+ComexSmb::ComexSmb()
 {
     dir_local = "." PATH_DELIM_STR;
 }
 
-CPPSmb::~CPPSmb()
+ComexSmb::~ComexSmb()
 {
     disconnect();
 }
 
-CPPSmb& CPPSmb::setShareUrlPath(const char* url)
+ComexSmb& ComexSmb::setShareUrlPath(const char* url)
 {
     if(url != NULL)
     {
@@ -26,7 +26,7 @@ CPPSmb& CPPSmb::setShareUrlPath(const char* url)
     return *this;
 }
 
-CPPSmb& CPPSmb::setHost(const char* host)
+ComexSmb& ComexSmb::setHost(const char* host)
 {
     if(host != NULL)
     {
@@ -35,7 +35,7 @@ CPPSmb& CPPSmb::setHost(const char* host)
     return *this;
 }
 
-CPPSmb& CPPSmb::setShareName(const char* share)
+ComexSmb& ComexSmb::setShareName(const char* share)
 {
     if(share != NULL)
     {
@@ -44,7 +44,7 @@ CPPSmb& CPPSmb::setShareName(const char* share)
     return *this;
 }
 
-CPPSmb& CPPSmb::setDomain(const char* domain)
+ComexSmb& ComexSmb::setDomain(const char* domain)
 {
     if(domain != NULL)
     {
@@ -53,7 +53,7 @@ CPPSmb& CPPSmb::setDomain(const char* domain)
     return *this;
 }
 
-CPPSmb& CPPSmb::setUsername(const char* user)
+ComexSmb& ComexSmb::setUsername(const char* user)
 {
     if(user != NULL)
     {
@@ -62,7 +62,7 @@ CPPSmb& CPPSmb::setUsername(const char* user)
     return *this;
 }
 
-CPPSmb& CPPSmb::setPassword(const char* pwd)
+ComexSmb& ComexSmb::setPassword(const char* pwd)
 {
     if(pwd != NULL)
     {
@@ -71,7 +71,7 @@ CPPSmb& CPPSmb::setPassword(const char* pwd)
     return *this;
 }
 
-CPPSmb& CPPSmb::setWorkstation(const char* workstation)
+ComexSmb& ComexSmb::setWorkstation(const char* workstation)
 {
     if(workstation != NULL)
     {
@@ -80,7 +80,7 @@ CPPSmb& CPPSmb::setWorkstation(const char* workstation)
     return *this;
 }
 
-CPPSmb& CPPSmb::setLocalDir(const char* dir)
+ComexSmb& ComexSmb::setLocalDir(const char* dir)
 {
     if(dir != NULL)
     {
@@ -93,7 +93,7 @@ CPPSmb& CPPSmb::setLocalDir(const char* dir)
     return *this;
 }
 
-CPPSmb& CPPSmb::setRemoteDir(const char* dir)
+ComexSmb& ComexSmb::setRemoteDir(const char* dir)
 {
     if(dir != NULL)
     {
@@ -106,7 +106,7 @@ CPPSmb& CPPSmb::setRemoteDir(const char* dir)
     return *this;
 }
 
-bool CPPSmb::autoReconnect()
+bool ComexSmb::autoReconnect()
 {
     if(smb_ctx != NULL && smb2_echo((struct smb2_context*)smb_ctx) == SMB2_STATUS_SUCCESS)
     {
@@ -180,7 +180,7 @@ bool CPPSmb::autoReconnect()
     return (ret == 0);
 }
 
-void CPPSmb::disconnect()
+void ComexSmb::disconnect()
 {
     if(smb_ctx != NULL)
     {
@@ -190,13 +190,13 @@ void CPPSmb::disconnect()
     }
 }
 
-bool CPPSmb::put(const char* file_path_local)
+bool ComexSmb::put(const char* file_path_local)
 {
     std::string file_path_remote = dir_remote + com_path_name(file_path_local);
     return putAs(file_path_local, file_path_remote.c_str());
 }
 
-bool CPPSmb::putAs(const char* file_path_local, const char* file_path_remote)
+bool ComexSmb::putAs(const char* file_path_local, const char* file_path_remote)
 {
     if(file_path_local == NULL || file_path_remote == NULL)
     {
@@ -253,7 +253,7 @@ bool CPPSmb::putAs(const char* file_path_local, const char* file_path_remote)
     return (write_size >= 0);
 }
 
-bool CPPSmb::get(const char* file_path_remote)
+bool ComexSmb::get(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -272,7 +272,7 @@ bool CPPSmb::get(const char* file_path_remote)
     return getAs(file_path_remote, file_path_local.c_str());
 }
 
-bool CPPSmb::getAs(const char* file_path_remote, const char* file_path_local)
+bool ComexSmb::getAs(const char* file_path_remote, const char* file_path_local)
 {
     if(file_path_remote == NULL || file_path_local == NULL)
     {
@@ -319,27 +319,27 @@ bool CPPSmb::getAs(const char* file_path_remote, const char* file_path_local)
     return (write_size > 0);
 }
 
-CPPBytes CPPSmb::getBytes(const char* file_path_remote)
+ComBytes ComexSmb::getBytes(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
         LOG_E("arg incorrect");
-        return CPPBytes();
+        return ComBytes();
     }
 
     if(autoReconnect() == false)
     {
-        return CPPBytes();
+        return ComBytes();
     }
 
     struct smb2fh* f_remote = smb2_open((struct smb2_context*)smb_ctx, file_path_remote, O_RDONLY);
     if(f_remote == NULL)
     {
         LOG_E("failed to open remote file:%s", file_path_remote);
-        return CPPBytes();
+        return ComBytes();
     }
 
-    CPPBytes bytes;
+    ComBytes bytes;
     uint8 buf[1024];
     int read_size = 0 ;
     while((read_size = smb2_read((struct smb2_context*)smb_ctx, f_remote, buf, sizeof(buf))) > 0)
@@ -350,7 +350,7 @@ CPPBytes CPPSmb::getBytes(const char* file_path_remote)
     return bytes;
 }
 
-std::map<std::string, int> CPPSmb::ls(const char* dir_path, bool full_path)
+std::map<std::string, int> ComexSmb::ls(const char* dir_path, bool full_path)
 {
     std::map<std::string, int> list;
     if(dir_path == NULL)
@@ -407,7 +407,7 @@ std::map<std::string, int> CPPSmb::ls(const char* dir_path, bool full_path)
     return list;
 }
 
-bool CPPSmb::rename(const char* file_path, const char* file_path_new)
+bool ComexSmb::rename(const char* file_path, const char* file_path_new)
 {
     if(file_path == NULL || file_path_new == NULL)
     {
@@ -423,7 +423,7 @@ bool CPPSmb::rename(const char* file_path, const char* file_path_new)
     return smb2_rename((struct smb2_context*)smb_ctx, file_path, file_path_new) == 0;
 }
 
-bool CPPSmb::clean(const char* file_path)
+bool ComexSmb::clean(const char* file_path)
 {
     if(file_path == NULL)
     {
@@ -439,7 +439,7 @@ bool CPPSmb::clean(const char* file_path)
     return smb2_truncate((struct smb2_context*)smb_ctx, file_path, 0) == 0;
 }
 
-bool CPPSmb::remove(const char* file_path)
+bool ComexSmb::remove(const char* file_path)
 {
     if(file_path == NULL)
     {
@@ -455,7 +455,7 @@ bool CPPSmb::remove(const char* file_path)
     return smb2_unlink((struct smb2_context*)smb_ctx, file_path) == 0;
 }
 
-bool CPPSmb::mkdir(const char* dir_path)
+bool ComexSmb::mkdir(const char* dir_path)
 {
     if(dir_path == NULL)
     {
@@ -511,7 +511,7 @@ bool CPPSmb::mkdir(const char* dir_path)
     return true;
 }
 
-bool CPPSmb::rmdir(const char* dir_path)
+bool ComexSmb::rmdir(const char* dir_path)
 {
     if(dir_path == NULL)
     {
@@ -556,7 +556,7 @@ bool CPPSmb::rmdir(const char* dir_path)
     return true;
 }
 
-int CPPSmb::getFileType(const char* file_path_remote)
+int ComexSmb::getFileType(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -593,7 +593,7 @@ int CPPSmb::getFileType(const char* file_path_remote)
     return FILE_TYPE_UNKNOWN;
 }
 
-int64 CPPSmb::getFileSize(const char* file_path_remote)
+int64 ComexSmb::getFileSize(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -615,7 +615,7 @@ int64 CPPSmb::getFileSize(const char* file_path_remote)
     return (int64)st.smb2_size;
 }
 
-uint32 CPPSmb::getFileAccessTime(const char* file_path_remote)
+uint32 ComexSmb::getFileAccessTime(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -637,7 +637,7 @@ uint32 CPPSmb::getFileAccessTime(const char* file_path_remote)
     return (uint32)st.smb2_atime;
 }
 
-uint32 CPPSmb::getFileModifyTime(const char* file_path_remote)
+uint32 ComexSmb::getFileModifyTime(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {
@@ -659,7 +659,7 @@ uint32 CPPSmb::getFileModifyTime(const char* file_path_remote)
     return (uint32)st.smb2_mtime;
 }
 
-uint32 CPPSmb::getFileChangeTime(const char* file_path_remote)
+uint32 ComexSmb::getFileChangeTime(const char* file_path_remote)
 {
     if(file_path_remote == NULL)
     {

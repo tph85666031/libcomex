@@ -96,7 +96,7 @@ private:
     std::map<std::string, int> sub_topics;
     std::thread thread_loop;
     std::atomic<bool> connection_ready;
-    CPPSem sem_mqtt_conn;
+    ComSem sem_mqtt_conn;
     void* mosq = NULL;
     bool clean_session = true;
     std::string client_id;
@@ -109,7 +109,7 @@ private:
     std::string cert_file;//PEM
     std::string key_file;//PEM
     std::string key_password;
-    CPPBytes will_data;
+    ComBytes will_data;
     std::string will_topic;
     int will_qos = MQTT_QOS1;
     bool will_retain = false;

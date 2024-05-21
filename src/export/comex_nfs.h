@@ -3,29 +3,29 @@
 
 #include "com_base.h"
 
-class COM_EXPORT CPPNfs
+class COM_EXPORT ComexNfs
 {
 public:
-    CPPNfs();
-    virtual ~CPPNfs();
+    ComexNfs();
+    virtual ~ComexNfs();
     
-	CPPNfs& setShareUrlPath(const char* url);
-    CPPNfs& setHost(const char* host);
-    CPPNfs& setShareName(const char* share_name);
-    CPPNfs& setUID(int uid);
-    CPPNfs& setGID(int gid);
-    CPPNfs& setVersion(int version);
-    CPPNfs& seReconnect(bool reconnect);
+	ComexNfs& setShareUrlPath(const char* url);
+    ComexNfs& setHost(const char* host);
+    ComexNfs& setShareName(const char* share_name);
+    ComexNfs& setUID(int uid);
+    ComexNfs& setGID(int gid);
+    ComexNfs& setVersion(int version);
+    ComexNfs& seReconnect(bool reconnect);
 
-    CPPNfs& setLocalDir(const char* dir);
-    CPPNfs& setRemoteDir(const char* dir);
+    ComexNfs& setLocalDir(const char* dir);
+    ComexNfs& setRemoteDir(const char* dir);
 
     bool put(const char* file_path_local);
     bool putAs(const char* file_path_local, const char* file_path_remote);
 
     bool get(const char* file_path_remote);
     bool getAs(const char* file_path_remote, const char* file_path_local);
-    CPPBytes getBytes(const char* file_path_remote);
+    ComBytes getBytes(const char* file_path_remote);
 
     std::map<std::string, int> ls(const char* dir_path, bool full_path = true);
     bool rename(const char* file_path, const char* file_path_new);
@@ -56,6 +56,7 @@ private:
     void* nfs_ctx  = NULL;
     bool nfs_connected = false;
 };
+//typedef ComexNfs DEPRECATED("Use ComexNfs instead") CPPNfs;
 
 #endif /* __COMEX_NFS_H__ */
 

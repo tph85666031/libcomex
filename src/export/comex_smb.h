@@ -3,26 +3,26 @@
 
 #include "com_base.h"
 
-class COM_EXPORT CPPSmb
+class COM_EXPORT ComexSmb
 {
 public:
-    CPPSmb();
-    virtual ~CPPSmb();
-    CPPSmb& setShareUrlPath(const char* url);
-    CPPSmb& setHost(const char* host);
-    CPPSmb& setShareName(const char* share);
-    CPPSmb& setDomain(const char* domain);
-    CPPSmb& setUsername(const char* user);
-    CPPSmb& setPassword(const char* pwd);
-    CPPSmb& setWorkstation(const char* workstation);
-    CPPSmb& setLocalDir(const char* dir);
-    CPPSmb& setRemoteDir(const char* dir);
+    ComexSmb();
+    virtual ~ComexSmb();
+    ComexSmb& setShareUrlPath(const char* url);
+    ComexSmb& setHost(const char* host);
+    ComexSmb& setShareName(const char* share);
+    ComexSmb& setDomain(const char* domain);
+    ComexSmb& setUsername(const char* user);
+    ComexSmb& setPassword(const char* pwd);
+    ComexSmb& setWorkstation(const char* workstation);
+    ComexSmb& setLocalDir(const char* dir);
+    ComexSmb& setRemoteDir(const char* dir);
 
     bool put(const char* file_path_local);
     bool putAs(const char* file_path_local, const char* file_path_remote);
     bool get(const char* file_path_remote);
     bool getAs(const char* file_path_remote, const char* file_path_local);
-    CPPBytes getBytes(const char* file_path_remote);
+    ComBytes getBytes(const char* file_path_remote);
 
     std::map<std::string, int> ls(const char* dir_path, bool full_path = true);
     bool rename(const char* file_path, const char* file_path_new);
@@ -52,6 +52,7 @@ private:
 
     void* smb_ctx  = NULL;
 };
+//typedef ComexSmb DEPRECATED("Use ComexSmb instead") CPPSmb;
 
 #endif /* __COMEX_SMB_H__ */
 

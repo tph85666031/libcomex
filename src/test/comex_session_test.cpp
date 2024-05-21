@@ -4,7 +4,7 @@
 
 void comex_session_unit_test_suit(void** state)
 {
-    CPPSessionManager mgr;
+    ComexSessionManager mgr;
     LOG_I("my session=%s", mgr.getSessionIDByPID().c_str());
     mgr.showAllSesions();
 }

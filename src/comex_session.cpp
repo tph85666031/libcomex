@@ -6,7 +6,7 @@
 #include "CJsonObject.h"
 #include "comex_session.h"
 
-std::string CPPSession::toJson()
+std::string ComexSession::toJson()
 {
     CJsonObject json;
     json.Add("ID", id);
@@ -28,19 +28,19 @@ std::string CPPSession::toJson()
     return json.ToString();
 }
 
-CPPSessionManager::CPPSessionManager()
+ComexSessionManager::ComexSessionManager()
 {
     memset(serial_id_propeties, 0, sizeof(serial_id_propeties));
     openDBus();
     querySessions();
 }
 
-CPPSessionManager::~CPPSessionManager()
+ComexSessionManager::~ComexSessionManager()
 {
     closeDBus();
 }
 
-bool CPPSessionManager::openDBus()
+bool ComexSessionManager::openDBus()
 {
     dbus_error_init(&err);
     conn = dbus_bus_get(DBUS_BUS_SYSTEM, &err);
@@ -79,7 +79,7 @@ bool CPPSessionManager::openDBus()
     return true;
 }
 
-void CPPSessionManager::closeDBus()
+void ComexSessionManager::closeDBus()
 {
     thread_event_dispatcher_running = false;
     if(thread_dispatcher.joinable())
@@ -95,7 +95,7 @@ void CPPSessionManager::closeDBus()
     }
 }
 
-std::string CPPSessionManager::getMessageValueAsString(DBusMessageIter& it)
+std::string ComexSessionManager::getMessageValueAsString(DBusMessageIter& it)
 {
     int type = dbus_message_iter_get_arg_type(&it);
     if(type == DBUS_TYPE_BYTE)
@@ -169,7 +169,7 @@ std::string CPPSessionManager::getMessageValueAsString(DBusMessageIter& it)
     return std::string();
 }
 
-bool CPPSessionManager::querySessions()
+bool ComexSessionManager::querySessions()
 {
     DBusMessage* msg = dbus_message_new_method_call("org.freedesktop.login1",
                        "/org/freedesktop/login1",
@@ -190,7 +190,7 @@ bool CPPSessionManager::querySessions()
     return true;
 }
 
-bool CPPSessionManager::queryProperties(const char* path)
+bool ComexSessionManager::queryProperties(const char* path)
 {
     if(path == NULL)
     {
@@ -223,7 +223,7 @@ bool CPPSessionManager::queryProperties(const char* path)
     return true;
 }
 
-bool CPPSessionManager::parseSessions(DBusMessage* msg)
+bool ComexSessionManager::parseSessions(DBusMessage* msg)
 {
     LOG_I("called");
     if(msg == NULL)
@@ -261,10 +261,10 @@ bool CPPSessionManager::parseSessions(DBusMessage* msg)
 
         if(sessions.count(id) == 0)
         {
-            sessions[id] = CPPSession();
+            sessions[id] = ComexSession();
         }
 
-        CPPSession& session = sessions[id];
+        ComexSession& session = sessions[id];
         session.id = id;
 
         //uid
@@ -312,7 +312,7 @@ bool CPPSessionManager::parseSessions(DBusMessage* msg)
     return true;
 }
 
-bool CPPSessionManager::parseProperties(DBusMessage* msg)
+bool ComexSessionManager::parseProperties(DBusMessage* msg)
 {
     if(msg == NULL)
     {
@@ -320,7 +320,7 @@ bool CPPSessionManager::parseProperties(DBusMessage* msg)
         return false;
     }
 
-    CPPSession session;
+    ComexSession session;
     DBusMessageIter it0;
     dbus_message_iter_init(msg, &it0);
 
@@ -434,7 +434,7 @@ bool CPPSessionManager::parseProperties(DBusMessage* msg)
     mutex_sessions.lock();
     if(sessions.count(session.id) > 0)
     {
-        CPPSession& session_old = sessions[session.id];
+        ComexSession& session_old = sessions[session.id];
         session.user = session_old.user;
         session.session_path = session_old.session_path;
         session.seat = session_old.seat;
@@ -458,17 +458,17 @@ bool CPPSessionManager::parseProperties(DBusMessage* msg)
     return true;
 }
 
-void CPPSessionManager::onSessionNew(CPPSession& session)
+void ComexSessionManager::onSessionNew(ComexSession& session)
 {
     LOG_I("%s", session.toJson().c_str());
 }
 
-void CPPSessionManager::onSessionRemoved(CPPSession& session)
+void ComexSessionManager::onSessionRemoved(ComexSession& session)
 {
     LOG_I("%s", session.toJson().c_str());
 }
 
-bool CPPSessionManager::isSessionExist(const char* id)
+bool ComexSessionManager::isSessionExist(const char* id)
 {
     if(id == NULL)
     {
@@ -478,23 +478,23 @@ bool CPPSessionManager::isSessionExist(const char* id)
     return sessions.count(id) > 0;
 }
 
-CPPSession CPPSessionManager::getSession(const char* id)
+ComexSession ComexSessionManager::getSession(const char* id)
 {
     if(id == NULL)
     {
-        return CPPSession();
+        return ComexSession();
     }
     std::lock_guard<std::mutex> lck(mutex_sessions);
     if(sessions.count(id) == 0)
     {
-        return CPPSession();
+        return ComexSession();
     }
     return sessions[id];
 }
 
-std::vector<CPPSession> CPPSessionManager::getAllSessions()
+std::vector<ComexSession> ComexSessionManager::getAllSessions()
 {
-    std::vector<CPPSession> values;
+    std::vector<ComexSession> values;
 
     std::lock_guard<std::mutex> lck(mutex_sessions);
     for(auto it = sessions.begin(); it != sessions.end(); it++)
@@ -504,7 +504,7 @@ std::vector<CPPSession> CPPSessionManager::getAllSessions()
     return values;
 }
 
-std::string CPPSessionManager::getSessionIDByPID(int64 pid)
+std::string ComexSessionManager::getSessionIDByPID(int64 pid)
 {
     if(pid < 0)
     {
@@ -519,7 +519,7 @@ std::string CPPSessionManager::getSessionIDByPID(int64 pid)
     return com_file_readall(com_string_format("/proc/%lld/sessionid", pid).c_str()).toString();
 }
 
-void CPPSessionManager::ThreadListener(CPPSessionManager* ctx)
+void ComexSessionManager::ThreadListener(ComexSessionManager* ctx)
 {
     if(ctx == NULL)
     {
@@ -533,17 +533,17 @@ void CPPSessionManager::ThreadListener(CPPSessionManager* ctx)
     return;
 }
 
-void CPPSessionManager::showAllSesions()
+void ComexSessionManager::showAllSesions()
 {
     std::lock_guard<std::mutex> lck(mutex_sessions);
     for(auto it = sessions.begin(); it != sessions.end(); it++)
     {
-        CPPSession& session = it->second;
+        ComexSession& session = it->second;
         LOG_I("%s", session.toJson().c_str());
     }
 }
 
-void CPPSessionManager::ThreadEventDispatcher(CPPSessionManager* ctx)
+void ComexSessionManager::ThreadEventDispatcher(ComexSessionManager* ctx)
 {
     if(ctx == NULL)
     {
@@ -573,7 +573,7 @@ void CPPSessionManager::ThreadEventDispatcher(CPPSessionManager* ctx)
                 ctx->mutex_sessions.unlock();
                 continue;
             }
-            CPPSession session = ctx->sessions[session_id];
+            ComexSession session = ctx->sessions[session_id];
             ctx->mutex_sessions.unlock();
             ctx->onSessionNew(session);
 
@@ -593,7 +593,7 @@ void CPPSessionManager::ThreadEventDispatcher(CPPSessionManager* ctx)
             ctx->mutex_event.unlock();
 
             ctx->mutex_sessions.lock();
-            CPPSession session;
+            ComexSession session;
             session.id = session_id;
             auto it = ctx->sessions.find(session_id);
             if(it != ctx->sessions.end())
@@ -612,13 +612,13 @@ void CPPSessionManager::ThreadEventDispatcher(CPPSessionManager* ctx)
     return;
 }
 
-DBusHandlerResult CPPSessionManager::ListenerMessageCallback(DBusConnection* conn, DBusMessage* msg, void* user_data)
+DBusHandlerResult ComexSessionManager::ListenerMessageCallback(DBusConnection* conn, DBusMessage* msg, void* user_data)
 {
     if(conn == NULL || msg == NULL || user_data == NULL)
     {
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
     }
-    CPPSessionManager* ctx = (CPPSessionManager*)user_data;
+    ComexSessionManager* ctx = (ComexSessionManager*)user_data;
 #if 0
     LOG_I("called,type=%d,member=%s,interface=%s,sender=%s,signature=%s,serial=%u,destination=%s,path=%s",
           dbus_message_get_type(msg),

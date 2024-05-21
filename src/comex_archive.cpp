@@ -41,7 +41,7 @@ static ssize_t Archive_Mem_Write(struct archive* ctx, void* buffer, const void* 
         return ARCHIVE_FATAL;
     }
 
-    CPPBytes* bytes = (CPPBytes*)buffer;
+    ComBytes* bytes = (ComBytes*)buffer;
     bytes->append((uint8*)data, size);
     return size;
 }
@@ -95,7 +95,7 @@ bool ArchiveZip::open(const char* file, bool append, bool create)
     return true;
 }
 
-bool ArchiveZip::open(const CPPBytes& content)
+bool ArchiveZip::open(const ComBytes& content)
 {
     zip_source_t* zip_source = zip_source_buffer_create(content.getData(), content.getDataSize(), 0, NULL);
     if(zip_source == NULL)
@@ -314,18 +314,18 @@ bool ArchiveZip::removeDirectoy(const char* path)
     return false;
 }
 
-CPPBytes ArchiveZip::read(const char* path)
+ComBytes ArchiveZip::read(const char* path)
 {
     if(ctx == NULL || path == NULL)
     {
-        return CPPBytes();
+        return ComBytes();
     }
     zip_file_t* f = zip_fopen((zip_t*)ctx, path, 0);
     if(f == NULL)
     {
-        return CPPBytes();
+        return ComBytes();
     }
-    CPPBytes result;
+    ComBytes result;
     uint8 buf[1024];
     zip_int64_t size = 0;
     while((size = zip_fread(f, buf, sizeof(buf))) > 0)
@@ -370,7 +370,7 @@ bool ArchiveZip::readTo(const char* path, const char* to, bool append)
         com_file_close(f_to);
         return false;
     }
-    CPPBytes result;
+    ComBytes result;
     uint8 buf[1024];
     zip_int64_t size = 0;
     while((size = zip_fread(f_from, buf, sizeof(buf))) > 0)
@@ -903,9 +903,9 @@ void ArchiveReader::list(const char* path, std::function<void(const std::string&
     close();
 }
 
-CPPBytes ArchiveReader::read()
+ComBytes ArchiveReader::read()
 {
-    CPPBytes data;
+    ComBytes data;
     int64 size = 0;
     uint8 buf[4096];
     while((size = archive_read_data((struct archive*)ctx, buf, sizeof(buf))) > 0)
@@ -915,13 +915,13 @@ CPPBytes ArchiveReader::read()
     return data;
 }
 
-CPPBytes ArchiveReader::read(const char* path)
+ComBytes ArchiveReader::read(const char* path)
 {
     if(path == NULL || open() == false)
     {
-        return CPPBytes();
+        return ComBytes();
     }
-    CPPBytes data;
+    ComBytes data;
     struct archive_entry* entry = NULL;
     while(archive_read_next_header((struct archive*)ctx, &entry) == ARCHIVE_OK)
     {
@@ -1075,7 +1075,7 @@ ArchiveWriter::ArchiveWriter(const char* file, const char* pwd)
     }
 }
 
-ArchiveWriter::ArchiveWriter(CPPBytes& buffer, const char* suffix, const char* pwd)
+ArchiveWriter::ArchiveWriter(ComBytes& buffer, const char* suffix, const char* pwd)
 {
     if(suffix == NULL)
     {

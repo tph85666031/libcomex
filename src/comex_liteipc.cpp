@@ -65,7 +65,7 @@ LiteIPC& LiteIPC::setWill(uint32 id, const void* data, int data_size)
         msg.magic = magic++;
         msg.id = id;
         msg.len = data_size;
-        CPPBytes bytes(sizeof(IPC_MSG) + data_size);
+        ComBytes bytes(sizeof(IPC_MSG) + data_size);
         bytes.append((uint8*)&msg, sizeof(IPC_MSG));
         bytes.append((const uint8*)data, data_size);
         std::string topic = com_string_format("/%u/OUT/STATUS/%u", addr, id);
@@ -151,19 +151,19 @@ void LiteIPC::onRecv(const std::string& topic, const uint8* data, int data_size,
     else
     {
         mutex_rx_queue.lock();
-        rx_queue.push(CPPBytes(data, data_size));
+        rx_queue.push(ComBytes(data, data_size));
         mutex_rx_queue.unlock();
         condition_rx_queue.notifyAll();
     }
     return;
 }
 
-CPPBytes LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms)
+ComBytes LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms)
 {
     if(data == NULL || data_size <= 0)
     {
         LOG_E("arg incorrect");
-        return CPPBytes();
+        return ComBytes();
     }
 
     IPC_MSG msg;
@@ -174,7 +174,7 @@ CPPBytes LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data
     msg.id = id;
     msg.len = data_size;
 
-    CPPBytes bytes(sizeof(IPC_MSG) + data_size);
+    ComBytes bytes(sizeof(IPC_MSG) + data_size);
     bytes.append((uint8*)&msg, sizeof(IPC_MSG));
     bytes.append((uint8*)data, data_size);
     std::string topic = com_string_format("/%u/IN", addr);
@@ -182,7 +182,7 @@ CPPBytes LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data
     if(isConnected() == false || timeout_ms <= 0)
     {
         publish(topic.c_str(), bytes.getData(), bytes.getDataSize(), qos_control, false);
-        return CPPBytes();
+        return ComBytes();
     }
 
     GetSyncManager().getAdapter("comex_liteipc").syncPrepare(msg.magic);
@@ -190,7 +190,7 @@ CPPBytes LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data
     {
         GetSyncManager().getAdapter("comex_liteipc").syncCancel(msg.magic);
         LOG_E("failed");
-        return CPPBytes();
+        return ComBytes();
     }
 
     return GetSyncManager().getAdapter("comex_liteipc").syncWait(msg.magic, timeout_ms);
@@ -212,7 +212,7 @@ bool LiteIPC::sendStatus(uint32 id, const void* data, int data_size)
     msg.id = id;
     msg.len = data_size;
 
-    CPPBytes bytes(sizeof(IPC_MSG) + data_size);
+    ComBytes bytes(sizeof(IPC_MSG) + data_size);
     bytes.append((uint8*)&msg, sizeof(IPC_MSG));
     bytes.append((uint8*)data, data_size);
 
@@ -236,7 +236,7 @@ bool LiteIPC::sendEvent(uint32 id, const void* data, int data_size)
     msg.id = id;
     msg.len = data_size;
 
-    CPPBytes bytes(sizeof(IPC_MSG) + data_size);
+    ComBytes bytes(sizeof(IPC_MSG) + data_size);
     bytes.append((uint8*)&msg, sizeof(IPC_MSG));
     bytes.append((uint8*)data, data_size);
 
@@ -264,7 +264,7 @@ void LiteIPC::ThreadRx(LiteIPC* ctx)
                 ctx->mutex_rx_queue.unlock();
                 break;
             }
-            CPPBytes bytes = std::move(ctx->rx_queue.front());
+            ComBytes bytes = std::move(ctx->rx_queue.front());
             ctx->rx_queue.pop();
             ctx->mutex_rx_queue.unlock();
 
@@ -277,7 +277,7 @@ void LiteIPC::ThreadRx(LiteIPC* ctx)
 
             if(msg->flag == LITE_IPC_FLAG_CONTROL)
             {
-                CPPBytes reply = std::move(ctx->onRecvControl(msg->from, msg->id, msg->data, msg->len));
+                ComBytes reply = std::move(ctx->onRecvControl(msg->from, msg->id, msg->data, msg->len));
                 IPC_MSG msg_reply;
                 msg_reply.from = ctx->addr;
                 msg_reply.to = msg->from;
