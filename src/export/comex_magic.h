@@ -12,9 +12,10 @@ public:
     std::string getFileType(const char* file);
     std::string getContentType(const void* data, int data_size);
     std::string getContentType(const ComBytes& data);
-
 private:
-    void* ctx;
+    void* open();
+    void close(void* ctx);
+private:
     ComBytes content;
 };
 

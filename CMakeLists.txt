@@ -50,8 +50,8 @@ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
 IF (NOT APPLE)
   IF (UNIX)
-    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,--copy-dt-needed-entries -fPIC -fvisibility=hidden -Wl,-Bsymbolic")
-    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--copy-dt-needed-entries -fPIC -fvisibility=hidden -Wl,-Bsymbolic")
+    SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,--copy-dt-needed-entries -fPIC -fvisibility=hidden -Wl,-Bsymbolic -Wl,--exclude-libs,ALL")
+    SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,--copy-dt-needed-entries -fPIC -fvisibility=hidden -Wl,-Bsymbolic -Wl,--exclude-libs,ALL")
   ENDIF()
 ENDIF()
 
@@ -83,7 +83,6 @@ SET(PROJECT_LIB
     pthread
     dl
     m
-    -Wl,--start-group
     libmosquitto.a
     libwebsockets.a
     libcurl.a
@@ -119,7 +118,6 @@ SET(PROJECT_LIB
     libqrencode.a
     libpixman-1.a
     libstdc++fs.a
-    -Wl,--end-group
 )
 ELSE()
 ADD_COMPILE_OPTIONS( /W3 /wd4819 /wd4251 /wd4200 /wd4996)
@@ -186,7 +184,7 @@ ELSE()
 ENDIF()
 
 SET(CPACK_GENERATOR TGZ)
-SET(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/out/export)
+SET(CMAKE_INSTALL_PREFIX ${PROJECT_SOURCE_DIR}/out/export/)
 SET(CMAKE_INSTALL_CONFIG_NAME ${CMAKE_BUILD_TYPE})
 SET(CPACK_PACKAGE_VERSION ${COMEX_MAJOR_VERSION}.${COMEX_MINOR_VERSION}.${COMEX_PATCH_VERSION})
 SET(CPACK_PACKAGE_VERSION_MAJOR ${COMEX_MAJOR_VERSION})
@@ -194,6 +192,7 @@ SET(CPACK_PACKAGE_VERSION_MINOR ${COMEX_MINOR_VERSION})
 SET(CPACK_PACKAGE_VERSION_PATCH ${COMEX_PATCH_VERSION})
 SET(CPACK_PACKAGE_FILE_NAME ${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VERSION}_${OS_TYPE}_${BUILD_ARCH}_${BUILD_TYPE})
 SET(CPACK_PACKAGE_DIRECTORY ${PROJECT_SOURCE_DIR}/out)
+SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 SET(CPACK_ARCHIVE_THREADS 0)
 INCLUDE(CPack)
 
