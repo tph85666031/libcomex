@@ -223,14 +223,7 @@ void PdfExtrator::extractImage()
                     {
                         int width = p_width->GetNumber();
                         int height = p_height->GetNumber();
-#if 0
-                        PdfObjectInputStream is = p_stream->GetInputStream(true);
-                        charbuff buffer;
-                        StringStreamDevice stream(buffer);
-                        is.CopyTo(stream, true);
-#else
                         auto buffer = p_stream->GetCopy();
-#endif
                         image.push_back(ppmToJpeg(width, height, (const uint8*)buffer.data(), buffer.size()));
                     }
                     catch(PdfError& e)

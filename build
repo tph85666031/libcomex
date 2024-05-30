@@ -98,7 +98,7 @@ tar -xvf 3rd_party/${OS_TYPE}_${BUILD_ARCH}.tar.xz -C ${DIR_ROOT}/out > /dev/nul
 cd ${DIR_ROOT}/tmp
 if [ -d ${DIR_ROOT} ];then
   if [ x"$OS_TYPE" == x"Windows" ];then
-      cmake -A ${BUILD_ARCH} -DBUILD_ARCH=${BUILD_ARCH} -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} -DOS_TYPE=${OS_TYPE} ${DIR_ROOT} && cmake --build . --target package --config ${BUILD_TYPE}
+      cmake -A ${BUILD_ARCH} -DBUILD_ARCH=${BUILD_ARCH} -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} -DOS_TYPE=${OS_TYPE} ${DIR_ROOT} -DCMAKE_WIN32_WINNT=0x0600 && cmake --build . --target package --config ${BUILD_TYPE}
   else
       cmake -DBUILD_ARCH=${BUILD_ARCH} -DBUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} -DOS_TYPE=${OS_TYPE} ${DIR_ROOT} && make -j${JOBS} && make package
   fi

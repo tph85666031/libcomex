@@ -796,6 +796,11 @@ bool ArchiveReader::isFileExist(const char* path)
     {
         return false;
     }
+    std::string path_str = path;
+    if(com_string_start_with(path_str.c_str(), "." PATH_DELIM_STR))
+    {
+        path_str.erase(0, 2);
+    }
     bool found = false;
     struct archive_entry* entry = NULL;
     while(archive_read_next_header((struct archive*)ctx, &entry) == ARCHIVE_OK)
@@ -805,13 +810,8 @@ bool ArchiveReader::isFileExist(const char* path)
         {
             continue;
         }
-        std::string path_cur_str = path_cur;
-        if(com_string_start_with(path_cur_str.c_str(), "./")
-                || com_string_start_with(path_cur_str.c_str(), ".\\"))
-        {
-            path_cur_str.erase(0, 2);
-        }
-        if(path_cur_str == path)
+        std::string path_cur_str = PATH_TO_LOCAL(path_cur);
+        if(path_cur_str == path_str)
         {
             found = true;
             break;
@@ -921,6 +921,11 @@ ComBytes ArchiveReader::read(const char* path)
     {
         return ComBytes();
     }
+    std::string path_str = path;
+    if(com_string_start_with(path_str.c_str(), "." PATH_DELIM_STR))
+    {
+        path_str.erase(0, 2);
+    }
     ComBytes data;
     struct archive_entry* entry = NULL;
     while(archive_read_next_header((struct archive*)ctx, &entry) == ARCHIVE_OK)
@@ -931,7 +936,7 @@ ComBytes ArchiveReader::read(const char* path)
             continue;
         }
         std::string path_cur_str = PATH_TO_LOCAL(path_cur);
-        if(path_cur_str == path
+        if(path_cur_str == path_str
                 && archive_entry_size_is_set(entry)
                 && archive_entry_size(entry) > 0)
         {
@@ -955,6 +960,11 @@ bool ArchiveReader::readTo(const char* path, const char* to)
     {
         return false;
     }
+    std::string path_str = path;
+    if(com_string_start_with(path_str.c_str(), "." PATH_DELIM_STR))
+    {
+        path_str.erase(0, 2);
+    }
     struct archive_entry* entry = NULL;
     while(archive_read_next_header((struct archive*)ctx, &entry) == ARCHIVE_OK)
     {
@@ -964,7 +974,7 @@ bool ArchiveReader::readTo(const char* path, const char* to)
             continue;
         }
         std::string path_cur_str = PATH_TO_LOCAL(path_cur);
-        if(path_cur_str == path
+        if(path_cur_str == path_str
                 && archive_entry_size_is_set(entry)
                 && archive_entry_size(entry) > 0)
         {

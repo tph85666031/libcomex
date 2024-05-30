@@ -42,6 +42,7 @@ void comex_archive_unit_test_suit(void** state)
     ASSERT_INT_EQUAL(r1.getFileSize(PATH_TO_LOCAL("./archive_test/1.txt").c_str()), 7);
     ASSERT_INT_EQUAL(r1.getFileSize(PATH_TO_LOCAL("./archive_test/2.txt").c_str()), 7);
     ASSERT_INT_EQUAL(r1.getFileSize(PATH_TO_LOCAL("./archive_test/3.txt").c_str()), 7);
+    ASSERT_TRUE(r1.isFileExist(PATH_TO_LOCAL("./archive_test/1.txt").c_str()));
 
     ComBytes b = r1.read(PATH_TO_LOCAL("./archive_test/1.txt").c_str());
     ASSERT_STR_EQUAL(b.toString().c_str(), "A123456");

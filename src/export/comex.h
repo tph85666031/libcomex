@@ -10,6 +10,5 @@
 #include "comex_smb.h"
 #include "comex_nfs.h"
 #include "comex_archive.h"
-#include "comex_cairo_watermark.h"
 
-#endif /* __COMEX_H__ */
+#endif /* __COMEX_H__ */
