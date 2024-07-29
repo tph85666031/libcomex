@@ -505,7 +505,8 @@ HttpResponse ComexCurl::send(const char* url, const char* method, const void* bo
     curl_easy_setopt(curl, CURLOPT_VERBOSE, debug_enable ? 1L : 0L); //打开调试日志
     curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
     curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, speed_send > 0 ? speed_send : 0);
-
+    curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, speed_recv > 0 ? speed_recv : 0);
+    
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     if(body != NULL || body_size > 0)
@@ -698,6 +699,7 @@ int64 ComexCurl::download(const char* url, int64 remote_file_size, ComBytes& byt
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connection_timeout_ms);
     curl_easy_setopt(curl, CURLOPT_POST, 0L);
+    curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, speed_send > 0 ? speed_send : 0);
     curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, speed_recv > 0 ? speed_recv : 0);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     if(timeout_ms > 0)
@@ -817,6 +819,7 @@ int64 ComexCurl::download(const char* url, ComBytes& bytes, CurlProgress& progre
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connection_timeout_ms);
     curl_easy_setopt(curl, CURLOPT_POST, 0L);
+    curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, speed_send > 0 ? speed_send : 0);
     curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, speed_recv > 0 ? speed_recv : 0);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     if(timeout_ms > 0)
@@ -948,6 +951,7 @@ int64 ComexCurl::download(const char* url, const char* file_path, CurlProgress& 
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connection_timeout_ms);
     curl_easy_setopt(curl, CURLOPT_POST, 0L);
+    curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, speed_send > 0 ? speed_send : 0);
     curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, speed_recv > 0 ? speed_recv : 0);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     if(timeout_ms > 0)
