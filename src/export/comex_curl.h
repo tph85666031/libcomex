@@ -111,6 +111,8 @@ public:
     ComexCurl& setKeyPassword(const char* password);
     ComexCurl& setUsername(const char* username);
     ComexCurl& setPassword(const char* password);
+    ComexCurl& setReceiveSpeed(int speed);//byte/s
+    ComexCurl& setSendSpeed(int speed);//byte/s
 
     int64 getRemoteFileSize(const char* url);
 
@@ -177,6 +179,9 @@ private:
 
     std::string cert_type;
     std::string key_type;
+
+    int speed_send;
+    int speed_recv;
 
     std::string server_cert_pem;
 };

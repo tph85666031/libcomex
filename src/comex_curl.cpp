@@ -197,6 +197,8 @@ ComexCurl::ComexCurl()
     connection_timeout_ms = 5000L;
     timeout_ms = 0;
     debug_enable = false;
+    speed_recv = 0;
+    speed_send = 0;
 }
 
 ComexCurl::~ComexCurl()
@@ -406,6 +408,18 @@ ComexCurl& ComexCurl::setPassword(const char* password)
     return *this;
 }
 
+ComexCurl& ComexCurl::setReceiveSpeed(int speed)
+{
+    this->speed_send = speed;
+    return *this;
+}
+
+ComexCurl& ComexCurl::setSendSpeed(int speed)
+{
+    this->speed_recv = speed;
+    return *this;
+}
+
 HttpResponse ComexCurl::post(const char* url, const char* body)
 {
     return send(url, "POST", body, com_string_len(body));
@@ -490,6 +504,7 @@ HttpResponse ComexCurl::send(const char* url, const char* method, const void* bo
     curl_easy_setopt(curl, CURLOPT_TIMEOUT_MS, timeout_ms);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, debug_enable ? 1L : 0L); //打开调试日志
     curl_easy_setopt(curl, CURLOPT_CERTINFO, 1L);
+    curl_easy_setopt(curl, CURLOPT_MAX_SEND_SPEED_LARGE, speed_send > 0 ? speed_send : 0);
 
     curl_easy_setopt(curl, CURLOPT_CUSTOMREQUEST, method);
     curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -626,7 +641,7 @@ int64 ComexCurl::getRemoteFileSize(const char* url)
     @return >0:已下载字节数
 */
 int64 ComexCurl::download(const char* url, int64 remote_file_size, ComBytes& bytes,
-                        int64 begin_byte, int64 end_byte, CurlProgress& progress)
+                          int64 begin_byte, int64 end_byte, CurlProgress& progress)
 {
     long code = 0;
     if(url == NULL || url[0] == '\0' || begin_byte < 0 || end_byte < 0)
@@ -683,6 +698,7 @@ int64 ComexCurl::download(const char* url, int64 remote_file_size, ComBytes& byt
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connection_timeout_ms);
     curl_easy_setopt(curl, CURLOPT_POST, 0L);
+    curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, speed_recv > 0 ? speed_recv : 0);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     if(timeout_ms > 0)
     {
@@ -801,6 +817,7 @@ int64 ComexCurl::download(const char* url, ComBytes& bytes, CurlProgress& progre
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connection_timeout_ms);
     curl_easy_setopt(curl, CURLOPT_POST, 0L);
+    curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, speed_recv > 0 ? speed_recv : 0);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     if(timeout_ms > 0)
     {
@@ -931,6 +948,7 @@ int64 ComexCurl::download(const char* url, const char* file_path, CurlProgress& 
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT_MS, connection_timeout_ms);
     curl_easy_setopt(curl, CURLOPT_POST, 0L);
+    curl_easy_setopt(curl, CURLOPT_MAX_RECV_SPEED_LARGE, speed_recv > 0 ? speed_recv : 0);
     curl_easy_setopt(curl, CURLOPT_URL, url);
     if(timeout_ms > 0)
     {
