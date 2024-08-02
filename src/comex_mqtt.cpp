@@ -461,11 +461,11 @@ MqttClient& MqttClient::setCAInfo(const char* ca_file)
     return *this;
 }
 
-MqttClient& MqttClient::setCertInfo(const char* ca_file, const char* key_file, const char* key_password)
+MqttClient& MqttClient::setCertInfo(const char* cert_file, const char* key_file, const char* key_password)
 {
-    if(ca_file != NULL)
+    if(cert_file != NULL)
     {
-        this->ca_file = ca_file;
+        this->cert_file = cert_file;
     }
     if(key_file != NULL)
     {
@@ -504,17 +504,17 @@ bool MqttClient::openClient()
 
     if(ca_file.empty() == false || (cert_file.empty() == false && key_file.empty() == false))
     {
-        std::string caPath;
+        std::string ca_path;
         if(ca_file.empty() == false)
         {
-            caPath = com_path_dir(ca_file.c_str());
+            ca_path = com_path_dir(ca_file.c_str());
         }
-        LOG_D("ca_file=%s,caPath=%s,cert=%s,key=%s", ca_file.c_str(), caPath.c_str(), cert_file.c_str(), key_file.c_str());
+        LOG_D("ca_file=%s,ca_path=%s,cert=%s,key=%s", ca_file.c_str(), ca_path.c_str(), cert_file.c_str(), key_file.c_str());
         mosquitto_tls_insecure_set((struct mosquitto*)mosq, true);
         //mosquitto_tls_opts_set((struct mosquitto*)mosq, 1, "tlsv1", NULL);
         ret = mosquitto_tls_set((struct mosquitto*)mosq,
                                 ca_file.empty() ? NULL : ca_file.c_str(),
-                                caPath.empty() ? NULL : caPath.c_str(),
+                                ca_path.empty() ? NULL : ca_path.c_str(),
                                 cert_file.empty() ? NULL : cert_file.c_str(),
                                 key_file.empty() ? NULL : key_file.c_str(),
                                 MqttPasswordCallback);

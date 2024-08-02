@@ -67,7 +67,7 @@ public:
     MqttClient& setUsername(const char* username);
     MqttClient& setPassword(const char* password);
     MqttClient& setCAInfo(const char* ca_file);
-    MqttClient& setCertInfo(const char* ca_file, const char* key_file, const char* key_password);
+    MqttClient& setCertInfo(const char* cert_file, const char* key_file, const char* key_password);
     bool startClient(bool wait = false, int timeout_ms = 5000);
     void stopClient();
     bool subscribe(const char* topic, int qos = MQTT_QOS1);
