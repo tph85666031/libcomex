@@ -30,26 +30,27 @@ public:
     MqttProperty& operator=(const MqttProperty& property);
     virtual ~MqttProperty();
 
+    MqttProperty& setWillDelayInterval(uint32 time_s);
     MqttProperty& setMessageExpiryTime(uint32 time_s);
     MqttProperty& setResponseTopic(const char* topic);
     MqttProperty& setSessionExpiryTime(uint32 time_s);
     MqttProperty& setContentType(const char* type);
-    MqttProperty& setKV(const char* key, const char* value);
+    MqttProperty& setUserProp(const char* key, const char* value);
 
-    std::string getKV(const char* key, const char* default_val = NULL);
+    std::string getUserProp(const char* key, const char* default_val = NULL);
     uint32 getMessageExpiryTime();
     std::string getAssignedClientID();
 
     void parse(const void* property);
     void* toProperty(bool recreate = false) const;
 private:
-    std::set<int> flags;
-    std::map<std::string, std::string> kv;
-    std::string content_type;
-    std::string response_topic;
-    std::string asigned_client_id;
-    uint32 session_expiry_time = 0;
-    uint32 message_expiry_time = 0;
+    std::map<int, uint8> flags_uint8;
+    std::map<int, uint16> flags_uint16;
+    std::map<int, uint32> flags_uint32;
+    std::map<int, uint32> flags_varint;
+    std::map<int, std::string> flags_utf8;
+    std::map<int, ComBytes> flags_array;
+    std::map<std::string, std::string> flags_user;
     void* prop = NULL;
 };
 
@@ -58,7 +59,7 @@ class COM_EXPORT MqttClient : public ThreadPool
 public:
     MqttClient();
     virtual ~MqttClient();
-    MqttClient& setWillInfo(uint8* will_data, int will_data_size, const char* will_topic, int will_qos = MQTT_QOS2, bool will_retain = true);
+    MqttClient& setWillInfo(uint8* will_data, int will_data_size, const char* will_topic, int will_delay_s = 3, int will_qos = MQTT_QOS2, bool will_retain = true);
     MqttClient& setCleanSession(bool clean_session);
     MqttClient& setClientID(const char* client_id);
     MqttClient& setHost(const char* server_host);
@@ -112,6 +113,7 @@ private:
     ComBytes will_data;
     std::string will_topic;
     int will_qos = MQTT_QOS1;
+    int will_delay_s = 5;
     bool will_retain = false;
 };
 

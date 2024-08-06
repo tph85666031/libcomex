@@ -78,17 +78,21 @@ MqttProperty::~MqttProperty()
     }
 }
 
+MqttProperty& MqttProperty::setWillDelayInterval(uint32 time_s)
+{
+    flags_uint32[MQTT_PROP_WILL_DELAY_INTERVAL] = time_s;
+    return *this;
+}
+
 MqttProperty& MqttProperty::setSessionExpiryTime(uint32 time_s)
 {
-    session_expiry_time = time_s;
-    flags.insert(MQTT_PROP_SESSION_EXPIRY_INTERVAL);
+    flags_uint32[MQTT_PROP_SESSION_EXPIRY_INTERVAL] = time_s;
     return *this;
 }
 
 MqttProperty& MqttProperty::setMessageExpiryTime(uint32 time_s)
 {
-    message_expiry_time = time_s;
-    flags.insert(MQTT_PROP_MESSAGE_EXPIRY_INTERVAL);
+    flags_uint32[MQTT_PROP_MESSAGE_EXPIRY_INTERVAL] = time_s;
     return *this;
 }
 
@@ -96,8 +100,7 @@ MqttProperty& MqttProperty::setResponseTopic(const char* topic)
 {
     if(topic != NULL)
     {
-        response_topic = topic;
-        flags.insert(MQTT_PROP_RESPONSE_TOPIC);
+        flags_utf8[MQTT_PROP_RESPONSE_TOPIC] = topic;
     }
     return *this;
 }
@@ -106,80 +109,153 @@ MqttProperty& MqttProperty::setContentType(const char* type)
 {
     if(type != NULL)
     {
-        content_type = type;
-        flags.insert(MQTT_PROP_CONTENT_TYPE);
+        flags_utf8[MQTT_PROP_RESPONSE_TOPIC] = type;
     }
     return *this;
 }
 
-MqttProperty& MqttProperty::setKV(const char* key, const char* value)
+MqttProperty& MqttProperty::setUserProp(const char* key, const char* value)
 {
-    if(key != NULL || value != NULL)
+    if(key != NULL && value != NULL)
     {
-        flags.insert(MQTT_PROP_USER_PROPERTY);
-        kv[key] = value;
+        flags_user[key] = value;
     }
     return  *this;
 }
 
 uint32 MqttProperty::getMessageExpiryTime()
 {
-    return message_expiry_time;
+    if(flags_uint32.count(MQTT_PROP_MESSAGE_EXPIRY_INTERVAL) <= 0)
+    {
+        return 0;
+    }
+    return flags_uint32[MQTT_PROP_MESSAGE_EXPIRY_INTERVAL];
 }
 
 std::string MqttProperty::getAssignedClientID()
 {
-    return asigned_client_id;
+    if(flags_utf8.count(MQTT_PROP_ASSIGNED_CLIENT_IDENTIFIER) <= 0)
+    {
+        return std::string();
+    }
+    return flags_utf8[MQTT_PROP_ASSIGNED_CLIENT_IDENTIFIER];
 }
 
-std::string MqttProperty::getKV(const char* key, const char* default_val)
+std::string MqttProperty::getUserProp(const char* key, const char* default_val)
 {
-    if(key == NULL || kv.count(key) == 0)
+    if(key == NULL || flags_user.count(key) == 0)
     {
         return ((default_val == NULL) ? std::string() : default_val);
     }
-    return kv[key];
+    return flags_user[key];
 }
 
 void MqttProperty::parse(const void* property)
 {
-    if(property == NULL)
-    {
-        return;
-    }
-    mosquitto_property_read_int32((const mosquitto_property*)property, MQTT_PROP_MESSAGE_EXPIRY_INTERVAL, &message_expiry_time, false);
-    mosquitto_property_read_int32((const mosquitto_property*)property, MQTT_PROP_SESSION_EXPIRY_INTERVAL, &session_expiry_time, false);
+    int id = 0;
+    uint8 data_uint8 = 0;
+    uint16 data_uint16 = 0;
+    uint32 data_uint32 = 0;
+    char* data_utf8 = NULL;
+    char* data_user_key = NULL;
+    char* data_user_value = NULL;
+    void* data_array = NULL;
+    uint16 data_array_len = 0;
 
-    char* value_str = NULL;
-    if(mosquitto_property_read_string((const mosquitto_property*)property, MQTT_PROP_RESPONSE_TOPIC, &value_str, false) != NULL)
+    for(const mosquitto_property* prop = (const mosquitto_property*)property; prop != NULL; prop = mosquitto_property_next(prop))
     {
-        response_topic = value_str;
-        free(value_str);
-        value_str = NULL;
-    }
-    if(mosquitto_property_read_string((const mosquitto_property*)property, MQTT_PROP_ASSIGNED_CLIENT_IDENTIFIER, &value_str, false) != NULL)
-    {
-        asigned_client_id = value_str;
-        free(value_str);
-        value_str = NULL;
-    }
+        switch(mosquitto_property_identifier(prop))
+        {
+            //uint8
+            case MQTT_PROP_PAYLOAD_FORMAT_INDICATOR:
+            case MQTT_PROP_REQUEST_RESPONSE_INFORMATION:
+            case MQTT_PROP_REQUEST_PROBLEM_INFORMATION:
+            case MQTT_PROP_MAXIMUM_QOS:
+            case MQTT_PROP_RETAIN_AVAILABLE:
+            case MQTT_PROP_WILDCARD_SUB_AVAILABLE:
+            case MQTT_PROP_SUBSCRIPTION_ID_AVAILABLE:
+            case MQTT_PROP_SHARED_SUB_AVAILABLE:
+                mosquitto_property_read_byte(prop, id, &data_uint8, false);
+                flags_uint8[id] = data_uint8;
+                break;
 
-    char* key_str = NULL;
-    const mosquitto_property* p = mosquitto_property_read_string_pair((const mosquitto_property*)property,
-                                  MQTT_PROP_USER_PROPERTY, &key_str,
-                                  &value_str, false);
-    while(p != NULL)
-    {
-        LOG_I("%s=%s", key_str, value_str);
-        kv[key_str] = value_str;
-        free(key_str);
-        free(value_str);
-        key_str = NULL;
-        value_str = NULL;
-        p = mosquitto_property_next(p);
-        p = mosquitto_property_read_string_pair((const mosquitto_property*)p,
-                                                MQTT_PROP_USER_PROPERTY, &key_str,
-                                                &value_str, false);
+            //uint16
+            case MQTT_PROP_SERVER_KEEP_ALIVE:
+            case MQTT_PROP_RECEIVE_MAXIMUM:
+            case MQTT_PROP_TOPIC_ALIAS_MAXIMUM:
+            case MQTT_PROP_TOPIC_ALIAS:
+                mosquitto_property_read_int16(prop, id, &data_uint16, false);
+                flags_uint16[id] = data_uint16;
+                break;
+
+            //uint32
+            case MQTT_PROP_MESSAGE_EXPIRY_INTERVAL:
+            case MQTT_PROP_SESSION_EXPIRY_INTERVAL:
+            case MQTT_PROP_WILL_DELAY_INTERVAL:
+            case MQTT_PROP_MAXIMUM_PACKET_SIZE:
+                mosquitto_property_read_int32(prop, id, &data_uint32, false);
+                flags_uint32[id] = data_uint32;
+                break;
+
+            //utf8
+            case MQTT_PROP_CONTENT_TYPE:
+            case MQTT_PROP_RESPONSE_TOPIC:
+            case MQTT_PROP_ASSIGNED_CLIENT_IDENTIFIER:
+            case MQTT_PROP_AUTHENTICATION_METHOD:
+            case MQTT_PROP_RESPONSE_INFORMATION:
+            case MQTT_PROP_SERVER_REFERENCE:
+            case MQTT_PROP_REASON_STRING:
+                mosquitto_property_read_string(prop, id, &data_utf8, false);
+                if(data_utf8 != NULL)
+                {
+                    flags_utf8[id] = data_utf8;
+                    free(data_utf8);
+                    data_utf8 = NULL;
+                }
+                break;
+
+            //array
+            case MQTT_PROP_CORRELATION_DATA:
+            case MQTT_PROP_AUTHENTICATION_DATA:
+                mosquitto_property_read_binary(prop, id, &data_array, &data_array_len, false);
+                if(data_array != NULL && data_array_len > 0)
+                {
+                    flags_array[id] = ComBytes((uint8*)data_array, data_array_len);
+                }
+                if(data_array != NULL)
+                {
+                    free(data_array);
+                    data_array = NULL;
+                }
+                break;
+
+            //var_int
+            case MQTT_PROP_SUBSCRIPTION_IDENTIFIER:
+                mosquitto_property_read_varint(prop, id, &data_uint32, false);
+                flags_varint[id] = data_uint32;
+                break;
+
+            //user
+            case MQTT_PROP_USER_PROPERTY:
+                mosquitto_property_read_string_pair(prop, id, &data_user_key, &data_user_value, false);
+                if(data_user_key != NULL && data_user_value != NULL)
+                {
+                    flags_user[data_user_key] = data_user_value;
+                }
+                if(data_user_key != NULL)
+                {
+                    free(data_user_key);
+                    data_user_key = NULL;
+                }
+                if(data_user_value != NULL)
+                {
+                    free(data_user_value);
+                    data_user_value = NULL;
+                }
+                break;
+            default:
+                break;
+        }
     }
     return;
 }
@@ -196,29 +272,34 @@ void* MqttProperty::toProperty(bool recreate) const
         return prop;
     }
 
-    for(auto it = flags.begin(); it != flags.end(); it++)
+    for(auto it = flags_uint8.begin(); it != flags_uint8.end(); it++)
     {
-        switch(*it)
-        {
-            case MQTT_PROP_MESSAGE_EXPIRY_INTERVAL:
-                mosquitto_property_add_int32((mosquitto_property**)&prop, *it, message_expiry_time);
-                break;
-            case MQTT_PROP_SESSION_EXPIRY_INTERVAL:
-                mosquitto_property_add_int32((mosquitto_property**)&prop, *it, session_expiry_time);
-                break;
-            case MQTT_PROP_RESPONSE_TOPIC:
-                mosquitto_property_add_string((mosquitto_property**)&prop, *it, response_topic.c_str());
-                break;
-            case MQTT_PROP_ASSIGNED_CLIENT_IDENTIFIER:
-                mosquitto_property_add_string((mosquitto_property**)&prop, *it, asigned_client_id.c_str());
-                break;
-            case MQTT_PROP_USER_PROPERTY:
-                for(auto it2 = kv.begin(); it2 != kv.end(); it2++)
-                {
-                    mosquitto_property_add_string_pair((mosquitto_property**)&prop, *it, it2->first.c_str(), it2->second.c_str());
-                }
-                break;
-        }
+        mosquitto_property_add_byte((mosquitto_property**)&prop, it->first, it->second);
+    }
+    for(auto it = flags_uint16.begin(); it != flags_uint16.end(); it++)
+    {
+        mosquitto_property_add_int16((mosquitto_property**)&prop, it->first, it->second);
+    }
+    for(auto it = flags_uint32.begin(); it != flags_uint32.end(); it++)
+    {
+        mosquitto_property_add_int32((mosquitto_property**)&prop, it->first, it->second);
+    }
+    for(auto it = flags_varint.begin(); it != flags_varint.end(); it++)
+    {
+        mosquitto_property_add_varint((mosquitto_property**)&prop, it->first, it->second);
+    }
+    for(auto it = flags_utf8.begin(); it != flags_utf8.end(); it++)
+    {
+        mosquitto_property_add_string((mosquitto_property**)&prop, it->first, it->second.c_str());
+    }
+    for(auto it = flags_array.begin(); it != flags_array.end(); it++)
+    {
+        const ComBytes& bytes = it->second;
+        mosquitto_property_add_binary((mosquitto_property**)&prop, it->first, bytes.getData(), bytes.getDataSize());
+    }
+    for(auto it = flags_user.begin(); it != flags_user.end(); it++)
+    {
+        mosquitto_property_add_string_pair((mosquitto_property**)&prop, MQTT_PROP_USER_PROPERTY, it->first.c_str(), it->second.c_str());
     }
     return prop;
 }
@@ -229,7 +310,7 @@ MqttClient::MqttClient()
     server_port = 0;
     will_qos = MQTT_QOS0;
     will_retain = false;
-	connection_ready = false;
+    connection_ready = false;
     mosq = NULL;
 }
 
@@ -251,7 +332,7 @@ void MqttClient::MqttMessageCallback(void* mosq, void* userdata,
 
     MqttClient* ctx = (MqttClient*)userdata;
     LOG_D("[%s]mqtt got message,topic=%s,prop=%p", ctx->client_id.c_str(), p_message->topic, props);
-    if(p_message->payload == NULL ||  p_message->payloadlen <= 0 || p_message->topic == NULL)
+    if(p_message->payload == NULL ||  p_message->payloadlen <= 0)
     {
         LOG_I("[%s]topic removed:%s", ctx->client_id.c_str(), p_message->topic);
         return;
@@ -385,8 +466,8 @@ void MqttClient::threadPoolRunner(Message& msg)
     mosquitto_property_free_all((mosquitto_property**)&prop);
 }
 
-MqttClient& MqttClient::setWillInfo(uint8* will_data, int will_data_size,
-                                    const char* will_topic, int will_qos, bool will_retain)
+MqttClient& MqttClient::setWillInfo(uint8* will_data, int will_data_size, const char* will_topic,
+                                    int will_delay_s, int will_qos, bool will_retain)
 {
     this->will_data = ComBytes(will_data, will_data_size);
     if(will_topic != NULL)
@@ -395,6 +476,7 @@ MqttClient& MqttClient::setWillInfo(uint8* will_data, int will_data_size,
     }
     this->will_qos = will_qos;
     this->will_retain = will_retain;
+    this->will_delay_s = will_delay_s;
     return *this;
 }
 
@@ -510,8 +592,7 @@ bool MqttClient::openClient()
             ca_path = com_path_dir(ca_file.c_str());
         }
         LOG_D("ca_file=%s,ca_path=%s,cert=%s,key=%s", ca_file.c_str(), ca_path.c_str(), cert_file.c_str(), key_file.c_str());
-        mosquitto_tls_insecure_set((struct mosquitto*)mosq, true);
-        //mosquitto_tls_opts_set((struct mosquitto*)mosq, 1, "tlsv1", NULL);
+        mosquitto_tls_insecure_set((struct mosquitto*)mosq, false);
         ret = mosquitto_tls_set((struct mosquitto*)mosq,
                                 ca_file.empty() ? NULL : ca_file.c_str(),
                                 ca_path.empty() ? NULL : ca_path.c_str(),
@@ -545,11 +626,21 @@ bool MqttClient::openClient()
     }
     else
     {
-        mosquitto_will_set((struct mosquitto*)mosq, will_topic.c_str(),
-                           will_data.getDataSize(),
-                           will_data.getData(),
-                           will_qos,
-                           will_retain);
+        MqttProperty prop;
+        prop.setWillDelayInterval(will_delay_s);
+
+        mosquitto_property* p_copy = NULL;
+        mosquitto_property_copy_all(&p_copy, (const mosquitto_property*)prop.toProperty());
+
+        if(mosquitto_will_set_v5((struct mosquitto*)mosq, will_topic.c_str(),
+                                 will_data.getDataSize(),
+                                 will_data.getData(),
+                                 will_qos,
+                                 will_retain,
+                                 p_copy) != MOSQ_ERR_SUCCESS)
+        {
+            mosquitto_property_free_all(&p_copy);
+        }
     }
     mosquitto_reconnect_delay_set((struct mosquitto*)mosq, 1, 1, false);
 #if defined(_WIN32) || defined(_WIN64)
@@ -581,6 +672,7 @@ void MqttClient::closeClient()
 bool MqttClient::startClient(bool wait, int timeout_ms)
 {
     LOG_D("called");
+    stopClient();
     if(client_id.empty())
     {
         LOG_W("mqtt client_id not specified");
@@ -627,6 +719,20 @@ bool MqttClient::subscribe(const char* topic, int qos)
         LOG_E("arg incorrect");
         return false;
     }
+    mutex_sub_topics.lock();
+    for(auto it = sub_topics.begin(); it != sub_topics.end(); it++)
+    {
+        bool result = false;
+        mosquitto_topic_matches_sub(it->first.c_str(), topic, &result);
+        if(result)
+        {
+            mutex_sub_topics.unlock();
+            LOG_E("%s alread subsribed", topic);
+            return false;
+        }
+    }
+    mutex_sub_topics.unlock();
+
     int ret = mosquitto_subscribe((struct mosquitto*)mosq, NULL, topic, qos);
     LOG_D("[%s]topic subscribed=%s,ret=%d", client_id.c_str(), topic, ret);
     mutex_sub_topics.lock();
@@ -639,7 +745,7 @@ bool MqttClient::unsubscribe(const char* topic)
 {
     if(topic == NULL)
     {
-        LOG_E("topic incorrect");
+        LOG_E("topic is null");
         return false;
     }
 
@@ -661,9 +767,15 @@ bool MqttClient::publish(const char* topic, const void* data, int data_size,
 {
     if(topic == NULL)
     {
-        LOG_E("topic incorrect");
+        LOG_E("topic is null");
         return false;
     }
+    if(mosquitto_pub_topic_check(topic) != MOSQ_ERR_SUCCESS)
+    {
+        LOG_E("topic:%s invalid", topic);
+        return false;
+    }
+
     if(data_size > 0 && data == NULL)
     {
         LOG_E("data incorrect");

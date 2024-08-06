@@ -76,6 +76,7 @@ LiteIPC& LiteIPC::setWill(uint32 id, const void* data, int data_size)
 
 bool LiteIPC::startIPC()
 {
+    stopIPC();
     thread_rx_running = true;
     thread_rx = std::thread(ThreadRx, this);
 
