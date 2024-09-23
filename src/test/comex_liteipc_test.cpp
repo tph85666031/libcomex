@@ -99,6 +99,5 @@ void comex_liteipc_unit_test_suit(void** state)
     LOG_I("control count=%d,event count=%d,status count=%d", ipc_b.count_control.load(), ipc_b.count_event.load(), ipc_b.count_status.load());
     comex_mqtt_global_uninit();
     ASSERT_TRUE(ipc_b.count_control >= ipc_b.count_control_max);
-    getchar();
 }
 

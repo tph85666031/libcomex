@@ -31,15 +31,19 @@ public:
     virtual ~MqttProperty();
 
     MqttProperty& setWillDelayInterval(uint32 time_s);
+    MqttProperty& setSessionExpiryTime(uint32 time_s);
     MqttProperty& setMessageExpiryTime(uint32 time_s);
     MqttProperty& setResponseTopic(const char* topic);
-    MqttProperty& setSessionExpiryTime(uint32 time_s);
     MqttProperty& setContentType(const char* type);
+    MqttProperty& setAssignedClientID(const char* client_id);
     MqttProperty& setUserProp(const char* key, const char* value);
-
-    std::string getUserProp(const char* key, const char* default_val = NULL);
-    uint32 getMessageExpiryTime();
-    std::string getAssignedClientID();
+    uint32 getWillDelayInterval(uint32 default_val = 0);
+    uint32 getSessionExpiryTime(uint32 default_val = 0);
+    uint32 getMessageExpiryTime(uint32 default_val = 0);
+    std::string getResponseTopic(std::string default_val = std::string());
+    std::string getContentType(std::string default_val = std::string());
+    std::string getAssignedClientID(std::string default_val = std::string());
+    std::string getUserProp(const char* key, std::string default_val = std::string());
 
     void parse(const void* property);
     void* toProperty(bool recreate = false) const;
@@ -85,9 +89,9 @@ private:
     void threadPoolRunner(Message& msg);
     static void ThreadLoop(MqttClient* ctx);
     static void MqttMessageCallback(void* mosq, void* userdata, const void* message, const void* props);
-    static void MqttConnectCallback(void* mosq, void* userdata, int result, const void* props);
+    static void MqttConnectCallback(void* mosq, void* userdata, int result, int flag, const void* props);
     static void MqttDisconnectCallback(void* mosq, void* userdata, int result, const void* props);
-    static void MqttPublishCallback(void* mosq, void* userdata, int mid, const void* props);
+    static void MqttPublishCallback(void* mosq, void* userdata, int mid, int result, const void* props);
     static void MqttSubscribeCallback(void* mosq, void* userdata, int mid, int qos_count, const int* granted_qos, const void* props);
     static void MqttUnsubscribeCallback(void* mosq, void* userdata, int mid, const void* props);
     static int MqttPasswordCallback(char* buf, int size, int rwflag, void* userdata);

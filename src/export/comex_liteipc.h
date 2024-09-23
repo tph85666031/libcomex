@@ -15,11 +15,11 @@ public:
 
     uint32 getAddr();
     LiteIPC& setAddr(uint32 addr);
-    LiteIPC& setWill(uint32 id, const void* data, int data_size);
+    LiteIPC& setWill(uint32 id, const void* data, int data_size, int delay_interval_s = 3);
 
     bool startIPC();
     void stopIPC();
-    
+
     bool addStatusListener(uint32 addr, uint32 id = LITEIPC_ID_ALL);
     bool addEventListener(uint32 addr, uint32 id = LITEIPC_ID_ALL);
     void removeStatusListener(uint32 addr, uint32 id = LITEIPC_ID_ALL);

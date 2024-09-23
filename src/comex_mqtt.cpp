@@ -1,3 +1,4 @@
+#include "openssl/ssl.h"
 #include "mosquitto.h"
 #include "mqtt_protocol.h"
 #include "com_thread.h"
@@ -114,6 +115,15 @@ MqttProperty& MqttProperty::setContentType(const char* type)
     return *this;
 }
 
+MqttProperty& MqttProperty::setAssignedClientID(const char* client_id)
+{
+    if(client_id != NULL)
+    {
+        flags_utf8[MQTT_PROP_ASSIGNED_CLIENT_IDENTIFIER] = client_id;
+    }
+    return *this;
+}
+
 MqttProperty& MqttProperty::setUserProp(const char* key, const char* value)
 {
     if(key != NULL && value != NULL)
@@ -123,29 +133,65 @@ MqttProperty& MqttProperty::setUserProp(const char* key, const char* value)
     return  *this;
 }
 
-uint32 MqttProperty::getMessageExpiryTime()
+uint32 MqttProperty::getWillDelayInterval(uint32 default_val)
+{
+    if(flags_uint32.count(MQTT_PROP_WILL_DELAY_INTERVAL) <= 0)
+    {
+        return default_val;
+    }
+    return flags_uint32[MQTT_PROP_WILL_DELAY_INTERVAL];
+}
+
+uint32 MqttProperty::getSessionExpiryTime(uint32 default_val)
+{
+    if(flags_uint32.count(MQTT_PROP_SESSION_EXPIRY_INTERVAL) <= 0)
+    {
+        return default_val;
+    }
+    return flags_uint32[MQTT_PROP_SESSION_EXPIRY_INTERVAL];
+}
+
+uint32 MqttProperty::getMessageExpiryTime(uint32 default_val)
 {
     if(flags_uint32.count(MQTT_PROP_MESSAGE_EXPIRY_INTERVAL) <= 0)
     {
-        return 0;
+        return default_val;
     }
     return flags_uint32[MQTT_PROP_MESSAGE_EXPIRY_INTERVAL];
 }
 
-std::string MqttProperty::getAssignedClientID()
+std::string MqttProperty::getResponseTopic(std::string default_val)
+{
+    if(flags_utf8.count(MQTT_PROP_MESSAGE_EXPIRY_INTERVAL) <= 0)
+    {
+        return default_val;
+    }
+    return flags_utf8[MQTT_PROP_MESSAGE_EXPIRY_INTERVAL];
+}
+
+std::string MqttProperty::getContentType(std::string default_val)
+{
+    if(flags_utf8.count(MQTT_PROP_RESPONSE_TOPIC) <= 0)
+    {
+        return default_val;
+    }
+    return flags_utf8[MQTT_PROP_RESPONSE_TOPIC];
+}
+
+std::string MqttProperty::getAssignedClientID(std::string default_val)
 {
     if(flags_utf8.count(MQTT_PROP_ASSIGNED_CLIENT_IDENTIFIER) <= 0)
     {
-        return std::string();
+        return default_val;
     }
     return flags_utf8[MQTT_PROP_ASSIGNED_CLIENT_IDENTIFIER];
 }
 
-std::string MqttProperty::getUserProp(const char* key, const char* default_val)
+std::string MqttProperty::getUserProp(const char* key, std::string default_val)
 {
-    if(key == NULL || flags_user.count(key) == 0)
+    if(key == NULL || flags_user.count(key) <= 0)
     {
-        return ((default_val == NULL) ? std::string() : default_val);
+        return default_val;
     }
     return flags_user[key];
 }
@@ -355,7 +401,7 @@ void MqttClient::MqttMessageCallback(void* mosq, void* userdata,
     }
 }
 
-void MqttClient::MqttConnectCallback(void* mosq, void* userdata, int result, const void* props)
+void MqttClient::MqttConnectCallback(void* mosq, void* userdata, int result, int flag, const void* props)
 {
     if(userdata == NULL)
     {
@@ -364,7 +410,7 @@ void MqttClient::MqttConnectCallback(void* mosq, void* userdata, int result, con
     MqttClient* ctx = (MqttClient*)userdata;
     ctx->connection_ready = (result == 0);
     ctx->sem_mqtt_conn.post();
-    LOG_D("[%s]connect error_str=%s,result=%d,prop=%p", ctx->client_id.c_str(), mosquitto_strerror(result), result, props);
+    LOG_D("[%s]connect error_str=%s,result=%d,flag=%d,prop=%p", ctx->client_id.c_str(), mosquitto_strerror(result), result, flag, props);
     if(ctx->connection_ready)
     {
         ctx->mutex_sub_topics.lock();
@@ -398,9 +444,9 @@ void MqttClient::MqttDisconnectCallback(void* mosq, void* userdata, int result, 
     ctx->onConnectionChanged(ctx->connection_ready, p);
 }
 
-void MqttClient::MqttPublishCallback(void* mosq, void* userdata, int mid, const void* props)
+void MqttClient::MqttPublishCallback(void* mosq, void* userdata, int mid, int result, const void* props)
 {
-    LOG_D("publish succeed,mosq=%p,mid=%d", mosq, mid);
+    LOG_D("publish succeed,mosq=%p,mid=%d,result=%d", mosq, mid, result);
 }
 
 void MqttClient::MqttSubscribeCallback(void* mosq, void* userdata, int mid, int qos_count, const int* granted_qos, const void* props)
@@ -593,6 +639,7 @@ bool MqttClient::openClient()
         }
         LOG_D("ca_file=%s,ca_path=%s,cert=%s,key=%s", ca_file.c_str(), ca_path.c_str(), cert_file.c_str(), key_file.c_str());
         mosquitto_tls_insecure_set((struct mosquitto*)mosq, false);
+        mosquitto_tls_opts_set((struct mosquitto*)mosq, SSL_VERIFY_PEER, NULL, NULL);
         ret = mosquitto_tls_set((struct mosquitto*)mosq,
                                 ca_file.empty() ? NULL : ca_file.c_str(),
                                 ca_path.empty() ? NULL : ca_path.c_str(),
@@ -609,8 +656,6 @@ bool MqttClient::openClient()
     }
 
     mosquitto_user_data_set((struct mosquitto*)mosq, this);
-    mosquitto_message_retry_set((struct mosquitto*)mosq, 10);
-
     mosquitto_int_option((struct mosquitto*)mosq, MOSQ_OPT_PROTOCOL_VERSION, MQTT_PROTOCOL_V5);
     mosquitto_publish_v5_callback_set((struct mosquitto*)mosq, (fp_mqtt_v5_on_publish)MqttPublishCallback);
     mosquitto_connect_v5_callback_set((struct mosquitto*)mosq, (fp_mqtt_v5_on_connect)MqttConnectCallback);

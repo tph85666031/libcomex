@@ -50,7 +50,7 @@ LiteIPC& LiteIPC::setAddr(uint32 addr)
     return *this;
 }
 
-LiteIPC& LiteIPC::setWill(uint32 id, const void* data, int data_size)
+LiteIPC& LiteIPC::setWill(uint32 id, const void* data, int data_size, int delay_interval_s)
 {
     if(data == NULL || data_size <= 0)
     {
@@ -69,7 +69,7 @@ LiteIPC& LiteIPC::setWill(uint32 id, const void* data, int data_size)
         bytes.append((uint8*)&msg, sizeof(IPC_MSG));
         bytes.append((const uint8*)data, data_size);
         std::string topic = com_string_format("/%u/OUT/STATUS/%u", addr, id);
-        setWillInfo(bytes.getData(), bytes.getDataSize(), topic.c_str(), qos_status, true);
+        setWillInfo(bytes.getData(), bytes.getDataSize(), topic.c_str(), delay_interval_s, qos_status, true);
     }
     return *this;
 }
@@ -102,35 +102,35 @@ void LiteIPC::stopIPC()
 bool LiteIPC::addStatusListener(uint32 addr, uint32 id)
 {
     //订阅指定设备的状态
-    std::string topic = com_string_format("/%s/OUT/STATUS/%s", 
-                        addr == LITEIPC_ADDR_ALL ? "+" : std::to_string(addr).c_str(),
-                        id == LITEIPC_ID_ALL ? "+" : std::to_string(id).c_str());
+    std::string topic = com_string_format("/%s/OUT/STATUS/%s",
+                                          addr == LITEIPC_ADDR_ALL ? "+" : std::to_string(addr).c_str(),
+                                          id == LITEIPC_ID_ALL ? "+" : std::to_string(id).c_str());
     return subscribe(topic.c_str(), qos_status);
 }
 
 bool LiteIPC::addEventListener(uint32 addr, uint32 id)
 {
     //订阅指定设备的状态
-    std::string topic = com_string_format("/%s/OUT/EVENT/%s", 
-                        addr == LITEIPC_ADDR_ALL ? "+" : std::to_string(addr).c_str(),
-                        id == LITEIPC_ID_ALL ? "+" : std::to_string(id).c_str());
+    std::string topic = com_string_format("/%s/OUT/EVENT/%s",
+                                          addr == LITEIPC_ADDR_ALL ? "+" : std::to_string(addr).c_str(),
+                                          id == LITEIPC_ID_ALL ? "+" : std::to_string(id).c_str());
     return subscribe(topic.c_str(), qos_status);
 }
 
 void LiteIPC::removeStatusListener(uint32 addr, uint32 id)
 {
-    std::string topic = com_string_format("/%s/OUT/STATUS/%s", 
-                        addr == LITEIPC_ADDR_ALL ? "+" : std::to_string(addr).c_str(),
-                        id == LITEIPC_ID_ALL ? "+" : std::to_string(id).c_str());
+    std::string topic = com_string_format("/%s/OUT/STATUS/%s",
+                                          addr == LITEIPC_ADDR_ALL ? "+" : std::to_string(addr).c_str(),
+                                          id == LITEIPC_ID_ALL ? "+" : std::to_string(id).c_str());
     unsubscribe(topic.c_str());
     return;
 }
 
 void LiteIPC::removeEventListener(uint32 addr, uint32 id)
 {
-    std::string topic = com_string_format("/%s/OUT/EVENT/%s", 
-                        addr == LITEIPC_ADDR_ALL ? "+" : std::to_string(addr).c_str(),
-                        id == LITEIPC_ID_ALL ? "+" : std::to_string(id).c_str());
+    std::string topic = com_string_format("/%s/OUT/EVENT/%s",
+                                          addr == LITEIPC_ADDR_ALL ? "+" : std::to_string(addr).c_str(),
+                                          id == LITEIPC_ID_ALL ? "+" : std::to_string(id).c_str());
     unsubscribe(topic.c_str());
     return;
 }

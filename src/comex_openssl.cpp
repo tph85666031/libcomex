@@ -1635,7 +1635,7 @@ bool OpensslCert::CreateCert(Message& params)
             std::vector<std::string> vals = com_string_split(params.getString("alt_name").c_str(), ",");
             for(size_t i = 0; i < vals.size(); i++)
             {
-                if(com_string_is_ip(vals[i].c_str()))
+                if(com_string_is_ipv4(vals[i].c_str()))
                 {
                     alt_name += "IP:" + vals[i] + ",";
                 }
