@@ -57,6 +57,7 @@ shift $(($OPTIND - 1))
 
 #清理环境
 rm -rf ${DIR_ROOT}/openssl/build 2>&1 > /dev/null
+rm -rf ${DIR_ROOT}/libuv/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libiconv/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libsmb2/build 2>&1 > /dev/null
 rm -rf ${DIR_ROOT}/libnfs/build 2>&1 > /dev/null
@@ -131,6 +132,18 @@ pushd ${DIR_ROOT}/libiconv/build
 make -j${JOBS} && make install
 if [ $? != 0 ]; then
     show_message "failed to make libiconv"
+    popd
+    exit -1
+fi
+popd
+
+#编译libuv
+mkdir ${DIR_ROOT}/libuv/build 2>&1 > /dev/null
+pushd ${DIR_ROOT}/libuv/build
+cmake -DCMAKE_POSITION_INDEPENDENT_CODE=1 -DLIBUV_BUILD_SHARED=0 -DLIBUV_BUILD_TESTS=0 -DLIBUV_BUILD_BENCH=0 -DCMAKE_PREFIX_PATH=${DIR_ROOT}/out -DCMAKE_INSTALL_PREFIX=${DIR_ROOT}/out ../
+make -j${JOBS} && make install
+if [ $? != 0 ]; then
+    show_message "failed to make libuv"
     popd
     exit -1
 fi

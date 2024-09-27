@@ -16,6 +16,7 @@ extern void comex_iconv_unit_test_suit(void** state);
 extern void comex_podofo_unit_test_suit(void** state);
 extern void comex_cairo_watermark_unit_test_suit(void** state);
 extern void comex_magic_unit_test_suit(void** state);
+extern void comex_socket_unit_test_suit(void** state);
 
 CMUnitTest test_cases_comex_lib[] =
 {
@@ -29,7 +30,7 @@ CMUnitTest test_cases_comex_lib[] =
 	cmocka_unit_test(comex_iconv_unit_test_suit),
 	cmocka_unit_test(comex_cairo_watermark_unit_test_suit)
 #else
-    cmocka_unit_test(comex_liteipc_unit_test_suit)
+    cmocka_unit_test(comex_socket_unit_test_suit)
 #endif
 };
 

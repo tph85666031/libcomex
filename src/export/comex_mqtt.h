@@ -58,7 +58,7 @@ private:
     void* prop = NULL;
 };
 
-class COM_EXPORT MqttClient : public ThreadPool
+class COM_EXPORT MqttClient : public ComThreadPool
 {
 public:
     MqttClient();

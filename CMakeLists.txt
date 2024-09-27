@@ -118,6 +118,7 @@ SET(PROJECT_LIB
     libqrencode.a
     libpixman-1.a
     libstdc++fs.a
+	libuv.a
 )
 ELSE()
 ADD_COMPILE_OPTIONS( /W3 /wd4819 /wd4251 /wd4200 /wd4996)

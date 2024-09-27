@@ -18,7 +18,7 @@ option(ENABLE_EXAMPLES "Build example programs" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake/Modules)
 
-find_package(GSSAPI)
+#find_package(GSSAPI)
 find_package(OpenSSL)
 
 if(GSSAPI_FOUND)
