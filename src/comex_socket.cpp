@@ -102,8 +102,8 @@ bool ComexTcpClient::connect()
     ((uv_tcp_t*)handle_tcp)->data = this;
     uv_tcp_init(uv_default_loop(), (uv_tcp_t*)handle_tcp);
     uv_tcp_nodelay((uv_tcp_t*)handle_tcp, 1);
-    uv_tcp_connect((uv_connect_t*)request, (uv_tcp_t*)handle_tcp, res->ai_addr,
-                   [](uv_connect_t* request, int status)->void
+    int ret = uv_tcp_connect((uv_connect_t*)request, (uv_tcp_t*)handle_tcp, res->ai_addr,
+                             [](uv_connect_t* request, int status)->void
     {
         assert(request != NULL);
         assert(request->handle != NULL);
@@ -169,6 +169,12 @@ bool ComexTcpClient::connect()
         delete request;
     });
     freeaddrinfo(res);
+
+    if(ret != 0)
+    {
+        LOG_E("connect failed,err=%s:%s", uv_err_name(ret), uv_strerror(ret));
+        return false;
+    }
     return true;
 }
 
@@ -192,7 +198,8 @@ void ComexTcpClient::stopClient()
     uv_async_t* handle = new uv_async_t();
     uv_async_init(uv_default_loop(), handle, [](uv_async_t* handle)
     {
-        if(uv_loop_close(uv_default_loop()) == UV_EBUSY)
+        int ret = uv_loop_close(uv_default_loop());
+        if(ret == UV_EBUSY)
         {
             uv_walk(uv_default_loop(), [](uv_handle_t* handle, void* arg)
             {
@@ -239,7 +246,7 @@ int ComexTcpClient::sendData(const void* data, int data_size)
             }
             else
             {
-                LOG_I("write ret=%d,c=%d", status, ++c);
+                //LOG_I("write ret=%d,c=%d", status, ++c);
             }
 
             delete[](char*)request->data;
@@ -683,10 +690,13 @@ bool ComexPipeClient::connect()
 bool ComexPipeClient::startClient()
 {
     handle_pipe = new uv_pipe_t();
+    if(connect() == false)
+    {
+        return false;
+    }
     thread_loop = std::thread([&]()
     {
         LOG_I("loop start");
-        connect();
         uv_run(uv_default_loop(), UV_RUN_DEFAULT);
         int ret = uv_loop_close(uv_default_loop());
         LOG_I("loop quit,ret=%s", uv_err_name(ret));

@@ -30,6 +30,7 @@ public:
         {
             startTest();
         }
+        LOG_I("send done");
     }
 
     void startTest()
@@ -38,7 +39,7 @@ public:
         {
             for(int64 i = 0; i < count_per_client; i++)
             {
-                LOG_I("send %lld", i);
+                //LOG_I("send %lld", i);
                 std::string text = com_string_format("test %lld", i);
                 if(sendData(text.c_str(), text.length() + 1) == 0)
                 {
@@ -48,7 +49,7 @@ public:
                 {
                     LOG_E("send failed:%lld", i);
                 }
-                com_sleep_ms(1);
+                //com_sleep_ms(1);
             }
         });
         thread_test.detach();
@@ -141,7 +142,7 @@ public:
                 {
                     LOG_E("send failed:%lld", i);
                 }
-                com_sleep_ms(100);
+                //com_sleep_ms(100);
             }
         });
         thread_test.detach();
@@ -177,7 +178,7 @@ public:
 void comex_socket_unit_test_suit(void** state)
 {
     LOG_I("called");
-    count_per_client = 200;
+    count_per_client = 1000;
     if(com_string_equal(getenv("TYPE"), "pipe"))
     {
         if(com_string_equal(getenv("NODE"), "client"))
