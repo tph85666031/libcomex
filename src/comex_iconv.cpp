@@ -23,7 +23,7 @@ ComBytes comex_iconv_convert(const char* cs_to, const char* cs_from, const void*
         return ComBytes();
     }
     iconv_t handle = iconv_open(cs_to, cs_from);
-    if(handle <= 0)
+    if(handle == NULL)
     {
         return ComBytes();
     }
