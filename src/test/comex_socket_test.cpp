@@ -87,7 +87,7 @@ public:
     void onConnectionChanged(void* handle, bool connected)
     {
         ComexSocketAddress addr = getClientAddress(handle);
-        LOG_I("client %s,handle=%p, %s:%u", connected ? "connected" : "disconnected", handle, com_ipv4_to_string(addr.ipv4).c_str(), addr.port);
+        LOG_I("client %s,handle=%p, %s:%u", connected ? "connected" : "disconnected", handle, com_string_from_ipv4(addr.ipv4).c_str(), addr.port);
     }
     void onRecv(void* handle, const uint8* data, int data_size)
     {

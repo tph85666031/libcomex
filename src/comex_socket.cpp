@@ -330,24 +330,24 @@ ComexSocketAddress ComexTcpServer::getClientAddress(void* handle)
         return ComexSocketAddress();
     }
 
-    struct sockaddr sock_addr;
-    int sock_addr_len = sizeof(struct sockaddr);
-    if(uv_tcp_getpeername((const uv_tcp_t*)handle, &sock_addr, &sock_addr_len) != 0)
+    struct sockaddr_storage sock_addr;
+    int sock_addr_len = sizeof(struct sockaddr_storage);
+    if(uv_tcp_getpeername((const uv_tcp_t*)handle, (struct sockaddr*)&sock_addr, &sock_addr_len) != 0)
     {
         LOG_E("failed");
         return ComexSocketAddress();
     }
 
     ComexSocketAddress addr;
-    addr.family = sock_addr.sa_family;
+    addr.family = sock_addr.ss_family;
 
-    if(sock_addr.sa_family == AF_INET)
+    if(sock_addr.ss_family == AF_INET)
     {
         struct sockaddr_in* addr_ipv4 = (struct sockaddr_in*)&sock_addr;
         addr.ipv4 = addr_ipv4->sin_addr.s_addr;
         addr.port = ntohs(addr_ipv4->sin_port);
     }
-    else if(sock_addr.sa_family == AF_INET6)
+    else if(sock_addr.ss_family == AF_INET6)
     {
         struct sockaddr_in6* addr_ipv6 = (struct sockaddr_in6*)&sock_addr;
         memcpy(addr.ipv6, addr_ipv6->sin6_addr.s6_addr, sizeof(addr.ipv6));
@@ -355,7 +355,7 @@ ComexSocketAddress ComexTcpServer::getClientAddress(void* handle)
     }
     else
     {
-        LOG_E("type not support:%d,sock_addr_len=%d", sock_addr.sa_family, sock_addr_len);
+        LOG_E("type not support:%d,sock_addr_len=%d", sock_addr.ss_family, sock_addr_len);
         return ComexSocketAddress();
     }
     return addr;

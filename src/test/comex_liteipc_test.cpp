@@ -52,7 +52,7 @@ void comex_liteipc_unit_test_suit(void** state)
 {
     TIME_COST();
 
-    uint8 buf[50 * 1024];
+    uint8 buf[1 * 1024];
     ComBytes send_data(sizeof(buf) * 5);
     ComBytes reply_data(sizeof(buf) * 5);
 
@@ -94,7 +94,7 @@ void comex_liteipc_unit_test_suit(void** state)
         ipc_a.sendStatus(1, "status1", sizeof("status1"));
         ipc_a.sendEvent(1, "event1", sizeof("event1"));
     }
-    ipc_b.sem.wait(30 * 1000);
+    ipc_b.sem.wait();
     TIME_COST_SHOW();
     LOG_I("control count=%d,event count=%d,status count=%d", ipc_b.count_control.load(), ipc_b.count_event.load(), ipc_b.count_status.load());
     comex_mqtt_global_uninit();

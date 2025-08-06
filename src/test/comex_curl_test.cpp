@@ -7,7 +7,7 @@ void comex_curl_unit_test_suit(void** state)
     ComexCurl curl;
     curl.enableDebug();
     curl.setVerifyCertDNS(true);
-    HttpResponse response = curl.get("https://127.0.0.1:15362/eps/view/admin/stat");
+    HttpResponse response = curl.get("https://www.baidu.com");
     LOG_I("code=%ld,res=%s", response.code, response.msg.c_str());
 }
 
