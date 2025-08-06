@@ -1,4 +1,4 @@
-Fontconfig Developers Reference, Version 2.14.2
+Fontconfig Developers Reference, Version 2.17.1
 
    Copyright © 2002 Keith Packard
 
@@ -147,8 +147,8 @@ Type
  use (deprecated)
     outline        FC_OUTLINE             Bool    Whether the glyphs are
  outlines
-    scalable       FC_SCALABLE            Bool    Whether glyphs can be
-scaled
+    scalable       FC_SCALABLE            Bool    Whether the glyphs are
+ outlines or have color
     dpi            FC_DPI                 Double  Target dots per inch
     rgba           FC_RGBA                Int     unknown, rgb, bgr, vrg
 b,
@@ -161,6 +161,8 @@ d)
     minspace       FC_MINSPACE            Bool    Eliminate leading from
  line
                                                   spacing
+    matrix         FC_MATRIX              Matrix  Hold an affine transfo
+rmation
     charset        FC_CHARSET             CharSet Unicode chars encoded
 by
                                                   the font
@@ -201,10 +203,10 @@ he font data
 (deprecated)
     postscriptname FC_POSTSCRIPT_NAME     String  Font name in PostScrip
 t
-    symbol         FC_SYMBOL              Bool    Whether font uses MS s
-ymbol-font encoding
     color          FC_COLOR               Bool    Whether any glyphs hav
 e color
+    symbol         FC_SYMBOL              Bool    Whether font uses MS s
+ymbol-font encoding
     fontvariations FC_FONT_VARIATIONS     String  comma-separated string
  of axes in variable font
     variable       FC_VARIABLE            Bool    Whether font is Variab
@@ -213,6 +215,11 @@ le Font
 ng
     order          FC_ORDER               Int     Order number of the fo
 nt
+    desktop        FC_DESKTOP_NAME        String  Current desktop name
+    namedinstance  FC_NAMED_INSTANCE      Bool    Whether font is a name
+d instance
+    fontwarapper   FC_FONT_WRAPPER        String  The font wrapper forma
+t
      __________________________________________________________
 
 Datatypes
@@ -656,6 +663,9 @@ FcPattern
    FcDefaultSubstitute -- Perform default substitutions in a
           pattern
 
+   FcConfigSetDefaultSubstitute -- Perform default substitutions
+          in a pattern
+
    FcNameParse -- Parse a pattern string
    FcNameUnparse -- Convert a pattern back into a string that can
           be parsed
@@ -899,7 +909,7 @@ Synopsis
    FcBool b);
 
    FcBool FcPatternAddFTFace(FcPattern *p, const char *object,
-   const FT_Facef);
+   const FT_Face f);
 
    FcBool FcPatternAddLangSet(FcPattern *p, const char *object,
    const FcLangSet *l);
@@ -1261,7 +1271,7 @@ Synopsis
 #include <fontconfig/fontconfig.h>
 
    FcResult FcPatternIterGetValue(const FcPattern *p,
-   FcPatternIter *iter, intid, FcValue *v, FcValueBinding *b);
+   FcPatternIter *iter, int id, FcValue *v, FcValueBinding *b);
 
 Description
 
@@ -1316,6 +1326,39 @@ Description
      * Patterns without a specified pixel size are given one
        computed from any specified point size (default 12), dpi
        (default 75) and scale (default 1).
+
+   This function has been replaced by FcConfigSetDefaultSubstitute
+   and will be deprecated.
+
+FcConfigSetDefaultSubstitute
+
+Name
+
+   FcConfigSetDefaultSubstitute -- Perform default substitutions
+   in a pattern
+
+Synopsis
+
+#include <fontconfig/fontconfig.h>
+
+   void FcConfigSetDefaultSubstitute(FcConfig *config, FcPattern
+   *pattern);
+
+Description
+
+   Supplies default values for underspecified font patterns:
+
+     * Patterns without a specified style or weight are set to
+       Medium
+     * Patterns without a specified style or slant are set to
+       Roman
+     * Patterns without a specified pixel size are given one
+       computed from any specified point size (default 12), dpi
+       (default 75) and scale (default 1).
+
+Since
+
+   version 2.17.0
 
 FcNameParse
 
@@ -1588,7 +1631,7 @@ FcFontSet
    FcFontSetList -- List fonts from a set of font sets
    FcFontSetMatch -- Return the best font from a set of font sets
    FcFontSetPrint -- Print a set of patterns to stdout
-   FcFontSetSort -- Add to a font set
+   FcFontSetSort -- Return list of matching fonts
    FcFontSetSortDestroy -- DEPRECATED destroy a font set
 
    An FcFontSet simply holds a list of patterns; these are used to
@@ -1657,7 +1700,7 @@ Synopsis
 #include <fontconfig/fontconfig.h>
 
    FcFontSet * FcFontSetList(FcConfig *config, FcFontSet **sets,
-   intnsets, FcPattern *pattern, FcObjectSet *object_set);
+   int nsets, FcPattern *pattern, FcObjectSet *object_set);
 
 Description
 
@@ -1677,7 +1720,7 @@ Synopsis
 #include <fontconfig/fontconfig.h>
 
    FcPattern * FcFontSetMatch(FcConfig *config, FcFontSet **sets,
-   intnsets, FcPattern *pattern, FcResult *result);
+   int nsets, FcPattern *pattern, FcResult *result);
 
 Description
 
@@ -1712,14 +1755,14 @@ FcFontSetSort
 
 Name
 
-   FcFontSetSort -- Add to a font set
+   FcFontSetSort -- Return list of matching fonts
 
 Synopsis
 
 #include <fontconfig/fontconfig.h>
 
    FcFontSet * FcFontSetSort(FcConfig *config, FcFontSet **sets,
-   intnsets, FcPattern *pattern, FcBool trim, FcCharSet **csp,
+   int nsets, FcPattern *pattern, FcBool trim, FcCharSet **csp,
    FcResult *result);
 
 Description
@@ -2006,6 +2049,50 @@ Description
    and accepted only for compatibility with older code.
      __________________________________________________________
 
+Fontations specific functions
+
+   Table of Contents
+   FcFontationsQueryAll -- compute all patterns from font file
+          (and index)
+
+   For font indexing, an alternative backend based on the
+   Fontations set of font libraries is in development. The
+   indexing functions are exposed as Fontations specific
+   functions.
+
+FcFontationsQueryAll
+
+Name
+
+   FcFontationsQueryAll -- compute all patterns from font file
+   (and index)
+
+Synopsis
+
+#include <fontconfig.h>
+#include <fcfontations.h>
+
+   unsigned int FcFontationsQueryAll(const FcChar8 *file, int id,
+   FcBlanks *blanks, int *count, FcFontSet *set);
+
+Description
+
+   UNSTABLE feature. Constructs patterns found in 'file'.
+   Currently pattern is incomplete compared to
+   FcFreeTypeQueryAll() and may deviate from what FreeType
+   indexing produces. Not supported yet, but will follow: If id is
+   -1, then all patterns found in 'file' are added to 'set'.
+   Otherwise, this function works exactly like
+   FcFreeTypeQueryAll()/FcFreeTypeQuery(). The number of faces in
+   'file' is returned in 'count'. The number of patterns added to
+   'set' is returned. FcBlanks is deprecated, blanks is ignored
+   and accepted only for compatibility with older code.
+
+Since
+
+   version 2.17.0
+     __________________________________________________________
+
 FcValue
 
    Table of Contents
@@ -2097,7 +2184,7 @@ FcCharSet
    FcCharSetCreate -- Create an empty character set
    FcCharSetDestroy -- Destroy a character set
    FcCharSetAddChar -- Add a character to a charset
-   FcCharSetDelChar -- Add a character to a charset
+   FcCharSetDelChar -- Delete a character from a charset
    FcCharSetCopy -- Copy a charset
    FcCharSetEqual -- Compare two charsets
    FcCharSetIntersect -- Intersect charsets
@@ -2179,7 +2266,7 @@ FcCharSetDelChar
 
 Name
 
-   FcCharSetDelChar -- Add a character to a charset
+   FcCharSetDelChar -- Delete a character from a charset
 
 Synopsis
 
@@ -2450,8 +2537,8 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   FcChar32 FcCharSetCoverage(const FcCharSet *a, FcChar32page,
-   FcChar32[8]result);
+   FcChar32 FcCharSetCoverage(const FcCharSet *a, FcChar32 page,
+   FcChar32[8] result);
 
 Description
 
@@ -2493,6 +2580,7 @@ FcLangSet
    FcLangSetHash -- return a hash value for a langset
    FcLangSetHasLang -- test langset for language support
    FcGetDefaultLangs -- Get the default languages list
+   FcConfigGetDefaultLangs -- Get the default languages list
    FcLangSetGetLangs -- get the list of languages in the langset
    FcGetLangs -- Get list of languages
    FcLangNormalize -- Normalize the language string
@@ -2760,9 +2848,36 @@ Description
    there are no valid values in those environment variables, "en"
    will be set as fallback.
 
+   This function has been replaced by FcConfigGetDefaultLangs and
+   will be deprecated.
+
 Since
 
    version 2.9.91
+
+FcConfigGetDefaultLangs
+
+Name
+
+   FcConfigGetDefaultLangs -- Get the default languages list
+
+Synopsis
+
+#include <fontconfig/fontconfig.h>
+
+   FcStrSet * FcConfigGetDefaultLangs(FcConfig *config);
+
+Description
+
+   Returns a string set of the default languages according to the
+   environment variables on the system. This function looks for
+   them in order of FC_LANG, LC_ALL, LC_CTYPE and LANG then. If
+   there are no valid values in those environment variables, "en"
+   will be set as fallback.
+
+Since
+
+   version 2.17.0
 
 FcLangSetGetLangs
 
@@ -3015,7 +3130,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   FcRange * FcRangeCreateDouble(doublebegin, doubleend);
+   FcRange * FcRangeCreateDouble(double begin, double end);
 
 Description
 
@@ -3036,7 +3151,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   FcRange * FcRangeCreateInteger(intbegin, intend);
+   FcRange * FcRangeCreateInteger(int begin, int end);
 
 Description
 
@@ -3098,6 +3213,12 @@ FcConfig
    FcConfigDestroy -- Destroy a configuration
    FcConfigSetCurrent -- Set configuration as default
    FcConfigGetCurrent -- Return current configuration
+   FcConfigSetFontSetFilter -- Set a predicate function to filter
+          fontsets
+
+   FcConfigAcceptFilter -- Test whether the given pattern matches
+          filter
+
    FcConfigUptoDate -- Check timestamps on config files
    FcConfigHome -- return the current home directory.
    FcConfigEnableHome -- controls use of the home directory.
@@ -3140,6 +3261,11 @@ FcConfig
 
    FcConfigFileInfoIterGet -- Obtain the configuration file
           information
+
+   FcConfigAcceptFont -- Test whether the given pattern matches
+          deny list
+
+   FcConfigPreferAppFont --
 
    An FcConfig object holds the internal representation of a
    configuration. There is a default configuration which
@@ -3239,6 +3365,57 @@ Description
 
    Returns the current default configuration.
 
+FcConfigSetFontSetFilter
+
+Name
+
+   FcConfigSetFontSetFilter -- Set a predicate function to filter
+   fontsets
+
+Synopsis
+
+#include <fontconfig/fontconfig.h>
+
+   FcConfig * FcConfigSetFontSetFilter(FcConfig *config,
+   FcFilterFontSetFunc filter_func, FcDestroyFunc
+   destroy_data_func, void *user_data);
+
+Description
+
+   Sets filter_func as a predicate function and filter out
+   fontsets in config as desired. filter_func will be called with
+   a font pattern and user_data only when loading caches. When
+   config is going to be destroyed, user_data will be destroyed
+   through destroy_data_func if it is set.
+
+Since
+
+   version 2.16.0
+
+FcConfigAcceptFilter
+
+Name
+
+   FcConfigAcceptFilter -- Test whether the given pattern matches
+   filter
+
+Synopsis
+
+#include <fontconfig/fontconfig.h>
+
+   FcBool FcConfigAcceptFilter(FcConfig *config, const FcPattern
+   *font);
+
+Description
+
+   This triggers a predicate function set by
+   FcConfigSetFontSetFilter and return FcTrue if font matches
+   something they expect. otherwise FcFalse.
+
+Since
+
+   version 2.16.0
+
 FcConfigUptoDate
 
 Name
@@ -3311,8 +3488,12 @@ Synopsis
 Description
 
    Builds the set of available fonts for the given configuration.
-   Note that any changes to the configuration after this call have
-   indeterminate effects. Returns FcFalse if this operation runs
+   Note that any changes to the configuration after this call
+   (through FcConfigParseAndLoad or
+   FcConfigParseAndLoadFromMemory) have indeterminate effects. (On
+   the other hand, application fonts can still be modified through
+   FcConfigAppFontAddFile, FcConfigAppFontAddDir and
+   FcConfigAppFontClear). Returns FcFalse if this operation runs
    out of memory. If config is NULL, the current configuration is
    used.
 
@@ -3760,7 +3941,10 @@ Description
    Error and warning messages will be output to stderr. Returns
    FcFalse if some error occurred while loading the file, either a
    parse error, semantic error or allocation failure. Otherwise
-   returns FcTrue.
+   returns FcTrue. After all configuration files / strings have
+   been loaded, with FcConfigParseAndLoad and/or
+   FcConfigParseAndLoadFromMemory, call FcConfigBuildFonts to
+   build the font database.
 
 FcConfigParseAndLoadFromMemory
 
@@ -3785,7 +3969,10 @@ Description
    Error and warning messages will be output to stderr. Returns
    FcFalse if fsome error occurred while loading the file, either
    a parse error, semantic error or allocation failure. Otherwise
-   returns FcTrue.
+   returns FcTrue. After all configuration files / strings have
+   been loaded, with FcConfigParseAndLoad and/or
+   FcConfigParseAndLoadFromMemory, call FcConfigBuildFonts to
+   build the font database.
 
 Since
 
@@ -3932,6 +4119,51 @@ Description
 Since
 
    version 2.12.91
+
+FcConfigAcceptFont
+
+Name
+
+   FcConfigAcceptFont -- Test whether the given pattern matches
+   deny list
+
+Synopsis
+
+#include <fontconfig/fontconfig.h>
+
+   FcBool FcConfigAcceptFont(FcConfig *config, FcPattern *pat);
+
+Description
+
+   fontconfig has the deny list which is built against
+   <rejectfont> directive in configuration file. This function
+   tries to match 'pat' with them and return FcFalse if 'pat' is
+   rejected, otherwise FcTrue.
+
+Since
+
+   version 2.15.1
+
+FcConfigPreferAppFont
+
+Name
+
+   FcConfigPreferAppFont --
+
+Synopsis
+
+#include <fontconfig/fontconfig.h>
+
+   void FcConfigPreferAppFont(FcConfig *config, FcBool flag);
+
+Description
+
+   Set 'flag' to change the priority of Application fonts. default
+   behavior is turned off for backward compatibility.
+
+Since
+
+   version 2.17.0
      __________________________________________________________
 
 FcObjectType
@@ -4123,7 +4355,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   double FcWeightFromOpenTypeDouble(doubleot_weight);
+   double FcWeightFromOpenTypeDouble(double ot_weight);
 
 Description
 
@@ -4151,7 +4383,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   double FcWeightToOpenTypeDouble(doubleot_weight);
+   double FcWeightToOpenTypeDouble(double ot_weight);
 
 Description
 
@@ -4175,7 +4407,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   int FcWeightFromOpenType(intot_weight);
+   int FcWeightFromOpenType(int ot_weight);
 
 Description
 
@@ -4197,7 +4429,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   int FcWeightToOpenType(intot_weight);
+   int FcWeightToOpenType(int ot_weight);
 
 Description
 
@@ -4754,7 +4986,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   const FcChar8 * FcCacheSubdir(const FcCache *cache, inti);
+   const FcChar8 * FcCacheSubdir(const FcCache *cache, int i);
 
 Description
 
@@ -4806,8 +5038,8 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   FcBool FcDirCacheClean(const FcChar8 *cache_dir,
-   FcBoolverbose);
+   FcBool FcDirCacheClean(const FcChar8 *cache_dir, FcBool
+   verbose);
 
 Description
 
@@ -4850,8 +5082,8 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   FcBool FcDirCacheCreateUUID(FcChar8 *dir, FcBoolforce, FcConfig
-   *config);
+   FcBool FcDirCacheCreateUUID(FcChar8 *dir, FcBool force,
+   FcConfig *config);
 
 Description
 
@@ -5225,7 +5457,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   FcBool FcIsLower(FcChar8c);
+   FcBool FcIsLower(FcChar8 c);
 
 Description
 
@@ -5241,7 +5473,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   FcBool FcIsUpper(FcChar8c);
+   FcBool FcIsUpper(FcChar8 c);
 
 Description
 
@@ -5257,7 +5489,7 @@ Synopsis
 
 #include <fontconfig/fontconfig.h>
 
-   FcChar8 FcToLower(FcChar8c);
+   FcChar8 FcToLower(FcChar8 c);
 
 Description
 

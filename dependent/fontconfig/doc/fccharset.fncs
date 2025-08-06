@@ -55,7 +55,7 @@ running out of memory.
 @FUNC@          FcCharSetDelChar
 @TYPE1@         FcCharSet *             @ARG1@          fcs
 @TYPE2@         FcChar32%               @ARG2@          ucs4
-@PURPOSE@       Add a character to a charset
+@PURPOSE@       Delete a character from a charset
 @DESC@
 <function>FcCharSetDelChar</function> deletes a single Unicode char from the set,
 returning FcFalse on failure, either as a result of a constant set or from
@@ -220,8 +220,8 @@ code point for the page, or <constant>FC_CHARSET_DONE</constant> if
 @RET@           FcChar32
 @FUNC@          FcCharSetCoverage
 @TYPE1@         const FcCharSet *       @ARG1@          a
-@TYPE2@         FcChar32                @ARG2@          page
-@TYPE3@         FcChar32[8]             @ARG3@          result
+@TYPE2@         FcChar32%               @ARG2@          page
+@TYPE3@         FcChar32[8]%            @ARG3@          result
 @PURPOSE@       DEPRECATED return coverage for a Unicode page
 @DESC@
 DEPRECATED
