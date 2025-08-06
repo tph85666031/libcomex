@@ -63,15 +63,15 @@ ENDIF()
 #头文件搜索路径,可修改
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}/src
-	${PROJECT_SOURCE_DIR}/src/export
-	${PROJECT_SOURCE_DIR}/out/include
+    ${PROJECT_SOURCE_DIR}/src/export
+    ${PROJECT_SOURCE_DIR}/out/include
     ${PROJECT_SOURCE_DIR}/../libcom/src/export
 )
 
 #库文件搜索路径,可修改
 LINK_DIRECTORIES(
-	${PROJECT_SOURCE_DIR}
-	${PROJECT_SOURCE_DIR}/out/lib
+    ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/out/lib
     ${PROJECT_SOURCE_DIR}/../libcom/out
 )
 
@@ -118,7 +118,8 @@ SET(PROJECT_LIB
     libqrencode.a
     libpixman-1.a
     libstdc++fs.a
-	libuv.a
+    libuv.a
+    libdeflate.a
 )
 ELSE()
 ADD_COMPILE_OPTIONS( /W3 /wd4819 /wd4251 /wd4200 /wd4996)
