@@ -25,7 +25,8 @@ public:
     void removeStatusListener(uint32 addr, uint32 id = LITEIPC_ID_ALL);
     void removeEventListener(uint32 addr, uint32 id = LITEIPC_ID_ALL);
 
-    ComBytes sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms = 5000);
+    ComBytes sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms);
+    bool sendControl(uint32 addr, uint32 id, const void* data, int data_size);
     bool sendStatus(uint32 id, const void* data, int data_size);
     bool sendEvent(uint32 id, const void* data, int data_size);
 private:

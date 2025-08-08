@@ -208,7 +208,7 @@ bool ComexNfs::putAs(const char* file_path_local, const char* file_path_remote)
     int64 write_size = 0;
     while((read_size = com_file_read(f_local, buf, sizeof(buf))) > 0)
     {
-        write_size += nfs_write((struct nfs_context*)nfs_ctx, f_remote, read_size, buf);
+        write_size += nfs_write((struct nfs_context*)nfs_ctx, f_remote, buf, read_size);
     }
     com_file_close(f_local);
     nfs_fsync((struct nfs_context*)nfs_ctx, f_remote);
@@ -269,7 +269,7 @@ bool ComexNfs::getAs(const char* file_path_remote, const char* file_path_local)
     uint8 buf[1024];
     int read_size = 0 ;
     int64 write_size = 0;
-    while((read_size = nfs_read((struct nfs_context*)nfs_ctx, f_remote, sizeof(buf), buf)) > 0)
+    while((read_size = nfs_read((struct nfs_context*)nfs_ctx, f_remote, buf, sizeof(buf))) > 0)
     {
         write_size += com_file_write(f_local, buf, read_size);
     }
@@ -307,7 +307,7 @@ ComBytes ComexNfs::getBytes(const char* file_path_remote)
     ComBytes bytes;
     uint8 buf[1024];
     int read_size = 0 ;
-    while((read_size = nfs_read((struct nfs_context*)nfs_ctx, f_remote, sizeof(buf), buf)) > 0)
+    while((read_size = nfs_read((struct nfs_context*)nfs_ctx, f_remote, buf, sizeof(buf))) > 0)
     {
         bytes.append(buf, read_size);
     }

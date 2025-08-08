@@ -1,11 +1,11 @@
 #CMAKE最小版本要求,可修改
-#CMAKE_BUILD_TYPE=release,debug  UNIT_TEST=true,false
+#BUILD_TYPE=release,debug  UNIT_TEST=true,false
 CMAKE_MINIMUM_REQUIRED(VERSION 3.0)
 
 PROJECT("comex")
 SET(COMEX_MAJOR_VERSION 1)
 SET(COMEX_MINOR_VERSION 1)
-SET(COMEX_PATCH_VERSION 9)
+SET(COMEX_PATCH_VERSION 8)
 
 MESSAGE("CMAKE_SYSTEM_VERSION: ${CMAKE_SYSTEM_VERSION}")
 MESSAGE("CMAKE_SYSTEM_PROCESSOR: ${CMAKE_SYSTEM_PROCESSOR}")
@@ -25,7 +25,7 @@ IF ("${UNIT_TEST}" STREQUAL "true")
   ADD_DEFINITIONS("-DUNIT_TEST")
 ENDIF()
 
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+IF ("${BUILD_TYPE}" STREQUAL "Debug")
   ADD_DEFINITIONS("-D__DEBUG__")
   IF (MSVC)
     ADD_COMPILE_OPTIONS( /MDd)
@@ -60,34 +60,20 @@ IF (APPLE)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fvisibility=hidden -framework SystemConfiguration -framework Foundation -framework CoreFoundation -Wl,-hidden-lcrypto -Wl,-hidden-lssl -Wl,-hidden-lz -Wl,-hidden-lbz2 -Wl,-hidden-ltar -Wl,-hidden-lzip -Wl,-hidden-larchive -Wl,-hidden-lsmb2 -Wl,-hidden-lnfs -Wl,-hidden-lcurl -Wl,-hidden-lwebsockets -Wl,-hidden-lmosquitto -Wl,-x")
 ENDIF()
 
-find_package(mosquitto)
-find_package(CURL)
-find_package(LibArchive)
-find_package(cairo)
-find_package(libuv)
-find_package(libzip)
-find_package(libqrencode)
-find_package(libtar)
-find_package(libmagic)
-find_package(podofo)
-find_package(BZip2)
-find_package(OpenSSL)
-find_package(libsmb2)
-find_package(libnfs)
-
 #头文件搜索路径,可修改
 INCLUDE_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/src/export
+    ${PROJECT_SOURCE_DIR}/out/include
     ${PROJECT_SOURCE_DIR}/../libcom/src/export
 )
 
 #库文件搜索路径,可修改
 LINK_DIRECTORIES(
     ${PROJECT_SOURCE_DIR}
+    ${PROJECT_SOURCE_DIR}/out/lib
     ${PROJECT_SOURCE_DIR}/../libcom/out
 )
-
 
 #依赖库,无需修改,静态库的依赖顺序为依赖的库写在后面
 IF (UNIX OR APPLE)
@@ -97,36 +83,94 @@ SET(PROJECT_LIB
     pthread
     dl
     m
+    libmosquitto.a
+    libwebsockets.a
+    libcurl.a
+    libpodofo.a
+    libpodofo_private.a
+    libcairo.a
+    libfontconfig.a
+    libfreetype.a
+    libarchive.a
+    libtiff.a
+    libxml2.a
+    libbz2.a
+    libtar.a
+    libzip.a
+    libsmb2.a
+    libnfs.a
+    libssl.a
+    libcrypto.a
+    libiconv.a
+    libexpat.a
+    libjbig.a
+    libidn.a
+    libharfbuzz.a
+    libbrotlidec.a
+    libbrotlienc.a
+    libbrotlicommon.a
+    libunistring.a
+    libjpeg.a
+    libpng.a
+    libmagic.a
+    liblzma.a
+    libz.a
+    libqrencode.a
+    libpixman-1.a
+    libstdc++fs.a
+    libuv.a
+    libdeflate.a
 )
 ELSE()
 ADD_COMPILE_OPTIONS( /W3 /wd4819 /wd4251 /wd4200 /wd4996)
 SET(PROJECT_LIB
     ${PROJECT_LIB}
     com.lib
+    archive.lib
+    bz2.lib
+    cares.lib
+    charset.lib
+    iconv.lib
+    libnfs.lib
+    libcrypto.lib
+    libcurl.lib
+    libssl.lib
+    libxml2.lib
+    lz4.lib
+    lzma.lib
+    mosquitto_static.lib
+    pthreadVC3.lib
+    smb2.lib
+    libuv.lib
+    websockets.lib
+    zip.lib
+    zlib.lib
+    zstd.lib
+    libexpatMD.lib
+    pixman-1.lib
+    brotlicommon.lib
+    brotlidec.lib
+    brotlienc.lib
+    fontconfig.lib
+    freetype.lib
+    jpeg.lib
+    turbojpeg.lib
+    libpng16.lib
+    podofo.lib
+    podofo_private.lib
+    tiff.lib
+    qrencode.lib
+    cairo.lib
+    tre.lib
+    magic.lib
     msvcrt.lib
     shlwapi.lib
     Crypt32.lib
 )
 ENDIF()
 
-SET(PROJECT_LIB
-    ${PROJECT_LIB}
-	libzip::zip
-	libqrencode::libqrencode 
-	CURL::libcurl 
-	mosquitto::mosquitto 
-	openssl::openssl 
-	LibArchive::LibArchive 
-	libnfs::libnfs 
-	uv 
-	Iconv::Iconv 
-	cairo::cairo
-	libmagic::libmagic
-	podofo::podofo
-	BZip2::BZip2
-	libtar::libtar
-	libsmb2::libsmb2
-)
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
 
 AUX_SOURCE_DIRECTORY(./src PROJECT_SRC)
 IF ("${UNIT_TEST}" STREQUAL "true")
@@ -135,10 +179,10 @@ ENDIF()
 
 SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-IF ("${CMAKE_BUILD_TYPE}" STREQUAL "Debug")
+IF ("${BUILD_TYPE}" STREQUAL "Debug")
   SET(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../../libcom/out")
 ELSE()
-  SET(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib:$ORIGIN/../../libcom/out")
+  SET(CMAKE_INSTALL_RPATH "$ORIGIN:$ORIGIN/lib")
 ENDIF()
 
 SET(CPACK_GENERATOR TGZ)
@@ -148,7 +192,7 @@ SET(CPACK_PACKAGE_VERSION ${COMEX_MAJOR_VERSION}.${COMEX_MINOR_VERSION}.${COMEX_
 SET(CPACK_PACKAGE_VERSION_MAJOR ${COMEX_MAJOR_VERSION})
 SET(CPACK_PACKAGE_VERSION_MINOR ${COMEX_MINOR_VERSION})
 SET(CPACK_PACKAGE_VERSION_PATCH ${COMEX_PATCH_VERSION})
-SET(CPACK_PACKAGE_FILE_NAME ${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VERSION}_${CMAKE_SYSTEM_NAME}_${CMAKE_SYSTEM_PROCESSOR}_${CMAKE_BUILD_TYPE})
+SET(CPACK_PACKAGE_FILE_NAME ${CMAKE_PROJECT_NAME}_${CPACK_PACKAGE_VERSION}_${OS_TYPE}_${BUILD_ARCH}_${BUILD_TYPE})
 SET(CPACK_PACKAGE_DIRECTORY ${PROJECT_SOURCE_DIR}/out)
 SET(CPACK_INCLUDE_TOPLEVEL_DIRECTORY 0)
 SET(CPACK_ARCHIVE_THREADS 0)
@@ -171,7 +215,6 @@ IF ("${UNIT_TEST}" STREQUAL "true")
     SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES LINK_FLAGS "/NODEFAULTLIB:LIBCMT /NODEFAULTLIB:MSVCRT /INCREMENTAL:NO /LTCG")
   ENDIF()
   INSTALL(TARGETS ${PROJECT_NAME} DESTINATION bin COMPONENT dev)
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_LIB})
 ELSE()
   IF (UNIX OR APPLE)
     SET(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/out)
@@ -190,11 +233,11 @@ ELSE()
   SET_TARGET_PROPERTIES(${PROJECT_NAME} PROPERTIES CLEAN_DIRECT_OUTPUT 1)
   INSTALL(TARGETS ${PROJECT_NAME} DESTINATION lib COMPONENT dev)
   INSTALL(TARGETS ${PROJECT_NAME}_static DESTINATION lib COMPONENT dev)
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME}_static ${PROJECT_LIB})
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_LIB})
 ENDIF()
+
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${PROJECT_LIB})
 
 FILE(GLOB LIBS_3RD ${PROJECT_SOURCE_DIR}/out/lib/*.a ${PROJECT_SOURCE_DIR}/out/lib/*.lib ${PROJECT_SOURCE_DIR}/out/lib/*.dll)
 INSTALL(FILES ${LIBS_3RD} DESTINATION lib COMPONENT dev)
-#INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/out/include/ DESTINATION include COMPONENT dev)
+INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/out/include/ DESTINATION include COMPONENT dev)
 INSTALL(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src/export/ DESTINATION include COMPONENT dev)

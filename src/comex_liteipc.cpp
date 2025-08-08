@@ -159,9 +159,33 @@ void LiteIPC::onRecv(const std::string& topic, const uint8* data, int data_size,
     return;
 }
 
-ComBytes LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms)
+bool LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data_size)
 {
     if(data == NULL || data_size <= 0)
+    {
+        LOG_E("arg incorrect");
+        return false;
+    }
+
+    IPC_MSG msg;
+    msg.from = this->addr;
+    msg.to = addr;
+    msg.flag = LITE_IPC_FLAG_CONTROL;
+    msg.magic = magic++;
+    msg.id = id;
+    msg.len = data_size;
+
+    ComBytes bytes(sizeof(IPC_MSG) + data_size);
+    bytes.append((uint8*)&msg, sizeof(IPC_MSG));
+    bytes.append((uint8*)data, data_size);
+    std::string topic = com_string_format("/%u/IN", addr);
+
+    return publish(topic.c_str(), bytes.getData(), bytes.getDataSize(), qos_control, false);
+}
+
+ComBytes LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms)
+{
+    if(data == NULL || data_size <= 0 || timeout_ms <= 0)
     {
         LOG_E("arg incorrect");
         return ComBytes();
@@ -179,12 +203,6 @@ ComBytes LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data
     bytes.append((uint8*)&msg, sizeof(IPC_MSG));
     bytes.append((uint8*)data, data_size);
     std::string topic = com_string_format("/%u/IN", addr);
-
-    if(isConnected() == false || timeout_ms <= 0)
-    {
-        publish(topic.c_str(), bytes.getData(), bytes.getDataSize(), qos_control, false);
-        return ComBytes();
-    }
 
     GetSyncManager().getAdapter("comex_liteipc").syncPrepare(msg.magic);
     if(publish(topic.c_str(), bytes.getData(), bytes.getDataSize(), qos_control, false) == false)
