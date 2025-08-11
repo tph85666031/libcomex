@@ -19,7 +19,7 @@ class ComexConan(ConanFile):
       self.requires("openssl/3.5.2")
       self.requires("podofo/1.0.1")
       self.requires("libsmb2/6.2")
-      self.requires("libmagic/5.46")
+      self.requires("libmagic/5.46-f1")
       self.requires("libjpeg/9f")
       if self.settings.os != "Windows":
         self.requires("libtar/1.2.20")

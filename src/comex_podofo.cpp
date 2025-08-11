@@ -118,7 +118,7 @@ ComBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm
 
     cinfo.err = jpeg_std_error(&jerr);
     jpeg_create_compress(&cinfo);
-    jpeg_mem_dest(&cinfo, &dst, (unsigned long*)&dst_size);
+    jpeg_mem_dest(&cinfo, &dst, &dst_size);
     cinfo.image_width = width;
     cinfo.image_height = height;
     cinfo.input_components = 3;
@@ -183,8 +183,8 @@ void PdfExtrator::extractImage()
         {
             continue;
         }
-        PdfObject* type_obj = obj->GetDictionary().GetKey(PdfName::KeyType);
-        PdfObject* subtype_obj = obj->GetDictionary().GetKey(PdfName::KeySubtype);
+        PdfObject* type_obj = obj->GetDictionary().GetKey("Type"_n);
+        PdfObject* subtype_obj = obj->GetDictionary().GetKey("Subtype"_n);
         if(type_obj == NULL || subtype_obj == NULL)
         {
             continue;
@@ -192,7 +192,7 @@ void PdfExtrator::extractImage()
         if((type_obj && type_obj->IsName() && (type_obj->GetName() == "XObject")) ||
                 (subtype_obj && subtype_obj->IsName() && (subtype_obj->GetName() == "Image")))
         {
-            PdfObject* filter = obj->GetDictionary().GetKey(PdfName::KeyFilter);
+            PdfObject* filter = obj->GetDictionary().GetKey("Filter"_n);
             if(filter == NULL)
             {
                 continue;

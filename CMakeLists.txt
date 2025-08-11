@@ -130,6 +130,7 @@ SET(PROJECT_LIB
 	libmagic::libmagic
 	Iconv::Iconv
 	JPEG::JPEG
+	podofo_3rdparty.lib
 )
 
 AUX_SOURCE_DIRECTORY(./src PROJECT_SRC)
