@@ -60,20 +60,21 @@ IF (APPLE)
   SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fPIC -fvisibility=hidden -framework SystemConfiguration -framework Foundation -framework CoreFoundation -Wl,-hidden-lcrypto -Wl,-hidden-lssl -Wl,-hidden-lz -Wl,-hidden-lbz2 -Wl,-hidden-ltar -Wl,-hidden-lzip -Wl,-hidden-larchive -Wl,-hidden-lsmb2 -Wl,-hidden-lnfs -Wl,-hidden-lcurl -Wl,-hidden-lwebsockets -Wl,-hidden-lmosquitto -Wl,-x")
 ENDIF()
 
-find_package(mosquitto)
-find_package(CURL)
-find_package(LibArchive)
-find_package(cairo)
-find_package(libuv)
-find_package(libzip)
-find_package(libqrencode)
-find_package(libtar)
-find_package(libmagic)
-find_package(podofo)
-find_package(BZip2)
-find_package(OpenSSL)
-find_package(libsmb2)
-find_package(libnfs)
+find_package(mosquitto REQUIRED)
+find_package(CURL REQUIRED)
+find_package(LibArchive REQUIRED)
+find_package(cairo REQUIRED)
+find_package(libuv REQUIRED)
+find_package(libzip REQUIRED)
+find_package(libqrencode REQUIRED)
+find_package(podofo REQUIRED)
+find_package(BZip2 REQUIRED)
+find_package(OpenSSL REQUIRED)
+find_package(libsmb2 REQUIRED)
+find_package(libnfs REQUIRED)
+find_package(Iconv REQUIRED)
+find_package(JPEG REQUIRED)
+find_package(libmagic REQUIRED)
 
 #头文件搜索路径,可修改
 INCLUDE_DIRECTORIES(
@@ -91,12 +92,14 @@ LINK_DIRECTORIES(
 
 #依赖库,无需修改,静态库的依赖顺序为依赖的库写在后面
 IF (UNIX OR APPLE)
+find_package(libtar)
 SET(PROJECT_LIB
     ${PROJECT_LIB}
     com
     pthread
     dl
     m
+	libtar::libtar
 )
 ELSE()
 ADD_COMPILE_OPTIONS( /W3 /wd4819 /wd4251 /wd4200 /wd4996)
@@ -121,11 +124,12 @@ SET(PROJECT_LIB
 	uv 
 	Iconv::Iconv 
 	cairo::cairo
-	libmagic::libmagic
 	podofo::podofo
 	BZip2::BZip2
-	libtar::libtar
 	libsmb2::libsmb2
+	libmagic::libmagic
+	Iconv::Iconv
+	JPEG::JPEG
 )
 
 AUX_SOURCE_DIRECTORY(./src PROJECT_SRC)

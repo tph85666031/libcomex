@@ -12,15 +12,17 @@ class ComexConan(ConanFile):
       self.requires("cairo/1.18.0")
       self.requires("libuv/1.49.2")
       self.requires("libzip/1.11.3")
+      self.requires("libiconv/1.17")
       self.requires("libnfs/6.0.2")
       self.requires("libqrencode/4.1.1")
       self.requires("bzip2/1.0.8")
-      self.requires("libtar/1.2.20")
-      self.requires("libmagic/5.45")
       self.requires("openssl/3.5.2")
-      self.requires("podofo/0.10.4")
+      self.requires("podofo/1.0.1")
       self.requires("libsmb2/6.2")
-      self.requires("libjpeg/9f", override=True) 
+      self.requires("libmagic/5.46")
+      self.requires("libjpeg/9f")
+      if self.settings.os != "Windows":
+        self.requires("libtar/1.2.20")
         
    def imports(self):
       self.copy("*", dst="out/bin", src="bin")
