@@ -69,7 +69,7 @@ shift $(($OPTIND - 1))
 
 #清理环境
 if [ x"${PROJECT_CLEAN}" == x"true" ];then
-	rm -rf ${DIR_ROOT}/build/ 2>&1 > /dev/null
+	rm -rf ${DIR_ROOT}/tmp/ 2>&1 > /dev/null
     rm -rf ${DIR_ROOT}/out 2>&1 > /dev/null
 	show_message "clean done"
 	echo ""
@@ -79,7 +79,7 @@ fi
 #环境准备
 mkdir -pv ${DIR_ROOT}/out/include > /dev/null 2>&1
 mkdir -pv ${DIR_ROOT}/out/lib > /dev/null 2>&1
-mkdir -pv ${DIR_ROOT}/build/ > /dev/null 2>&1
+mkdir -pv ${DIR_ROOT}/tmp/ > /dev/null 2>&1
 
 #编译
 if [ x"${JOBS}" == x"" ];then
@@ -91,12 +91,12 @@ if [ -z ${JOBS} ];then
 fi
 
 if [ x"${BUILD_LIBS}" == x"true" ];then
-    rm -rf ${DIR_ROOT}/build > /dev/null 2>&1
-    conan install . -of=${DIR_ROOT}/build --build=missing -s build_type=${BUILD_TYPE}
+    rm -rf ${DIR_ROOT}/tmp > /dev/null 2>&1
+    conan install . -of=${DIR_ROOT}/tmp --build=missing -s build_type=${BUILD_TYPE}
 fi
 
 #编译comex
-cd ${DIR_ROOT}/build
+cd ${DIR_ROOT}/tmp
 if [ -d ${DIR_ROOT} ];then
   if [ x"$OS_TYPE" == x"Windows" ];then
       cmake .. -DCMAKE_TOOLCHAIN_FILE=conan_toolchain.cmake -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_BUILD_TYPE=${BUILD_TYPE} -DUNIT_TEST=${UNIT_TEST} -DCMAKE_WIN32_WINNT=0x0600 && cmake --build . --target package --config ${BUILD_TYPE}
