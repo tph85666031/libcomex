@@ -247,7 +247,15 @@ PdfWatermark::~PdfWatermark()
 
 bool PdfWatermark::addWaterMark(const char* file_image_block, int space_x, int space_y)
 {
+    if(file_image_block == NULL || space_x < 0 || space_y < 0)
+    {
+        return false;
+    }
     ComBytes file_raw =  com_file_readall(file_image_block);
+    if(file_raw.empty())
+    {
+        return false;
+    }
     auto& pages = ((PdfMemDocument*)ctx)->GetPages();
     std::unique_ptr<PdfImage> image = NULL;
     for(size_t i = 0; i < pages.GetCount(); i++)
