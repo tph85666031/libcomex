@@ -300,7 +300,7 @@ void LiteIPC::ThreadRx(LiteIPC* ctx)
 
                 reply.insert(0, (uint8*)&msg_reply, sizeof(IPC_MSG));
                 std::string topic = com_string_format("/%u/IN", msg->from);
-                ctx->publish(topic.c_str(), reply.getData(), reply.getDataSize(), MQTT_QOS0, false);
+                ctx->publish(topic.c_str(), reply.getData(), reply.getDataSize(), ctx->qos_control, false);
             }
             else if(msg->flag == LITE_IPC_FLAG_STATUS)
             {
