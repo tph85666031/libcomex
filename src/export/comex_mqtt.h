@@ -11,16 +11,6 @@
 #define MQTT_QOS1    1
 #define MQTT_QOS2    2
 
-COM_EXPORT void comex_mqtt_global_init();
-COM_EXPORT void comex_mqtt_global_uninit();
-
-class COM_EXPORT MqttInitializer
-{
-public:
-    MqttInitializer();
-    virtual ~MqttInitializer();
-};
-
 class COM_EXPORT MqttProperty
 {
 public:

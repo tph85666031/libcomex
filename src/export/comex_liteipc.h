@@ -16,7 +16,8 @@ public:
     uint32 getAddr();
     LiteIPC& setAddr(uint32 addr);
     LiteIPC& setWill(uint32 id, const void* data, int data_size, int delay_interval_s = 3);
-
+    LiteIPC& setQOS(int qos_control, int qos_status, int qos_event);
+    
     bool startIPC();
     void stopIPC();
 
@@ -25,8 +26,7 @@ public:
     void removeStatusListener(uint32 addr, uint32 id = LITEIPC_ID_ALL);
     void removeEventListener(uint32 addr, uint32 id = LITEIPC_ID_ALL);
 
-    ComBytes sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms);
-    bool sendControl(uint32 addr, uint32 id, const void* data, int data_size);
+    ComBytes sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms=5000);
     bool sendStatus(uint32 id, const void* data, int data_size);
     bool sendEvent(uint32 id, const void* data, int data_size);
 private:

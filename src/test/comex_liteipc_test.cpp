@@ -1,4 +1,4 @@
-#include "comex.h"
+#include "comex_liteipc.h"
 #include "com_log.h"
 #include "com_test.h"
 
@@ -11,7 +11,7 @@ public:
     virtual ComBytes onRecvControl(uint32 addr, uint32 id, uint8* data, int data_size)
     {
         count_control++;
-        LOG_I("got control from %u,msg=%s,data_size=%d,count=%d", addr, (char*)data, data_size, count_control.load());
+        LOG_I("got control from %u,msg=%d,data_size=%d,count=%d", addr, data[0], data_size, count_control.load());
         if(count_control == count_control_max)
         {
             sem.post();
@@ -44,7 +44,7 @@ void th_test(MyLiteIPC* ipc)
 {
     for(int i = 0; i < ipc->count_control; i++)
     {
-        ipc->sendControl(2, 1, ipc->bytes.getData(), ipc->bytes.getDataSize());
+        ipc->sendControl(2, 1, ipc->bytes.getData(),ipc->bytes.getDataSize());
     }
 }
 
@@ -64,11 +64,10 @@ void comex_liteipc_unit_test_suit(void** state)
     }
     TIME_COST_SHOW();
 
-    comex_mqtt_global_init();
     //com_log_set_level("DEBUG");
     MyLiteIPC ipc_a;
     MyLiteIPC ipc_b;
-    ipc_a.setHost("127.0.0.1").setPort(1883);
+    ipc_a.setHost("/tmp/mqtt.sock").setPort(0);
     ipc_a.setAddr(1);
     ipc_a.bytes = send_data;
     ipc_a.startIPC();
@@ -95,9 +94,9 @@ void comex_liteipc_unit_test_suit(void** state)
         ipc_a.sendEvent(1, "event1", sizeof("event1"));
     }
     ipc_b.sem.wait();
+
     TIME_COST_SHOW();
     LOG_I("control count=%d,event count=%d,status count=%d", ipc_b.count_control.load(), ipc_b.count_event.load(), ipc_b.count_status.load());
-    comex_mqtt_global_uninit();
     ASSERT_TRUE(ipc_b.count_control >= ipc_b.count_control_max);
 }
 

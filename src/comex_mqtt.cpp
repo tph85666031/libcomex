@@ -14,26 +14,6 @@ typedef void (*fp_mqtt_v5_on_subscribe)(struct mosquitto*, void*, int, int, cons
 typedef void (*fp_mqtt_v5_on_unsubscribe)(struct mosquitto*, void*, int, const mosquitto_property* props);
 typedef void (*fp_mqtt_v5_on_log)(struct mosquitto*, void*, int, const char*);
 
-MqttInitializer::MqttInitializer()
-{
-    mosquitto_lib_init();
-}
-
-MqttInitializer::~MqttInitializer()
-{
-    mosquitto_lib_cleanup();
-}
-
-void comex_mqtt_global_init()
-{
-    mosquitto_lib_init();
-}
-
-void comex_mqtt_global_uninit()
-{
-    mosquitto_lib_cleanup();
-}
-
 MqttProperty::MqttProperty()
 {
 }
@@ -358,11 +338,13 @@ MqttClient::MqttClient()
     will_retain = false;
     connection_ready = false;
     mosq = NULL;
+    mosquitto_lib_init();
 }
 
 MqttClient::~MqttClient()
 {
     stopClient();
+    mosquitto_lib_cleanup();
 }
 
 void MqttClient::MqttMessageCallback(void* mosq, void* userdata,
@@ -410,7 +392,7 @@ void MqttClient::MqttConnectCallback(void* mosq, void* userdata, int result, int
     MqttClient* ctx = (MqttClient*)userdata;
     ctx->connection_ready = (result == 0);
     ctx->sem_mqtt_conn.post();
-    LOG_D("[%s]connect error_str=%s,result=%d,flag=%d,prop=%p", ctx->client_id.c_str(), mosquitto_strerror(result), result, flag, props);
+    LOG_I("[%s]connect error_str=%s,result=%d,flag=%d,prop=%p", ctx->client_id.c_str(), mosquitto_strerror(result), result, flag, props);
     if(ctx->connection_ready)
     {
         ctx->mutex_sub_topics.lock();
@@ -779,7 +761,7 @@ bool MqttClient::subscribe(const char* topic, int qos)
     mutex_sub_topics.unlock();
 
     int ret = mosquitto_subscribe((struct mosquitto*)mosq, NULL, topic, qos);
-    LOG_D("[%s]topic subscribed=%s,ret=%d", client_id.c_str(), topic, ret);
+    LOG_I("[%s]topic subscribed=%s,ret=%d", client_id.c_str(), topic, ret);
     mutex_sub_topics.lock();
     sub_topics[topic] = qos;
     mutex_sub_topics.unlock();

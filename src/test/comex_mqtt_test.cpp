@@ -26,7 +26,6 @@ public:
 
 void comex_mqtt_unit_test_suit(void** state)
 {
-	comex_mqtt_global_init();
     //com_run_shell("sudo pkill mosquitto");
     //com_run_shell("mosquitto -d");
     MyMqttClient client;

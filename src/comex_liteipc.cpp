@@ -50,6 +50,23 @@ LiteIPC& LiteIPC::setAddr(uint32 addr)
     return *this;
 }
 
+LiteIPC& LiteIPC::setQOS(int qos_control, int qos_status, int qos_event)
+{
+    if(qos_control >= MQTT_QOS0 && qos_control <= MQTT_QOS2)
+    {
+        this->qos_control = qos_control;
+    }
+    if(qos_status >= MQTT_QOS0 && qos_status <= MQTT_QOS2)
+    {
+        this->qos_status = qos_status;
+    }
+    if(qos_event >= MQTT_QOS0 && qos_event <= MQTT_QOS2)
+    {
+        this->qos_event = qos_event;
+    }
+    return *this;
+}
+
 LiteIPC& LiteIPC::setWill(uint32 id, const void* data, int data_size, int delay_interval_s)
 {
     if(data == NULL || data_size <= 0)
@@ -86,7 +103,7 @@ bool LiteIPC::startIPC()
     }
 
     std::string topic = com_string_format("/%u/IN", addr);
-    return subscribe(topic.c_str());
+    return subscribe(topic.c_str(), qos_control);
 }
 
 void LiteIPC::stopIPC()
@@ -114,7 +131,7 @@ bool LiteIPC::addEventListener(uint32 addr, uint32 id)
     std::string topic = com_string_format("/%s/OUT/EVENT/%s",
                                           addr == LITEIPC_ADDR_ALL ? "+" : std::to_string(addr).c_str(),
                                           id == LITEIPC_ID_ALL ? "+" : std::to_string(id).c_str());
-    return subscribe(topic.c_str(), qos_status);
+    return subscribe(topic.c_str(), qos_event);
 }
 
 void LiteIPC::removeStatusListener(uint32 addr, uint32 id)
@@ -157,30 +174,6 @@ void LiteIPC::onRecv(const std::string& topic, const uint8* data, int data_size,
         condition_rx_queue.notifyAll();
     }
     return;
-}
-
-bool LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data_size)
-{
-    if(data == NULL || data_size <= 0)
-    {
-        LOG_E("arg incorrect");
-        return false;
-    }
-
-    IPC_MSG msg;
-    msg.from = this->addr;
-    msg.to = addr;
-    msg.flag = LITE_IPC_FLAG_CONTROL;
-    msg.magic = magic++;
-    msg.id = id;
-    msg.len = data_size;
-
-    ComBytes bytes(sizeof(IPC_MSG) + data_size);
-    bytes.append((uint8*)&msg, sizeof(IPC_MSG));
-    bytes.append((uint8*)data, data_size);
-    std::string topic = com_string_format("/%u/IN", addr);
-
-    return publish(topic.c_str(), bytes.getData(), bytes.getDataSize(), qos_control, false);
 }
 
 ComBytes LiteIPC::sendControl(uint32 addr, uint32 id, const void* data, int data_size, int timeout_ms)
@@ -307,7 +300,7 @@ void LiteIPC::ThreadRx(LiteIPC* ctx)
 
                 reply.insert(0, (uint8*)&msg_reply, sizeof(IPC_MSG));
                 std::string topic = com_string_format("/%u/IN", msg->from);
-                ctx->publish(topic.c_str(), reply.getData(), reply.getDataSize(), ctx->qos_control, false);
+                ctx->publish(topic.c_str(), reply.getData(), reply.getDataSize(), MQTT_QOS0, false);
             }
             else if(msg->flag == LITE_IPC_FLAG_STATUS)
             {
