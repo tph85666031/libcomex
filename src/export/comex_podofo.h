@@ -3,11 +3,11 @@
 
 #include "com_base.h"
 
-class COM_EXPORT PdfReader
+class COM_EXPORT ComexPdfReader
 {
 public:
-    PdfReader();
-    virtual ~PdfReader();
+    ComexPdfReader();
+    virtual ~ComexPdfReader();
     void loadFromFile(const char* file);
     void loadFromMemory(const ComBytes& content);
     void loadFromMemory(const void* data, int data_size);
@@ -17,11 +17,11 @@ protected:
     void* ctx;
 };
 
-class COM_EXPORT PdfExtrator : public PdfReader
+class COM_EXPORT ComexPdfExtrator : public ComexPdfReader
 {
 public:
-    PdfExtrator();
-    virtual ~PdfExtrator();
+    ComexPdfExtrator();
+    virtual ~ComexPdfExtrator();
 
     std::string getText();
     std::vector<ComBytes>& getImage();
@@ -45,11 +45,11 @@ public:
     int type;
 };
 
-class COM_EXPORT PdfWatermark : public PdfReader
+class COM_EXPORT ComexPdfWatermark : public ComexPdfReader
 {
 public:
-    PdfWatermark();
-    virtual ~PdfWatermark();
+    ComexPdfWatermark();
+    virtual ~ComexPdfWatermark();
     bool addWaterMark(const char* file_image_block, int space_x = 100, int space_y = 100);
     std::vector<DarkMarkPos> addDarkMark(int pix_size);
 private:

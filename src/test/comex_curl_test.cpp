@@ -1,4 +1,4 @@
-#include "comex.h"
+#include "comex_curl.h"
 #include "com_log.h"
 #include "com_test.h"
 

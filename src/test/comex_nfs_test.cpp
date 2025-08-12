@@ -1,6 +1,7 @@
-#include "comex.h"
+#include "comex_nfs.h"
 #include "com_test.h"
 #include "com_file.h"
+#include "com_log.h"
 
 void comex_nfs_unit_test_suit(void** state)
 {

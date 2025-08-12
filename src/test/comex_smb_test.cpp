@@ -1,5 +1,6 @@
-#include "comex.h"
+#include "comex_smb.h"
 #include "com_test.h"
+#include "com_file.h"
 
 void comex_smb_unit_test_suit(void** state)
 {

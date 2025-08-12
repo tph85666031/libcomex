@@ -1378,29 +1378,6 @@ bool OpensslRSA::GenerateKey(int key_bits, std::string& public_key, std::string&
     return true;
 }
 
-CertDistinguishedName::CertDistinguishedName()
-{
-}
-
-CertDistinguishedName::~CertDistinguishedName()
-{
-}
-
-std::string CertDistinguishedName::toString()
-{
-    return std::string();
-}
-
-CertDistinguishedName CertDistinguishedName::FromString(const char* str)
-{
-    if(com_string_len(str) <= 0)
-    {
-        return CertDistinguishedName();
-    }
-    return CertDistinguishedName();
-}
-
-
 OpensslCert::OpensslCert()
 {
 }

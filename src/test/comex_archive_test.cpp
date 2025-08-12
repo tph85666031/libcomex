@@ -1,4 +1,7 @@
-#include "comex.h"
+#include "comex_archive.h"
+#include "com_test.h"
+#include "com_file.h"
+#include "com_log.h"
 
 void comex_archive_unit_test_suit(void** state)
 {

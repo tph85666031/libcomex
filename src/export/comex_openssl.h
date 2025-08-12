@@ -257,25 +257,6 @@ private:
     int padding_mode;
 };
 
-class CertDistinguishedName
-{
-public:
-    CertDistinguishedName();
-    virtual ~CertDistinguishedName();
-    std::string toString();
-    static CertDistinguishedName FromString(const char* str);
-
-public:
-    std::string CN;
-    std::string O;
-    std::string OU;
-    std::string L;
-    std::string S;
-    std::string C;
-    std::string E;
-    std::string G;
-};
-
 class COM_EXPORT OpensslCert
 {
 public:

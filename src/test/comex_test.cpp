@@ -1,4 +1,6 @@
-#include "comex.h"
+#include "com_base.h"
+#include "com_log.h"
+#include "com_test.h"
 
 extern void comex_session_unit_test_suit(void** state);
 extern void comex_mqtt_unit_test_suit(void** state);
@@ -30,7 +32,7 @@ CMUnitTest test_cases_comex_lib[] =
 	cmocka_unit_test(comex_iconv_unit_test_suit),
 	cmocka_unit_test(comex_cairo_watermark_unit_test_suit)
 #else
-    cmocka_unit_test(comex_podofo_unit_test_suit)
+    cmocka_unit_test(comex_liteipc_unit_test_suit)
 #endif
 };
 

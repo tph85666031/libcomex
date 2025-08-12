@@ -19,21 +19,21 @@
 
 using namespace PoDoFo;
 
-PdfReader::PdfReader()
+ComexPdfReader::ComexPdfReader()
 {
     ctx = new PdfMemDocument();
 }
 
-PdfReader::~PdfReader()
+ComexPdfReader::~ComexPdfReader()
 {
     if(ctx != NULL)
     {
-        delete(PdfMemDocument*)ctx;
+        delete((PdfMemDocument*)ctx);
         ctx = NULL;
     }
 }
 
-void PdfReader::loadFromFile(const char* file)
+void ComexPdfReader::loadFromFile(const char* file)
 {
     if(ctx == NULL || file == NULL)
     {
@@ -50,7 +50,7 @@ void PdfReader::loadFromFile(const char* file)
     }
 }
 
-void PdfReader::loadFromMemory(const ComBytes& content)
+void ComexPdfReader::loadFromMemory(const ComBytes& content)
 {
     try
     {
@@ -62,7 +62,7 @@ void PdfReader::loadFromMemory(const ComBytes& content)
     }
 }
 
-void PdfReader::loadFromMemory(const void* data, int data_size)
+void ComexPdfReader::loadFromMemory(const void* data, int data_size)
 {
     if(ctx == NULL || data == NULL || data_size <= 0)
     {
@@ -79,7 +79,7 @@ void PdfReader::loadFromMemory(const void* data, int data_size)
     }
 }
 
-bool PdfReader::saveAs(const char* file)
+bool ComexPdfReader::saveAs(const char* file)
 {
     if(ctx == NULL || com_string_is_empty(file))
     {
@@ -90,25 +90,25 @@ bool PdfReader::saveAs(const char* file)
     return true;
 }
 
-PdfExtrator::PdfExtrator()
+ComexPdfExtrator::ComexPdfExtrator()
 {
 }
 
-PdfExtrator::~PdfExtrator()
+ComexPdfExtrator::~ComexPdfExtrator()
 {
 }
 
-std::string PdfExtrator::getText()
+std::string ComexPdfExtrator::getText()
 {
     return text;
 }
 
-std::vector<ComBytes>& PdfExtrator::getImage()
+std::vector<ComBytes>& ComexPdfExtrator::getImage()
 {
     return image;
 }
 
-ComBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm_size)
+ComBytes ComexPdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm_size)
 {
     if(width <= 0 || height <= 0 || ppm == NULL || ppm_size <= 0)
     {
@@ -136,7 +136,7 @@ ComBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm
     jpeg_start_compress(&cinfo, TRUE);
 
     JSAMPROW row_pointer[1] = {0};
-    unsigned char* bytes = new unsigned char[width * 3];
+    unsigned char* bytes = new unsigned char[width * 3]();
     int ppm_pos = 0;
     while(cinfo.next_scanline < cinfo.image_height)
     {
@@ -164,7 +164,7 @@ ComBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm
     return result;
 }
 
-void PdfExtrator::extractText()
+void ComexPdfExtrator::extractText()
 {
     try
     {
@@ -188,7 +188,7 @@ void PdfExtrator::extractText()
     }
 }
 
-void PdfExtrator::extractImage()
+void ComexPdfExtrator::extractImage()
 {
     try
     {
@@ -250,15 +250,15 @@ void PdfExtrator::extractImage()
     return;
 }
 
-PdfWatermark::PdfWatermark()
+ComexPdfWatermark::ComexPdfWatermark()
 {
 }
 
-PdfWatermark::~PdfWatermark()
+ComexPdfWatermark::~ComexPdfWatermark()
 {
 }
 
-bool PdfWatermark::addWaterMark(const char* file_image_block, int space_x, int space_y)
+bool ComexPdfWatermark::addWaterMark(const char* file_image_block, int space_x, int space_y)
 {
     if(file_image_block == NULL || space_x < 0 || space_y < 0)
     {
@@ -301,7 +301,7 @@ bool PdfWatermark::addWaterMark(const char* file_image_block, int space_x, int s
     return true;
 }
 
-std::vector<DarkMarkPos> PdfWatermark::addDarkMark(int pix_size)
+std::vector<DarkMarkPos> ComexPdfWatermark::addDarkMark(int pix_size)
 {
     std::vector<DarkMarkPos> pos_list;
     try
