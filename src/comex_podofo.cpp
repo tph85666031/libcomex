@@ -52,7 +52,14 @@ void PdfReader::loadFromFile(const char* file)
 
 void PdfReader::loadFromMemory(const ComBytes& content)
 {
-    loadFromMemory(content.getData(), content.getDataSize());
+    try
+    {
+        loadFromMemory(content.getData(), content.getDataSize());
+    }
+    catch(const std::exception& e)
+    {
+        LOG_E("failed,err=%s", e.what());
+    }
 }
 
 void PdfReader::loadFromMemory(const void* data, int data_size)
@@ -159,80 +166,86 @@ ComBytes PdfExtrator::ppmToJpeg(int width, int height, const uint8* ppm, int ppm
 
 void PdfExtrator::extractText()
 {
-    auto& pages = ((PdfMemDocument*)ctx)->GetPages();
-    for(unsigned i = 0; i < pages.GetCount(); i++)
+    try
     {
-        auto& page = pages.GetPageAt(i);
-
-        std::vector<PdfTextEntry> entries;
-        page.ExtractTextTo(entries);
-
-        for(auto& entry : entries)
+        auto& pages = ((PdfMemDocument*)ctx)->GetPages();
+        for(unsigned i = 0; i < pages.GetCount(); i++)
         {
-            text.append(entry.Text + "\n");
+            auto& page = pages.GetPageAt(i);
+
+            std::vector<PdfTextEntry> entries;
+            page.ExtractTextTo(entries);
+
+            for(auto& entry : entries)
+            {
+                text.append(entry.Text + "\n");
+            }
         }
     }
-    return;
+    catch(const std::exception& e)
+    {
+        LOG_E("failed,err=%s", e.what());
+    }
 }
 
 void PdfExtrator::extractImage()
 {
-    for(PdfObject* obj : ((PdfMemDocument*)ctx)->GetObjects())
+    try
     {
-        if(obj == NULL || obj->IsDictionary() == false)
+        for(PdfObject* obj : ((PdfMemDocument*)ctx)->GetObjects())
         {
-            continue;
-        }
-        PdfObject* type_obj = obj->GetDictionary().GetKey("Type"_n);
-        PdfObject* subtype_obj = obj->GetDictionary().GetKey("Subtype"_n);
-        if(type_obj == NULL || subtype_obj == NULL)
-        {
-            continue;
-        }
-        if((type_obj && type_obj->IsName() && (type_obj->GetName() == "XObject")) ||
-                (subtype_obj && subtype_obj->IsName() && (subtype_obj->GetName() == "Image")))
-        {
-            PdfObject* filter = obj->GetDictionary().GetKey("Filter"_n);
-            if(filter == NULL)
+            if(obj == NULL || obj->IsDictionary() == false)
             {
                 continue;
             }
-
-            if(filter->IsArray() && filter->GetArray().GetSize() == 1 &&
-                    filter->GetArray()[0].IsName() && (filter->GetArray()[0].GetName() == "DCTDecode"))
+            PdfObject* type_obj = obj->GetDictionary().GetKey("Type"_n);
+            PdfObject* subtype_obj = obj->GetDictionary().GetKey("Subtype"_n);
+            if(type_obj == NULL || subtype_obj == NULL)
             {
-                filter = &filter->GetArray()[0];
+                continue;
             }
-
-            if(filter->IsName() && (filter->GetName() == "DCTDecode"))
+            if((type_obj && type_obj->IsName() && (type_obj->GetName() == "XObject")) ||
+                    (subtype_obj && subtype_obj->IsName() && (subtype_obj->GetName() == "Image")))
             {
-                const PdfMemoryObjectStream& memprovider = dynamic_cast<const PdfMemoryObjectStream&>(((const PdfObject&)(*obj)).GetStream()->GetProvider());
-                auto& buffer = memprovider.GetBuffer();
-                ComBytes jpeg;
-                jpeg.append((const uint8*)buffer.data(), buffer.size());
-                image.push_back(jpeg);
-            }
-            else
-            {
-                PdfObject* p_width = obj->GetDictionary().GetKey("Width");
-                PdfObject* p_height = obj->GetDictionary().GetKey("Height");
-                PdfObjectStream* p_stream = obj->GetStream();
-                if(p_width != NULL && p_height != NULL && p_stream != NULL)
+                PdfObject* filter = obj->GetDictionary().GetKey("Filter"_n);
+                if(filter == NULL)
                 {
-                    try
+                    continue;
+                }
+
+                if(filter->IsArray() && filter->GetArray().GetSize() == 1 &&
+                        filter->GetArray()[0].IsName() && (filter->GetArray()[0].GetName() == "DCTDecode"))
+                {
+                    filter = &filter->GetArray()[0];
+                }
+
+                if(filter->IsName() && (filter->GetName() == "DCTDecode"))
+                {
+                    const PdfMemoryObjectStream& memprovider = dynamic_cast<const PdfMemoryObjectStream&>(((const PdfObject&)(*obj)).GetStream()->GetProvider());
+                    auto& buffer = memprovider.GetBuffer();
+                    ComBytes jpeg;
+                    jpeg.append((const uint8*)buffer.data(), buffer.size());
+                    image.push_back(jpeg);
+                }
+                else
+                {
+                    PdfObject* p_width = obj->GetDictionary().GetKey("Width");
+                    PdfObject* p_height = obj->GetDictionary().GetKey("Height");
+                    PdfObjectStream* p_stream = obj->GetStream();
+                    if(p_width != NULL && p_height != NULL && p_stream != NULL)
                     {
                         int width = p_width->GetNumber();
                         int height = p_height->GetNumber();
                         auto buffer = p_stream->GetCopy();
                         image.push_back(ppmToJpeg(width, height, (const uint8*)buffer.data(), buffer.size()));
                     }
-                    catch(PdfError& e)
-                    {
-                        LOG_E("%s", e.what());
-                    }
                 }
             }
         }
+    }
+    catch(const std::exception& e)
+    {
+        LOG_E("failed,err=%s", e.what());
     }
     return;
 }
@@ -251,30 +264,39 @@ bool PdfWatermark::addWaterMark(const char* file_image_block, int space_x, int s
     {
         return false;
     }
-    ComBytes file_raw =  com_file_readall(file_image_block);
+    ComBytes file_raw = com_file_readall(file_image_block);
     if(file_raw.empty())
     {
         return false;
     }
-    auto& pages = ((PdfMemDocument*)ctx)->GetPages();
-    std::unique_ptr<PdfImage> image = NULL;
-    for(size_t i = 0; i < pages.GetCount(); i++)
+    try
     {
-        PdfPage& page = pages.GetPageAt(i);
-        Rect rect =  page.GetRect();
-        if(image == NULL || (int)(image->GetRect().Width) != (int)(rect.Width) || (int)(image->GetRect().Height) != (int)(rect.Height))
+        auto& pages = ((PdfMemDocument*)ctx)->GetPages();
+        std::unique_ptr<PdfImage> image = NULL;
+        for(size_t i = 0; i < pages.GetCount(); i++)
         {
-            ComBytes result = WaterMark::ExpandWaterMark(file_raw, rect.Width, rect.Height, space_x, space_y);
-            image = ((PdfMemDocument*)ctx)->CreateImage();
-            image->LoadFromBuffer(bufferview((const char*)result.getData(), result.getDataSize()));
+            PdfPage& page = pages.GetPageAt(i);
+            Rect rect =  page.GetRect();
+            if(image == NULL || (int)(image->GetRect().Width) != (int)(rect.Width) || (int)(image->GetRect().Height) != (int)(rect.Height))
+            {
+                ComBytes result = WaterMark::ExpandWaterMark(file_raw, rect.Width, rect.Height, space_x, space_y);
+                image = ((PdfMemDocument*)ctx)->CreateImage();
+                image->LoadFromBuffer(bufferview((const char*)result.getData(), result.getDataSize()));
+
+            }
+            if(image == NULL)
+            {
+                return false;
+            }
+            PdfPainter painter;
+            painter.SetCanvas(page);
+            painter.DrawImage(*image, 0, 0);
         }
-        if(image == NULL)
-        {
-            return false;
-        }
-        PdfPainter painter;
-        painter.SetCanvas(page);
-        painter.DrawImage(*image, 0, 0);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_E("failed,err=%s", e.what());
+        return false;
     }
     return true;
 }
@@ -282,92 +304,100 @@ bool PdfWatermark::addWaterMark(const char* file_image_block, int space_x, int s
 std::vector<DarkMarkPos> PdfWatermark::addDarkMark(int pix_size)
 {
     std::vector<DarkMarkPos> pos_list;
-    auto& pages = ((PdfMemDocument*)ctx)->GetPages();
-    for(size_t i = 0; i < pages.GetCount(); i++)
+    try
     {
-        PdfPage& page = pages.GetPageAt(i);
-        std::vector<PdfTextEntry> entries;
-        page.ExtractTextTo(entries);
-        if(entries.empty())
+        auto& pages = ((PdfMemDocument*)ctx)->GetPages();
+        for(size_t i = 0; i < pages.GetCount(); i++)
         {
-            continue;
-        }
-        //检查文字类型，只在非符号文字下面做暗水印标记
-        std::vector<PdfTextEntry> entries_refine;
-        for(size_t n = 0; n < entries.size(); n++)
-        {
-            std::wstring text = com_wstring_from_utf8(ComBytes(entries[n].Text.data(), entries[n].Text.length()));
-            bool found = false;
-            for(size_t j = 0; j < text.length(); j++)
+            PdfPage& page = pages.GetPageAt(i);
+            std::vector<PdfTextEntry> entries;
+            page.ExtractTextTo(entries);
+            if(entries.empty())
             {
-                if(std::iswalnum(text[j]) || (text[j] > 127 && std::iswgraph(text[j])))
+                continue;
+            }
+            //检查文字类型，只在非符号文字下面做暗水印标记
+            std::vector<PdfTextEntry> entries_refine;
+            for(size_t n = 0; n < entries.size(); n++)
+            {
+                std::wstring text = com_wstring_from_utf8(ComBytes(entries[n].Text.data(), entries[n].Text.length()));
+                bool found = false;
+                for(size_t j = 0; j < text.length(); j++)
                 {
-                    found = true;
-                    break;
+                    if(std::iswalnum(text[j]) || (text[j] > 127 && std::iswgraph(text[j])))
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if(found)
+                {
+                    entries_refine.push_back(entries[n]);
                 }
             }
-            if(found)
+            if(entries_refine.empty())
             {
-                entries_refine.push_back(entries[n]);
+                continue;
             }
-        }
-        if(entries_refine.empty())
-        {
-            continue;
-        }
 
-        PdfTextEntry& entry = entries_refine[com_rand(0, entries_refine.size() - 1)];
-        //一行文字中随机选择一个可见字符
-        std::vector<int> cache_index;
-        std::wstring text = com_wstring_from_utf8(ComBytes(entry.Text.data(), entry.Text.length()));
-        for(size_t j = 0; j < text.length(); j++)
-        {
-            if(std::iswalnum(text[j]) || text[j] > 127)
+            PdfTextEntry& entry = entries_refine[com_rand(0, entries_refine.size() - 1)];
+            //一行文字中随机选择一个可见字符
+            std::vector<int> cache_index;
+            std::wstring text = com_wstring_from_utf8(ComBytes(entry.Text.data(), entry.Text.length()));
+            for(size_t j = 0; j < text.length(); j++)
             {
-                cache_index.push_back(j);
+                if(std::iswalnum(text[j]) || text[j] > 127)
+                {
+                    cache_index.push_back(j);
+                }
             }
+            int rand_index = cache_index[com_rand(0, cache_index.size() - 1)];
+            double x = entry.X + entry.Length * rand_index / text.length();
+            double y = entry.Y;
+            LOG_D("%.0f:%.0f %s", x, y, entry.Text.c_str());
+            PdfPainter painter;
+            painter.SetCanvas(page);
+            int type = com_rand(1, 4);
+            //painter.DrawLine(x, y, x + entry.Length, y);
+            if(type == 1)
+            {
+                //三角形
+                painter.DrawLine(x, y - pix_size * 0.87 - 1, x + (double)pix_size / 2, y - 1);
+                painter.DrawLine(x, y - pix_size * 0.87 - 1, x + pix_size, y - pix_size * 0.87 - 1);
+                painter.DrawLine(x + (double)pix_size / 2, y - 1, x + pix_size, y - pix_size * 0.87 - 1);
+            }
+            else if(type == 2)
+            {
+                //圆形
+                painter.DrawCircle(x + pix_size / 2, y - pix_size / 2 - 1, pix_size / 2);
+            }
+            else if(type == 3)
+            {
+                //正方形
+                painter.DrawRectangle(x, y - pix_size - 1, pix_size, pix_size);
+            }
+            else if(type == 4)
+            {
+                //棱形
+                painter.DrawLine(x, y - (double)pix_size / 2 - 1, x + (double)pix_size / 2, y - 1);
+                painter.DrawLine(x, y - (double)pix_size / 2 - 1, x + (double)pix_size / 2, y - pix_size - 1);
+                painter.DrawLine(x + (double)pix_size / 2, y - 1, x + pix_size, y - (double)pix_size / 2 - 1);
+                painter.DrawLine(x + (double)pix_size / 2, y - pix_size - 1, x + pix_size, y - (double)pix_size / 2 - 1);
+            }
+            painter.FinishDrawing();
+            DarkMarkPos pos;
+            pos.page = i;
+            pos.text = entry.Text;
+            pos.x = x;
+            pos.y = y;
+            pos.type = type;
+            pos_list.push_back(pos);
         }
-        int rand_index = cache_index[com_rand(0, cache_index.size() - 1)];
-        double x = entry.X + entry.Length * rand_index / text.length();
-        double y = entry.Y;
-        LOG_D("%.0f:%.0f %s", x, y, entry.Text.c_str());
-        PdfPainter painter;
-        painter.SetCanvas(page);
-        int type = com_rand(1, 4);
-        //painter.DrawLine(x, y, x + entry.Length, y);
-        if(type == 1)
-        {
-            //三角形
-            painter.DrawLine(x, y - pix_size * 0.87 - 1, x + (double)pix_size / 2, y - 1);
-            painter.DrawLine(x, y - pix_size * 0.87 - 1, x + pix_size, y - pix_size * 0.87 - 1);
-            painter.DrawLine(x + (double)pix_size / 2, y - 1, x + pix_size, y - pix_size * 0.87 - 1);
-        }
-        else if(type == 2)
-        {
-            //圆形
-            painter.DrawCircle(x + pix_size / 2, y - pix_size / 2 - 1, pix_size / 2);
-        }
-        else if(type == 3)
-        {
-            //正方形
-            painter.DrawRectangle(x, y - pix_size - 1, pix_size, pix_size);
-        }
-        else if(type == 4)
-        {
-            //棱形
-            painter.DrawLine(x, y - (double)pix_size / 2 - 1, x + (double)pix_size / 2, y - 1);
-            painter.DrawLine(x, y - (double)pix_size / 2 - 1, x + (double)pix_size / 2, y - pix_size - 1);
-            painter.DrawLine(x + (double)pix_size / 2, y - 1, x + pix_size, y - (double)pix_size / 2 - 1);
-            painter.DrawLine(x + (double)pix_size / 2, y - pix_size - 1, x + pix_size, y - (double)pix_size / 2 - 1);
-        }
-        painter.FinishDrawing();
-        DarkMarkPos pos;
-        pos.page = i;
-        pos.text = entry.Text;
-        pos.x = x;
-        pos.y = y;
-        pos.type = type;
-        pos_list.push_back(pos);
+    }
+    catch(const std::exception& e)
+    {
+        LOG_E("failed,err=%s", e.what());
+        pos_list.clear();
     }
     return pos_list;
 }
