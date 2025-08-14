@@ -8,11 +8,11 @@ class ComexConan(ConanFile):
    default_options = {"*:shared": False}
 
    def requirements(self):
-       self.requires("mosquitto/2.0.21")
+       self.requires("mosquitto/2.0.22",options={"broker": True,"websockets": True,"build_cpp": False})
        self.requires("libcurl/8.12.1")
        self.requires("libarchive/3.7.2")
        self.requires("cairo/1.18.0")
-       self.requires("libuv/1.49.2")
+       self.requires("libuv/1.47.0")
        self.requires("libzip/1.11.3")
        self.requires("libiconv/1.17")
        self.requires("libnfs/6.0.2")
@@ -25,7 +25,7 @@ class ComexConan(ConanFile):
        self.requires("libjpeg/9f")
        if self.settings.os != "Windows":
           self.requires("libtar/1.2.20")
-        
+   
    def generate(self):
        for dep in self.dependencies.values():
            for libdir in dep.cpp_info.libdirs:
@@ -34,3 +34,5 @@ class ComexConan(ConanFile):
                copy(self, "*.dll", libdir, os.path.join(self.build_folder, "..","out","lib"))
            for includedir in dep.cpp_info.includedirs:
                copy(self, "*.h", includedir, os.path.join(self.build_folder, "..","out","include"))
+           for bindir in dep.cpp_info.bindirs:
+               copy(self, "mosquitto", bindir, os.path.join(self.build_folder, "..","out","bin"))

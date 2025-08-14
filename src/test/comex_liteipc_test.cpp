@@ -22,13 +22,13 @@ public:
     virtual void onRecvStatus(uint32 addr, uint32 id, uint8* data, int data_size)
     {
         count_status++;
-        LOG_I("got status from %u,msg=%s", addr, (char*)data);
+        LOG_I("[%d]got status from %u,msg=%s,count=%d", getAddr(), addr, (char*)data, count_status.load());
     }
 
     virtual void onRecvEvent(uint32 addr, uint32 id, uint8* data, int data_size)
     {
         count_event++;
-        LOG_I("got event from %u,msg=%s", addr, (char*)data);
+        LOG_I("[%d]got event from %u,msg=%s,cont=%d", getAddr(), addr, (char*)data, count_event.load());
     }
 
     ComBytes bytes;
@@ -44,7 +44,7 @@ void th_test(MyLiteIPC* ipc)
 {
     for(int i = 0; i < ipc->count_control; i++)
     {
-        ipc->sendControl(2, 1, ipc->bytes.getData(),ipc->bytes.getDataSize());
+        ipc->sendControl(2, 1, ipc->bytes.getData(), ipc->bytes.getDataSize());
     }
 }
 
@@ -53,8 +53,8 @@ void comex_liteipc_unit_test_suit(void** state)
     TIME_COST();
 
     uint8 buf[1 * 1024];
-    ComBytes send_data(sizeof(buf) * 5);
-    ComBytes reply_data(sizeof(buf) * 5);
+    ComBytes send_data;
+    ComBytes reply_data;
 
     TIME_COST_SHOW();
     for(int i = 0; i < 1; i++)
@@ -75,8 +75,8 @@ void comex_liteipc_unit_test_suit(void** state)
     ipc_b.setHost("127.0.0.1").setPort(1883);
     ipc_b.setAddr(2);
     ipc_b.bytes = reply_data;
-    ipc_b.addStatusListener(1);
-    ipc_b.addEventListener(1);
+    ipc_b.addStatusListener(LITEIPC_ADDR_ALL);
+    ipc_b.addEventListener(LITEIPC_ADDR_ALL);
     ipc_b.startIPC();
 
     int count_max = 100;
@@ -88,10 +88,10 @@ void comex_liteipc_unit_test_suit(void** state)
         std::thread t = std::thread(th_test, &ipc_a);
         t.detach();
     }
-    for(int i = 0; i < 1; i++)
+    for(int i = 0; i < 1000; i++)
     {
-        ipc_a.sendStatus(1, "status1", sizeof("status1"));
-        ipc_a.sendEvent(1, "event1", sizeof("event1"));
+        ipc_a.sendStatus(i, "status1", sizeof("status1"));
+        ipc_a.sendEvent(i, "event1", sizeof("event1"));
     }
     ipc_b.sem.wait();
 
