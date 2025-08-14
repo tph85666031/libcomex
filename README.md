@@ -4,7 +4,7 @@ easy API library of openssl curl zlib mqtt ...
 comex lib requires com (https://github.com/tph85666031/libcom.git)  
 
 How to build:  
-1: install conan2
+1: install conan2  
 2: clone https://github.com/tph85666031/conan2_repo.git  
 3: run build.sh in conan2_repo dir to update local lib to conan cache  
 4: clone libcomex  
