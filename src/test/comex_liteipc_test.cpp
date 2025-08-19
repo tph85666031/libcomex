@@ -77,6 +77,8 @@ void comex_liteipc_unit_test_suit(void** state)
     ipc_b.bytes = reply_data;
     ipc_b.addStatusListener(LITEIPC_ADDR_ALL);
     ipc_b.addEventListener(LITEIPC_ADDR_ALL);
+    ipc_b.setCAInfo("../../etc/ca.crt");
+    ipc_b.setCertInfo("../../etc/client.crt", "../../etc/client.key",NULL);
     ipc_b.startIPC();
 
     int count_max = 100;

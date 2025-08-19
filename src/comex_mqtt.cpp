@@ -619,8 +619,8 @@ bool MqttClient::openClient()
         {
             ca_path = com_path_dir(ca_file.c_str());
         }
-        LOG_D("ca_file=%s,ca_path=%s,cert=%s,key=%s", ca_file.c_str(), ca_path.c_str(), cert_file.c_str(), key_file.c_str());
-        mosquitto_tls_insecure_set((struct mosquitto*)mosq, false);
+        LOG_I("ca_file=%s,ca_path=%s,cert=%s,key=%s", ca_file.c_str(), ca_path.c_str(), cert_file.c_str(), key_file.c_str());
+        mosquitto_tls_insecure_set((struct mosquitto*)mosq, true);
         mosquitto_tls_opts_set((struct mosquitto*)mosq, SSL_VERIFY_PEER, NULL, NULL);
         ret = mosquitto_tls_set((struct mosquitto*)mosq,
                                 ca_file.empty() ? NULL : ca_file.c_str(),
