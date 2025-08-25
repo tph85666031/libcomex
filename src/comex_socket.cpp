@@ -215,10 +215,12 @@ void ComexTcpClient::stopClient()
     });
     uv_async_send(handle);
 
+    LOG_I("join thread");
     if(thread_loop.joinable())
     {
         thread_loop.join();
     }
+    LOG_I("join thread done");
 }
 
 int ComexTcpClient::sendData(const void* data, int data_size)
