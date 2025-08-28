@@ -687,7 +687,11 @@ bool OpensslCrypto::decryptEnd(ComBytes& result)
     uint8* buf = new uint8[block_size * 2];
     if(EVP_DecryptFinal_ex((EVP_CIPHER_CTX*)ctx, buf, &size_out) != 1)
     {
-        LOG_W("failed,size_out=%d", size_out);
+        int err_code = 0;
+        while((err_code = ERR_get_error()) != 0)
+        {
+            LOG_W("failed,size_out=%d,err=%s", size_out, ERR_error_string(err_code, NULL));
+        }
         return false;
     }
     if(size_out > 0)
