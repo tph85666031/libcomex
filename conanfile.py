@@ -8,7 +8,7 @@ class ComexConan(ConanFile):
    default_options = {"*:shared": False}
 
    def requirements(self):
-       self.requires("mosquitto/2.0.22",options={"broker": True,"websockets": True,"build_cpp": False})
+       self.requires("mosquitto/2.0.22-fix",options={"broker": True,"websockets": True,"build_cpp": False})
        self.requires("libcurl/8.12.1")
        self.requires("libarchive/3.7.2")
        self.requires("cairo/1.18.0")
