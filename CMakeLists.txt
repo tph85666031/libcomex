@@ -75,6 +75,7 @@ find_package(libnfs REQUIRED)
 find_package(Iconv REQUIRED)
 find_package(JPEG REQUIRED)
 find_package(libmagic REQUIRED)
+find_package(Poco REQUIRED)
 
 #头文件搜索路径,可修改
 INCLUDE_DIRECTORIES(
@@ -130,6 +131,7 @@ SET(PROJECT_LIB
 	libmagic::libmagic
 	Iconv::Iconv
 	JPEG::JPEG
+	Poco::Poco
 )
 
 AUX_SOURCE_DIRECTORY(./src PROJECT_SRC)

@@ -23,6 +23,8 @@ class ComexConan(ConanFile):
        self.requires("libsmb2/6.2")
        self.requires("libmagic/5.46-f1")
        self.requires("libjpeg/9f")
+       self.requires("poco/1.14.2")
+       self.requires("zstd/1.5.7", override=True)
        if self.settings.os != "Windows":
           self.requires("libtar/1.2.20")
    

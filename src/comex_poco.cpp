@@ -3,29 +3,30 @@
 
 #include <Poco/NotificationQueue.h>
 #include <Poco/Notification.h>
-#include <Poco/Net/ServerSocket.h>
-#include <Poco/Net/StreamSocket.h>
-#include <Poco/Net/SecureStreamSocket.h>
-#include <Poco/Net/SSLException.h>
-#include <Poco/Net/SSLManager.h>
 #include <Poco/Net/HTTPClientSession.h>
 #include <Poco/Net/HTTPSClientSession.h>
 #include <Poco/Net/HTTPRequestHandler.h>
 #include <Poco/Net/HTTPServerRequest.h>
 #include <Poco/Net/HTTPServerResponse.h>
 #include <Poco/Net/SecureServerSocket.h>
+#include <Poco/Net/SecureStreamSocket.h>
+#include <Poco/Net/HTTPServer.h>
+#include <Poco/Net/Context.h>
+#include <Poco/Net/SSLException.h>
+#include <Poco/Net/SSLManager.h>
 
 using namespace Poco;
 using namespace Poco::Net;
 
-class ProxyHTTPRequestHandler : public Poco::Net::HTTPRequestHandler
+class MyHTTPRequestHandler : public HTTPRequestHandler
 {
 public:
-    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
+    MyHTTPRequestHandler(ComexPocoProxyServer& server): server(server) {};
+    template <class T>
+    void handleHTTP(HTTPServerRequest& request, HTTPServerResponse& response)
     {
-        LOG_I("addr=%s", request.clientAddress().toString().c_str());
-        HTTPSClientSession session("www.baidu.com");
-
+        T session("www.baidu.com");
+        //T session("172.21.23.72");
         Poco::Net::HTTPRequest forward_request(request.getMethod(),
                                                request.getURI(),
                                                request.getVersion());
@@ -84,15 +85,67 @@ public:
         }
         while(true);
     }
+    void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
+    {
+        LOG_I("addr=%s", request.clientAddress().toString().c_str());
+        handleHTTP<HTTPSClientSession>(request, response);
+        //handleHTTP<HTTPClientSession>(request, response);
+    }
+private:
+    ComexPocoProxyServer& server;
 };
 
-class ProxyHTTPRequestHandlerFactory : public HTTPRequestHandlerFactory
+class MyHTTPRequestHandlerFactory : public HTTPRequestHandlerFactory
 {
 public:
+    MyHTTPRequestHandlerFactory(ComexPocoProxyServer& server): server(server) {};
     Poco::Net::HTTPRequestHandler* createRequestHandler(const HTTPServerRequest& request)
     {
-        return new ProxyHTTPRequestHandler();
+        return new MyHTTPRequestHandler(server);
     }
+private:
+    ComexPocoProxyServer& server;
+};
+
+template<class T>
+class MyTCPServerConnection: public TCPServerConnection
+{
+public:
+    MyTCPServerConnection(ComexPocoProxyServer& server, const StreamSocket& socket) : TCPServerConnection(socket), server(server) {};
+    void run()
+    {
+        StreamSocket& socket_client = socket();
+        char buf[4096];
+        int ret = socket_client.receiveBytes(buf, sizeof(buf));
+        LOG_I("ret=%d:%s", ret,buf);
+
+        T socket_target;
+        socket_target.connect(SocketAddress("www.baidu.com", 80));
+        std::string request = "GET / HTTP/1.1\r\nHost: example.com\r\n\r\n";
+        socket_target.sendBytes(request.data(), request.size());
+    }
+private:
+    ComexPocoProxyServer& server;
+};
+
+class MyTCPServerConnectionFactory : public TCPServerConnectionFactory
+{
+public:
+    MyTCPServerConnectionFactory(ComexPocoProxyServer& server, bool with_ssl = false): server(server), with_ssl(with_ssl) {};
+    TCPServerConnection* createConnection(const StreamSocket& socket)
+    {
+        if(with_ssl)
+        {
+            return new MyTCPServerConnection<SecureStreamSocket>(server, socket);
+        }
+        else
+        {
+            return new MyTCPServerConnection<StreamSocket>(server, socket);
+        }
+    }
+private:
+    ComexPocoProxyServer& server;
+    bool with_ssl = false;
 };
 
 ComexPocoProxyServer::ComexPocoProxyServer()
@@ -104,9 +157,12 @@ ComexPocoProxyServer::~ComexPocoProxyServer()
     stopServer();
 }
 
-ComexPocoProxyServer& ComexPocoProxyServer::setPort(uint16 port)
+ComexPocoProxyServer& ComexPocoProxyServer::setPort(uint16 port_http, uint16 port_https, uint16 port_tcp, uint16 port_tcps)
 {
-    this->proxy_server_port = port;
+    this->server_port_http = port_http;
+    this->server_port_https = port_https;
+    this->server_port_tcp = port_tcp;
+    this->server_port_tcps = port_tcps;
     return *this;
 }
 
@@ -125,22 +181,33 @@ ComexPocoProxyServer& ComexPocoProxyServer::setCA(const char* ca_crt, const char
 
 bool ComexPocoProxyServer::startServer()
 {
-    SSLManager::instance().initializeServer(NULL, NULL, Context::Ptr(new Context(
-            Poco::Net::Context::TLS_SERVER_USE,
-            ca_key,   // 根证书私钥
-            ca_crt,  // 根证书
-            "",            // 无CA链
-            Poco::Net::Context::VERIFY_RELAXED,
-            9,
-            false)));
-    SecureServerSocket socket(proxy_server_port);
-    HTTPServerParams* params = new HTTPServerParams();
-    params->setKeepAlive(true);
-    params->setKeepAliveTimeout(Timespan(10, 0));
-    params->setMaxThreads(16);
+    SSLManager::instance().initializeServer(NULL, NULL, Context::Ptr(new Context(Poco::Net::Context::TLS_SERVER_USE, ca_key, ca_crt, "", Poco::Net::Context::VERIFY_RELAXED, 9, false)));
 
-    http_server = new HTTPServer(new ProxyHTTPRequestHandlerFactory(), socket, params);
-    http_server->start();
+    ServerSocket socket_http(server_port_http);
+    SecureServerSocket socket_https(server_port_https);
+    ServerSocket socket_tcp(server_port_tcp);
+    SecureServerSocket socket_tcps(server_port_tcps);
+
+    HTTPServerParams::Ptr params_http = new HTTPServerParams();
+    params_http->setKeepAlive(true);
+    params_http->setKeepAliveTimeout(Timespan(10, 0));
+    params_http->setMaxThreads(16);
+
+    TCPServerParams::Ptr params_tcp = new TCPServerParams();
+    params_tcp->setMaxThreads(16);
+
+    http_server = new HTTPServer(new MyHTTPRequestHandlerFactory(*this), socket_http, params_http);
+    ((Poco::Net::HTTPServer*)http_server)->start();
+
+    https_server = new HTTPServer(new MyHTTPRequestHandlerFactory(*this), socket_https, params_http);
+    ((Poco::Net::HTTPServer*)https_server)->start();
+
+    tcp_server = new TCPServer(new MyTCPServerConnectionFactory(*this), socket_tcp, params_tcp);
+    ((Poco::Net::TCPServer*)tcp_server)->start();
+
+    tcps_server = new TCPServer(new MyTCPServerConnectionFactory(*this, true), socket_tcps, params_tcp);
+    ((Poco::Net::TCPServer*)tcps_server)->start();
+
     return true;
 }
 
@@ -148,9 +215,28 @@ void ComexPocoProxyServer::stopServer()
 {
     if(http_server != NULL)
     {
-        http_server->stop();
-        delete http_server;
+        ((Poco::Net::HTTPServer*)http_server)->stop();
+        delete((Poco::Net::HTTPServer*)http_server);
         http_server = NULL;
+    }
+    if(https_server != NULL)
+    {
+        ((Poco::Net::HTTPServer*)https_server)->stop();
+        delete((Poco::Net::HTTPServer*)https_server);
+        https_server = NULL;
+    }
+    if(tcp_server != NULL)
+    {
+        ((Poco::Net::TCPServer*)tcp_server)->stop();
+        delete((Poco::Net::TCPServer*)tcp_server);
+        tcp_server = NULL;
+    }
+    if(tcps_server != NULL)
+    {
+        ((Poco::Net::TCPServer*)tcps_server)->stop();
+        delete((Poco::Net::TCPServer*)tcps_server);
+        tcps_server = NULL;
     }
     Poco::Net::SSLManager::instance().shutdown();
 }
+
