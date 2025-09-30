@@ -21,7 +21,7 @@ class ComexConan(ConanFile):
        self.requires("openssl/3.5.2")
        self.requires("podofo/1.0.1")
        self.requires("libsmb2/6.2")
-       self.requires("libmagic/5.46-f1")
+       self.requires("libmagic/5.46-win")
        self.requires("libjpeg/9f")
        self.requires("poco/1.14.2")
        self.requires("zstd/1.5.7", override=True)
