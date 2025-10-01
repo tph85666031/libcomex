@@ -289,7 +289,7 @@ void LiteIPC::ThreadRx(LiteIPC* ctx)
 
             if(msg->flag == LITE_IPC_FLAG_CONTROL)
             {
-                ComBytes reply = std::move(ctx->onRecvControl(msg->from, msg->id, msg->data, msg->len));
+                ComBytes reply = ctx->onRecvControl(msg->from, msg->id, msg->data, msg->len);
                 IPC_MSG msg_reply;
                 msg_reply.from = ctx->addr;
                 msg_reply.to = msg->from;

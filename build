@@ -92,7 +92,7 @@ fi
 
 if [ x"${BUILD_LIBS}" == x"true" ];then
     rm -rf ${DIR_ROOT}/tmp > /dev/null 2>&1
-    conan install . -of=${DIR_ROOT}/tmp --build=missing -s build_type=${BUILD_TYPE}
+    conan install . -of=${DIR_ROOT}/tmp --build=missing -s build_type=${BUILD_TYPE} -c tools.system.package_manager:mode=install
 fi
 
 #编译comex
