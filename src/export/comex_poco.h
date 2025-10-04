@@ -4,7 +4,10 @@
 #include "com_base.h"
 #include "com_thread.h"
 
-class ComexPocoProxyServer
+#define ACTION_BLOCK 0
+#define ACTION_PASS  1
+
+class COM_EXPORT ComexPocoProxyServer
 {
 public:
     ComexPocoProxyServer();
@@ -14,6 +17,10 @@ public:
     ComexPocoProxyServer& setCA(const char* ca_crt, const char* ca_key);
     bool startServer();
     void stopServer();
+    
+    virtual bool onQueryAddr(const sockaddr_storage& addr_from, sockaddr_storage& addr_to);
+    virtual int onHttpRequest(const std::string uri, const std::string method, const std::map<std::string, std::string> headers, const uint8* data, int data_size);
+    virtual int onHttpResponse(const std::string uri, const std::string method, const std::map<std::string, std::string> headers, const uint8* data, int data_size, int http_code);
 private:
     uint16 server_port_http;
     uint16 server_port_https;
@@ -29,3 +36,4 @@ private:
 };
 
 #endif /* __COMEX_POCO_H__ */
+

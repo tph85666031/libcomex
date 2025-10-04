@@ -21,7 +21,7 @@ using namespace Poco::Net;
 class MyHTTPRequestHandler : public HTTPRequestHandler
 {
 public:
-    MyHTTPRequestHandler(ComexPocoProxyServer& server): server(server) {};
+    MyHTTPRequestHandler(ComexPocoProxyServer& server, bool with_ssl = false): server(server), with_ssl(with_ssl) {};
     template <class T>
     void handleHTTP(HTTPServerRequest& request, HTTPServerResponse& response)
     {
@@ -32,12 +32,15 @@ public:
                                                request.getVersion());
         LOG_I("method=%s,uri=%s", request.getMethod().c_str(), request.getURI().c_str());
         // 复制请求头
+        std::map<std::string, std::string> header_request;
         for(auto it = request.begin(); it != request.end(); ++it)
         {
             forward_request.set(it->first, it->second);
+            header_request.emplace(it->first, it->second);
             LOG_I("%s:%s", it->first.c_str(), it->second.c_str());
         }
         forward_request.erase("Host");
+        header_request.erase("Host");
 
         // 发送请求
         std::istream& request_stream = request.stream();
@@ -51,7 +54,13 @@ public:
             {
                 break;
             }
-            //TODO:dlp the buf
+            if(server.onHttpRequest(request.getURI(), request.getMethod(), header_request, (uint8*)buf, read_size) != ACTION_PASS)
+            {
+                response.set("Connection", "close");
+                std::ostream& out = response.send();
+                out.flush();
+                return;
+            }
             forward_stream.write(buf, read_size);
         }
         while(true);
@@ -66,9 +75,11 @@ public:
         response.setReason(forward_response.getReason());
 
         // 复制响应头
+        std::map<std::string, std::string> header_response;
         for(auto it = forward_response.begin(); it != forward_response.end(); ++it)
         {
             response.set(it->first, it->second);
+            header_response.emplace(it->first, it->second);
         }
 
         std::ostream& client_stream = response.send();
@@ -80,31 +91,59 @@ public:
             {
                 break;
             }
-            //TODO:dlp the buf
-            client_stream.write(buf, read_size);
+            if(server.onHttpResponse(request.getURI(), request.getMethod(), header_response, (uint8*)buf, read_size, forward_response.getStatus()) == ACTION_PASS)
+            {
+                client_stream.write(buf, read_size);
+            }
         }
         while(true);
     }
     void handleRequest(HTTPServerRequest& request, HTTPServerResponse& response)
     {
         LOG_I("addr=%s", request.clientAddress().toString().c_str());
-        handleHTTP<HTTPSClientSession>(request, response);
-        //handleHTTP<HTTPClientSession>(request, response);
+        sockaddr_storage addr_from;
+        sockaddr_storage addr_to;
+        if(addr_from.ss_family == AF_INET)
+        {
+            memcpy(&addr_from, request.clientAddress().addr(), sizeof(struct sockaddr_in));
+        }
+        else if(addr_from.ss_family == AF_INET6)
+        {
+            memcpy(&addr_from, request.clientAddress().addr(), sizeof(struct sockaddr_in6));
+        }
+        else
+        {
+            return;
+        }
+        if(server.onQueryAddr(addr_from, addr_to) == false)
+        {
+            return;
+        }
+        if(with_ssl)
+        {
+            handleHTTP<HTTPSClientSession>(request, response);
+        }
+        else
+        {
+            handleHTTP<HTTPClientSession>(request, response);
+        }
     }
 private:
     ComexPocoProxyServer& server;
+    bool with_ssl = false;
 };
 
 class MyHTTPRequestHandlerFactory : public HTTPRequestHandlerFactory
 {
 public:
-    MyHTTPRequestHandlerFactory(ComexPocoProxyServer& server): server(server) {};
+    MyHTTPRequestHandlerFactory(ComexPocoProxyServer& server, bool with_ssl = false): server(server), with_ssl(with_ssl) {};
     Poco::Net::HTTPRequestHandler* createRequestHandler(const HTTPServerRequest& request)
     {
-        return new MyHTTPRequestHandler(server);
+        return new MyHTTPRequestHandler(server, with_ssl);
     }
 private:
     ComexPocoProxyServer& server;
+    bool with_ssl = false;
 };
 
 template<class T>
@@ -117,7 +156,7 @@ public:
         StreamSocket& socket_client = socket();
         char buf[4096];
         int ret = socket_client.receiveBytes(buf, sizeof(buf));
-        LOG_I("ret=%d:%s", ret,buf);
+        LOG_I("ret=%d:%s", ret, buf);
 
         T socket_target;
         socket_target.connect(SocketAddress("www.baidu.com", 80));
@@ -199,7 +238,7 @@ bool ComexPocoProxyServer::startServer()
     http_server = new HTTPServer(new MyHTTPRequestHandlerFactory(*this), socket_http, params_http);
     ((Poco::Net::HTTPServer*)http_server)->start();
 
-    https_server = new HTTPServer(new MyHTTPRequestHandlerFactory(*this), socket_https, params_http);
+    https_server = new HTTPServer(new MyHTTPRequestHandlerFactory(*this, true), socket_https, params_http);
     ((Poco::Net::HTTPServer*)https_server)->start();
 
     tcp_server = new TCPServer(new MyTCPServerConnectionFactory(*this), socket_tcp, params_tcp);
@@ -238,5 +277,20 @@ void ComexPocoProxyServer::stopServer()
         tcps_server = NULL;
     }
     Poco::Net::SSLManager::instance().shutdown();
+}
+
+int ComexPocoProxyServer::onHttpRequest(const std::string uri, const std::string method, const std::map<std::string, std::string> headers, const uint8* data, int data_size)
+{
+    return ACTION_PASS;
+}
+
+int ComexPocoProxyServer::onHttpResponse(const std::string uri, const std::string method, const std::map<std::string, std::string> headers, const uint8* data, int data_size, int http_code)
+{
+    return ACTION_PASS;
+}
+
+bool ComexPocoProxyServer::onQueryAddr(const sockaddr_storage& addr_from, sockaddr_storage& addr_to)
+{
+    return false;
 }
 
